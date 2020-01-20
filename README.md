@@ -12,6 +12,7 @@ New features to be considered:
 * Destructable objects that could provide loot and reward.
 * A zoomed in map alongside an entire world map.
 * More world features instead of just land and houses.
+* Supply drops that spawn in the late game.
 
 Designs and features to change from Fortnite Bot 1:
 * Weapons with variable range.
