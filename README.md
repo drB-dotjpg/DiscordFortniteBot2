@@ -36,4 +36,4 @@ New elements should be added in order to make a more dynamic world. Destrucable 
 ### Gameplay
 Gameplay will be controlled using reactions in order to simplify the user experience. Adjustments will be made in order to remove the reliance on keyboard input. Shooting weapons will be changed into a 4 (or 8) way directional fire. With reactions, the turn timer could be reduced. The turn timer could be replaced with a system that waits for all players to finish their turn if an auto kick feature is added.
 
-Weapon balance can be changed. Like in Fortnite Bot 1, weapons will be balenced on ammo amount and the damage they output. The range factor will be changed into real range. Split up into low, medium, and high just to keep it simple.
+Weapon balance can be changed. Like in Fortnite Bot 1, weapons will be balenced on ammo amount and the damage they output. The range factor will be changed into real range. Split up into low, medium, and high just to keep it simple. Lower range weapons will typically do more damage to reward players that can close distance.
