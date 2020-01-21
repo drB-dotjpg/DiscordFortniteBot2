@@ -22,7 +22,6 @@ Designs and features to change from Fortnite Bot 1:
 
 Some more questionable ideas:
 * No more turn based gameplay.
-* Game all or mostly controlled using reactions.
 * Choose where you start on the map at the start of the match.
 * Join game after its already begun.
 * Quit game after inactivity or if specified.
@@ -32,5 +31,8 @@ Some more questionable ideas:
 The biggest change planned is a user interface revamp. Minimise the text on screen and use visual elements in order to give the player information. The current proposal to address this is to have 2 map views rather than one. The traditional world, seen in Fortnite Bot 1,  map will stay. This serves as a reference on where the player is on the map and where the major structures are located. This map will be refered to as the **world view**. The second map provides more detail on whats around the player. This includes loot, players, and detailed map elements. This map will be refered to as the **player view**.
 
 ### World
-New elements should be added in order to make a more dynamic world. Destrucable objects that bullets cannot pass through. Chests that you can gain items from. Rivers and lakes that you cannot shoot when swimming in. Trees you can get building materials from.
+New elements should be added in order to make a more dynamic world. Destrucable objects that bullets cannot pass through. Chests that you can gain items from. Rivers and lakes that you cannot shoot when swimming in. Trees you can get building materials from. Buildings on the world map will no longer be reduced to better loot chance, rather buildings that you can enter and loot from.
 
+### Gameplay
+Gameplay will be controlled using reactions in order to simplify the user experience. Adjustments will be made in order to remove the reliance on keyboard input. Shooting weapons will be changed into a 4 (or 8) way directional fire. With reactions, the turn timer could be reduced. The turn timer could be replaced with a system that waits for all players to finish their turn if an auto kick feature is added.
+Weapon balance can be changed. Like in Fortnite Bot 1, weapons will be balenced on ammo amount and the damage they output. The range factor will be changed into real range. Split up into low, medium, and high just to keep it simple.
