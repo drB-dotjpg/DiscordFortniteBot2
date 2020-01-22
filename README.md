@@ -37,3 +37,16 @@ New elements should be added in order to make a more dynamic world. Destrucable 
 Gameplay will be controlled using reactions in order to simplify the user experience. Adjustments will be made in order to remove the reliance on keyboard input. Shooting weapons will be changed into a 4 (or 8) way directional fire. With reactions, the turn timer could be reduced. The turn timer could be replaced with a system that waits for all players to finish their turn if an auto kick feature is added.
 
 Weapon balance can be changed. Like in Fortnite Bot 1, weapons will be balenced on ammo amount and the damage they output. The range factor will be changed into real range. Split up into low, medium, and high just to keep it simple. Lower range weapons will typically do more damage to reward players that can close distance.
+
+### Code Structure
+The following classes should be necessary:
+* Program
+* (Abstract) Data
+* (Public) Player
+* (Public) Item
+
+The program class will handle all discord communication and game processing. Like in Fortnite Bot 1, the gameplay states will be split into phases (Pregame, Ingame, Postgame). Each turn process all data happening at once.
+
+The data class will store all data required for the game. Things like weapon data and map data. This class should not require any objects as its purpose is to store data.
+
+The Player class and the Item class represent the classes needed to create said objects. The player object is the player and the info tied to them. The items are stored in the players inventory using an array in the player class.
