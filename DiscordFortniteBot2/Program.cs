@@ -1,10 +1,11 @@
-﻿using Discord.WebSocket;
+﻿ using Discord.WebSocket;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace DiscordFortniteBot2
 {
@@ -25,9 +26,9 @@ namespace DiscordFortniteBot2
                 File.WriteAllText(configFile, "EDIT TOKEN\nEDIT SERVER");
             }
 
-            string[] configLines = File.ReadAllLines(configFile); //get the current token and server name from the file
+            string[] configLines = @File.ReadAllLines(configFile); //get the current token and server name from the file
             inputToken = configLines[0];
-            inputServerName = configLines[1];
+            inputServerName = @configLines[1];
 
             Console.WriteLine($"The token is {inputToken.Substring(0, 10)}... [Press T to change].\n" +
                 $"The server is named {inputServerName} [Press S to change].\n" +
@@ -78,13 +79,15 @@ namespace DiscordFortniteBot2
             _client.Log += Log; //subscribe to discord events
             _client.MessageReceived += MessageReceived;
             _client.ReactionAdded += ReactionAdded;
+            _client.Ready += OnReady;
 
             await _client.LoginAsync(TokenType.Bot, inputToken);  //login using token & start
             await _client.StartAsync();
 
             while (_client.ConnectionState != ConnectionState.Connected) await Task.Delay(30); //wait for login to finish
 
-            _server = _client.Guilds.First(g => g.Name == inputServerName); //get the server by name TODO: Make it not break
+            await Task.Delay(-1);
+            
         }
 
         private Task Log(LogMessage arg)
@@ -93,14 +96,21 @@ namespace DiscordFortniteBot2
             return Task.CompletedTask;
         }
 
+        private Task OnReady()
+        {
+            _server = _client.Guilds.First(g => g.Name == inputServerName); //get the server by name TODO: Make it not break
+            Console.WriteLine(_server.Name);
+            return Task.CompletedTask;
+        }
+
         private Task MessageReceived(SocketMessage arg)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }

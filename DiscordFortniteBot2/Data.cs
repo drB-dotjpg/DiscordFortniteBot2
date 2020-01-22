@@ -6,22 +6,23 @@ namespace DiscordFortniteBot2
 {
     public static class Data
     {
-        //Game Logic
-        public enum Phase
-        {
-            Pregame, Ingame, Postgame
-        }
+    
+    }
 
+    //Game Logic
+    public enum Phase
+    {
+        Pregame, Ingame, Postgame
+    }
 
-        //Item related
-        public enum ItemType
-        {
-            Empty, Weapon, Health, Shield
-        }
+    //Item related
+    public enum ItemType
+    {
+        Empty, Weapon, Health, Shield
+    }
 
-        public enum Range
-        {
-            Short, Medium, Far
-        }
+    public enum Range
+    {
+        Short, Medium, Far
     }
 }
