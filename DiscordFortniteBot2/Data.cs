@@ -16,7 +16,7 @@ namespace DiscordFortniteBot2
         //Item related
         public enum ItemType
         {
-            Empty, Weapon, Health, Sheild
+            Empty, Weapon, Health, Shield
         }
 
         public enum Range
