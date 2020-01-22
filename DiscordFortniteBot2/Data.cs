@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DiscordFortniteBot2
 {
-    public abstract class Data
+    public static class Data
     {
         //Game Logic
         public enum Phase
