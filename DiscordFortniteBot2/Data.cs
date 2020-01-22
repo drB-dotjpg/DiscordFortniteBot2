@@ -6,7 +6,7 @@ namespace DiscordFortniteBot2
 {
     public static class Data
     {
-    
+        
     }
 
     //Game Logic
@@ -20,7 +20,6 @@ namespace DiscordFortniteBot2
     {
         Empty, Weapon, Health, Shield
     }
-
     public enum Range
     {
         Short, Medium, Far
