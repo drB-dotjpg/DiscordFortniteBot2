@@ -49,3 +49,8 @@ The program class will handle all discord communication and game processing. Lik
 The Player class and the Item class represent the classes needed to create said objects. The player object is the player and the info tied to them. The items are stored in the players inventory using an array in the player class.
 
 Other smaller classes may be added.
+
+
+
+
+![BRUH](Tease.png)
