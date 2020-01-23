@@ -11,10 +11,14 @@ namespace DiscordFortniteBot2
 {
     class Program
     {
+        #region Runs on Startup
+
         static void Main(string[] args) => new Program();
 
         string inputToken;
         string inputServerName;
+
+        bool debug = false;
 
         Program() //runs on startup: Gets token and server data before logging into discord.
         {
@@ -32,7 +36,8 @@ namespace DiscordFortniteBot2
 
             Console.WriteLine($"The token is {inputToken.Substring(0, 10)}... [Press T to change].\n" +
                 $"The server is named {inputServerName} [Press S to change].\n" +
-                $"Press Enter to log into discord.\n");
+                $"Press Enter to log into discord.\n" +
+                $"Press D to Login with debug on.\n");
 
             bool loop = true;
             while (loop)
@@ -54,8 +59,16 @@ namespace DiscordFortniteBot2
                         inputServerName = newServerName;
                         break;
 
+                    case ConsoleKey.D: //if the key pressed is D then enable debug and login
+                        Console.Write("- Debug on.");
+                        debug = true;
+                        goto Login;
+
                     case ConsoleKey.Enter: //if the key pressed is enter then log into discord (done after switch statement)
-                        Console.WriteLine("Enter- Logging in.");
+                        Console.Write("Enter- Logging in.");
+                        goto Login;
+
+                    Login:
                         File.WriteAllLines(configFile, configLines); //save any possible changes to the config file
                         loop = false;
                         break;
@@ -68,6 +81,10 @@ namespace DiscordFortniteBot2
             Pregame().GetAwaiter().GetResult(); //start pregame sequence
         }
 
+        #endregion
+
+        #region Discord Related
+
         public DiscordSocketClient _client;
         private IServiceProvider _services;
         public SocketGuild _server;
@@ -75,7 +92,7 @@ namespace DiscordFortniteBot2
 
         async Task Login()
         {
-            _client = new DiscordSocketClient(new DiscordSocketConfig { ExclusiveBulkDelete = true }) ; //create discord client
+            _client = new DiscordSocketClient(new DiscordSocketConfig { ExclusiveBulkDelete = true }); //create discord client
             _services = new ServiceCollection().AddSingleton(_client).BuildServiceProvider();
 
             _client.Log += Log; //subscribe to discord events
@@ -120,8 +137,9 @@ namespace DiscordFortniteBot2
             }
         }
 
+        #endregion
 
-        //Pregame stuffs
+        #region Pregame
 
         Phase phase = Phase.Pregame;
         SocketTextChannel channel;
@@ -171,19 +189,19 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = 10;
+            int seconds = 15;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
-            while(seconds > 0) //while the timer is running
+            while (seconds > 0) //while the timer is running
             {
                 await Task.Delay(1000); //wait 1 second
 
-                if (players.Count >= 2) seconds--;
+                if (players.Count >= 2 || debug) seconds--; //only move timer if there are 2 or more players (or debug is on)
 
                 string joinedPlayers = GetPlayersJoined();
-                string timeLeft = players.Count >= 2 
-                    ? seconds / 60 + ":" + (seconds % 60).ToString("00") 
+                string timeLeft = players.Count >= 2 || debug
+                    ? seconds / 60 + ":" + (seconds % 60).ToString("00")
                     : "*Starts when 2 or more players have joined.*";
 
                 await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: { joinedPlayers }\n" +
@@ -229,10 +247,12 @@ namespace DiscordFortniteBot2
             {
                 if (player.discordUser == user) //if the user is found in the list of players.
                 {
-                    return true; 
+                    return true;
                 }
             }
-            return false; 
+            return false;
         }
+
+        #endregion
     }
 }
