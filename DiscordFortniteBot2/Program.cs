@@ -75,7 +75,7 @@ namespace DiscordFortniteBot2
 
         async Task Login()
         {
-            _client = new DiscordSocketClient(); //create discord client
+            _client = new DiscordSocketClient(new DiscordSocketConfig { ExclusiveBulkDelete = true }) ; //create discord client
             _services = new ServiceCollection().AddSingleton(_client).BuildServiceProvider();
 
             _client.Log += Log; //subscribe to discord events
@@ -115,7 +115,7 @@ namespace DiscordFortniteBot2
             switch (phase)
             {
                 case Phase.Pregame:
-                    await HandlePregameReaction(arg3);
+                    HandlePregameReaction(arg3);
                     break;
             }
         }
@@ -171,17 +171,27 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            var usersJoinedMessage = await channel.SendMessageAsync($"> { GetPlayersJoined() }"); //post the users joined message
+            int seconds = 10;
 
-            while(true) //TODO: Don't make this infinite.
+            var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
+
+            while(seconds > 0) //while the timer is running
             {
-                await Task.Delay(1000);
-                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> { GetPlayersJoined() }");
+                await Task.Delay(1000); //wait 1 second
 
+                if (players.Count >= 2) seconds--;
+
+                string joinedPlayers = GetPlayersJoined();
+                string timeLeft = players.Count >= 2 
+                    ? seconds / 60 + ":" + (seconds % 60).ToString("00") 
+                    : "*Starts when 2 or more players have joined.*";
+
+                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: { joinedPlayers }\n" +
+                    $" > **Time Left**: { timeLeft }");
             }
         }
 
-        async Task HandlePregameReaction(SocketReaction reaction)
+        void HandlePregameReaction(SocketReaction reaction)
         {
             if (reaction.Emote.Name == Emotes.joinGame.Name) //if the reaction is the one needed to join game.
             {
@@ -198,14 +208,19 @@ namespace DiscordFortniteBot2
         {
             string builder = "";
 
-            foreach (Player player in players) //for each player in the game, add them to the list.
+            if (players.Count > 0) //if there are more than 0 players
             {
-                builder += ", " + player.discordUser.Username;
+                foreach (Player player in players) //for each player in the game, add them to the list.
+                {
+                    builder += "`" + player.discordUser.Username + "`";
+                }
+            }
+            else //if there are no players
+            {
+                builder = "None";
             }
 
-            if (builder.Length >= 2) builder = builder.Substring(2); //trim the start off
-
-            return "Players Joined: " + builder;
+            return builder;
         }
 
         bool HasPlayerJoined(SocketUser user)
