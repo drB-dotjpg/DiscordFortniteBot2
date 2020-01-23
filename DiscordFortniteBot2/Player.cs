@@ -1,7 +1,4 @@
 ﻿using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DiscordFortniteBot2
 {
@@ -10,6 +7,7 @@ namespace DiscordFortniteBot2
         public SocketUser discordUser { get; }
         public int health { get; set; }
         public Item[] inventory { get; set; } = new Item[5];
+        public int materials { get; set; } //building materials
 
         public Player(SocketUser discordUser)
         {
