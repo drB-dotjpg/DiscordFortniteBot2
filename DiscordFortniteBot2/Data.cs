@@ -28,8 +28,6 @@ namespace DiscordFortniteBot2
     {
         //pregame
         public static Emoji joinGame = new Emoji("🎮"); //used for join button
-
-
     }
 
     //Items that can be created and looted in game
@@ -41,7 +39,7 @@ namespace DiscordFortniteBot2
             //       v-Name-----------v  v-Item type---v  v-Range---v  v-damage, ammo
             new Item("Tactical Shotgun", ItemType.Weapon, Range.Short, 80, 3),
             new Item("Pump Shotgun", ItemType.Weapon, Range.Short, 100, 2),
-            new Item("Pistol", ItemType.Weapon, Range.Medium, 65, 6),
+            new Item("Pistol", ItemType.Weapon, Range.Medium, 50, 6),
             new Item("Burst Assault Rifle", ItemType.Weapon, Range.Medium, 70, 5),
             new Item("Assault Rifle", ItemType.Weapon, Range.Medium, 75, 4),
             new Item("Sniper Rifle", ItemType.Weapon, Range.Far, 80, 3),

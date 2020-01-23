@@ -174,6 +174,8 @@ namespace DiscordFortniteBot2
                 channel = _server.GetTextChannel(newChannel.Id); //you can't convert RestTextChannel to SocketTextChannel for some reason.
             }
 
+            //await PostMap(channel, new Map());
+
             //Prompt users to join
 
             try
@@ -220,6 +222,34 @@ namespace DiscordFortniteBot2
                     Console.WriteLine($"Added {reactionUser.Username} to the game.");
                 }
             }
+        }
+
+        async Task PostMap(SocketTextChannel channel, Map map)
+        {
+            string emoteMap = "";
+            for (int x = 0; x < Map.mapWidth; x++)
+            {
+                for (int y = 0; y < Map.mapHeight; y++)
+                {
+                    switch (map.mapGrid[x, y].type)
+                    {
+                        case TileType.Grass:
+                            emoteMap += "🌳";
+                            break;
+                        case TileType.Water:
+                            emoteMap += "🌊";
+                            break;
+                        case TileType.House:
+                            emoteMap += "🏠";
+                            break;
+                    }
+                }
+                emoteMap += "\n";
+            }
+
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.AddField("Map", emoteMap);
+            await channel.SendMessageAsync("", false, builder.Build());
         }
 
         string GetPlayersJoined()
