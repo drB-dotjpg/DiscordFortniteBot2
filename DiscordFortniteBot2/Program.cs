@@ -158,6 +158,16 @@ namespace DiscordFortniteBot2
 
             //Prompt users to join
 
+            try
+            {
+                await channel.SendFileAsync("FortniteBot2.png", null); //try to send the epic logo (c# is weird with this)
+            }
+            catch (FileNotFoundException)
+            {
+                string imageDir = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + Path.DirectorySeparatorChar; //try again
+                await channel.SendFileAsync(imageDir + "FortniteBot2.png", null);
+            }
+
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
