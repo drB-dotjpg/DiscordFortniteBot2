@@ -1,6 +1,8 @@
 ![Logo](DiscordFortniteBot2/FortniteBot2.png "Epic Logo")
 Another Fortnite game playable in a discord client. This project is a sequel/rewrite to an existing project created in March 2019. Fortnite Bot 2 began as a concept in January 2020. The project's anticipated completion time is before April 2020. 
 
+![BRUH](Tease.png)
+
 # Design Docs
 
 ## Goals
@@ -49,8 +51,3 @@ The program class will handle all discord communication and game processing. Lik
 The Player class and the Item class represent the classes needed to create said objects. The player object is the player and the info tied to them. The items are stored in the players inventory using an array in the player class.
 
 Other smaller classes may be added.
-
-
-
-
-![BRUH](Tease.png)
