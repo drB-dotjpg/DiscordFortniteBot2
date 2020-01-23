@@ -1,13 +1,10 @@
-﻿using System;
+﻿using Discord;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace DiscordFortniteBot2
 {
-    public static class Data
-    {
-        
-    }
 
     //Game Logic
     public enum Phase
@@ -23,5 +20,10 @@ namespace DiscordFortniteBot2
     public enum Range
     {
         Short, Medium, Far
+    }
+
+    public static class Emotes
+    {
+        public static Emoji joinGame = new Emoji("🎮");
     }
 }

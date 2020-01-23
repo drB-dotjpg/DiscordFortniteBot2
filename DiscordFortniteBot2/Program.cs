@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Discord.Rest;
 
 namespace DiscordFortniteBot2
 {
@@ -109,9 +108,16 @@ namespace DiscordFortniteBot2
             return Task.CompletedTask;
         }
 
-        Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            return Task.CompletedTask;
+            if (_server.GetUser(arg3.UserId).IsBot) return;
+
+            switch (phase)
+            {
+                case Phase.Pregame:
+                    await HandlePregameReaction(arg3);
+                    break;
+            }
         }
 
 
@@ -120,34 +126,88 @@ namespace DiscordFortniteBot2
         Phase phase = Phase.Pregame;
         SocketTextChannel channel;
 
+        List<Player> players = new List<Player>();
+
         async Task Pregame()
         {
             Console.WriteLine("Entering pregame phase.");
 
-            //get a channel to post in
+            //Get a channel to post in
 
             string channelName = "fortnite-bot-2";
             try
             {
                 Console.WriteLine($"Attempting to get the channel {channelName} in {_server.Name}.");
 
-                channel = _server.TextChannels.First(c => c.Name == channelName); //try to get the channel (throws if none is found)
+                channel = _server.TextChannels.First(c => c.Name == channelName); //try to get the channel (throws if none is found).
 
                 Console.WriteLine("Channel found.");
+
+                await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync()); //delete preexisting messages.
             }
             catch (InvalidOperationException)
             {
                 Console.WriteLine("Channel not found. Attempting to create one.");
 
-                var newChannel = await _server.CreateTextChannelAsync(channelName); //if one is not found, attempt to create one (assuming perms are not an issue right now)
+                var newChannel = await _server.CreateTextChannelAsync(channelName); //if one is not found, attempt to create one (assuming perms are not an issue right now).
                 OverwritePermissions permissions = new OverwritePermissions(addReactions: PermValue.Deny, sendMessages: PermValue.Deny);
                 await newChannel.AddPermissionOverwriteAsync(_server.EveryoneRole, permissions);
 
                 channel = _server.GetTextChannel(newChannel.Id); //you can't convert RestTextChannel to SocketTextChannel for some reason.
             }
 
+            //Prompt users to join
 
-            await Task.Delay(-1); //TODO: Remove this when done
+            var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
+            await joinPrompt.AddReactionAsync(Emotes.joinGame);
+
+            var usersJoinedMessage = await channel.SendMessageAsync($"> { GetPlayersJoined() }"); //post the users joined message
+
+            while(true) //TODO: Don't make this infinite.
+            {
+                await Task.Delay(1000);
+                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> { GetPlayersJoined() }");
+
+            }
+        }
+
+        async Task HandlePregameReaction(SocketReaction reaction)
+        {
+            if (reaction.Emote.Name == Emotes.joinGame.Name) //if the reaction is the one needed to join game.
+            {
+                SocketUser reactionUser = _server.GetUser(reaction.UserId); //get the discord user.
+                if (!HasPlayerJoined(reactionUser)) //if they have not joined the game.
+                {
+                    players.Add(new Player(reactionUser)); //add them to the game.
+                    Console.WriteLine($"Added {reactionUser.Username} to the game.");
+                }
+            }
+        }
+
+        string GetPlayersJoined()
+        {
+            string builder = "";
+
+            foreach (Player player in players) //for each player in the game, add them to the list.
+            {
+                builder += ", " + player.discordUser.Username;
+            }
+
+            if (builder.Length >= 2) builder = builder.Substring(2); //trim the start off
+
+            return "Players Joined: " + builder;
+        }
+
+        bool HasPlayerJoined(SocketUser user)
+        {
+            foreach (Player player in players) //for each player in the game.
+            {
+                if (player.discordUser == user) //if the user is found in the list of players.
+                {
+                    return true; 
+                }
+            }
+            return false; 
         }
     }
 }
