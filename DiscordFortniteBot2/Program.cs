@@ -98,8 +98,7 @@ namespace DiscordFortniteBot2
 
         private Task OnReady()
         {
-            _server = _client.Guilds.First(g => g.Name == inputServerName); //get the server by name TODO: Make it not break
-            Console.WriteLine(_server.Name);
+            _server = _client.Guilds.First(g => g.Name == inputServerName); //get the server by name
             return Task.CompletedTask;
         }
 
