@@ -27,10 +27,7 @@ namespace DiscordFortniteBot2
 
         Random random = new Random();
 
-        public Map(bool debug)
-        {
-            GenerateMap(debug);
-        }
+        public Map(bool debug) => GenerateMap(debug);
 
         void GenerateMap(bool debug)
         {
@@ -202,7 +199,7 @@ namespace DiscordFortniteBot2
 
             public Tile(TileType type)
             {
-                this.Type = type;
+                Type = type;
                 Items = new Item[0];
             }
 

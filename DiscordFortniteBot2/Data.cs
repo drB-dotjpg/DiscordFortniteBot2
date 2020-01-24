@@ -16,7 +16,7 @@ namespace DiscordFortniteBot2
     //Item related
     public enum ItemType
     {
-        Empty, Weapon, Health, Shield, HealAll
+        Empty, Weapon, Health, Shield, HealAll, Trap
     }
     public enum Range
     {
@@ -55,7 +55,10 @@ namespace DiscordFortniteBot2
 
             //health+shield
             new Item("Slurp Juice", ItemType.HealAll, Range.None, 50, 2),
-            new Item("Chug Jug", ItemType.HealAll, Range.None, 200, 1)
+            new Item("Chug Jug", ItemType.HealAll, Range.None, 200, 1),
+
+            //traps
+            new Item("Spike Trap", ItemType.Trap, Range.None, 75, 1)
         };
 
         public static Item GetRandomSpawnable()
