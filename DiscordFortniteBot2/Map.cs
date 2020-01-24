@@ -27,10 +27,7 @@ namespace DiscordFortniteBot2
 
         Random random = new Random();
 
-        public Map(bool debug)
-        {
-            GenerateMap(debug);
-        }
+        public Map(bool debug) => GenerateMap(debug);
 
         void GenerateMap(bool debug)
         {
