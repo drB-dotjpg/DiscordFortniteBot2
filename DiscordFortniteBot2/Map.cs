@@ -211,13 +211,18 @@ namespace DiscordFortniteBot2
             while (yMap < 7)
             {
                 int xMap = 0;
+                xTrack = xCap - 7;
+
                 while (xMap < 7)
                 {
+                    //Console.Write($"\nxTrack = {xTrack}; yTrack = {yTrack}; xMap = {xMap}; yMap = {yMap}; ");
+                    //Console.WriteLine($"mapGrid[xTrack, yTrack] = {mapGrid[xTrack, yTrack].Type.ToString()}");
+
                     if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap)
                         mapArea[xMap, yMap] = mapGrid[xTrack, yTrack];
 
-                    yMap++;
-                    yTrack++;
+                    xMap++;
+                    xTrack++;
                 }
                 yMap++;
                 yTrack++;
@@ -231,47 +236,56 @@ namespace DiscordFortniteBot2
             Tile[,] mapArea = GetMapArea(x, y);
             string mapString = "";
 
+            x -= 3;
+            y -= 3;
+            int yStore = y;
+
             for (int i = 0; i < 7; i++) //all assuming GetMapArea returns a 7x7 array
             {
+                y = yStore;
+
                 for (int j = 0; j < 7; j++)
                 {
+                    Console.WriteLine($"GetMapAreaString: x = {x}; y = {y}");
+
                     bool playerFound = false;
-                    foreach(Player player in players)
+                    foreach (Player player in players)
                     {
-                        if (player.x == i && player.y == j)
+                        if (player.x == x && player.y == y)
                         {
                             mapString += player.icon;
+                            playerFound = true;
                         }
                     }
 
-                    if (playerFound) continue;
+                    if (playerFound) { y++; continue; }
 
                     switch (mapArea[i, j].Type)
                     {
                         case TileType.Chest:
-                            mapString += "🎁";
+                            mapString += "🟨"; //yellow block
                             break;
                         case TileType.Grass:
-                            mapString += "🟩";
+                            mapString += "🟩"; //green block
                             break;
                         case TileType.Tree:
-                            mapString += "🌳";
+                            mapString += "🟫"; //brown block
                             break;
                         case TileType.Wall:
-                            mapString += "🧱";
+                            mapString += "🟥"; //red block
                             break;
                         case TileType.Water:
-                            mapString += "🟦";
-                            break;
-                        case TileType.SpikeTrap:
-                            mapString += "⚠";
+                            mapString += "🟦"; //blue block
                             break;
                         default:
-                            mapString += "⬛";
+                            mapString += "⬛"; //grey block
                             break;
                     }
+
+                    y++;
                 }
 
+                x++;
                 mapString += "\n";
             }
 
