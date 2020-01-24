@@ -37,7 +37,7 @@ namespace DiscordFortniteBot2
             Console.WriteLine($"The token is {inputToken.Substring(0, 10)}... [Press T to change].\n" +
                 $"The server is named {inputServerName} [Press S to change].\n" +
                 $"Press Enter to log into discord.\n" +
-                $"Press D to Login with debug on.\n");
+                $"Press D to login with debug on.\n");
 
             bool loop = true;
             while (loop)
@@ -60,7 +60,7 @@ namespace DiscordFortniteBot2
                         break;
 
                     case ConsoleKey.D: //if the key pressed is D then enable debug and login
-                        Console.Write("- Debug on.");
+                        Console.Write("- Debug on.\n");
                         debug = true;
                         goto Login;
 
@@ -78,7 +78,12 @@ namespace DiscordFortniteBot2
             //The rest of the program methods will be called here (for better error handling)
 
             Login().GetAwaiter().GetResult(); //start login sequence
+
             Pregame().GetAwaiter().GetResult(); //start pregame sequence
+
+            phase = Phase.Ingame;
+
+            InGame().GetAwaiter().GetResult(); //start Ingame sequence
         }
 
         #endregion
@@ -139,7 +144,7 @@ namespace DiscordFortniteBot2
 
         #endregion
 
-        #region Pregame
+        #region Pre Game
 
         Phase phase = Phase.Pregame;
         SocketTextChannel channel;
@@ -191,7 +196,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = 15;
+            int seconds = !debug ? 180 : 10;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
@@ -239,7 +244,7 @@ namespace DiscordFortniteBot2
                         case TileType.Water:
                             emoteMap += "🌊";
                             break;
-                        case TileType.House:
+                        case TileType.Wall:
                             emoteMap += "🏠";
                             break;
                     }
@@ -281,6 +286,19 @@ namespace DiscordFortniteBot2
                 }
             }
             return false;
+        }
+
+        #endregion
+
+        #region In Game
+
+        Map map;
+
+        async Task InGame()
+        {
+            map = new Map(debug);
+
+            await Task.Delay(-1);
         }
 
         #endregion

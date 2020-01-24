@@ -7,30 +7,31 @@ namespace DiscordFortniteBot2
     public enum TileType
     {
         Grass,
-        House,
         Chest,
         Water,
-        Structure,
+        Wall,
+        Tree
     }
     public class Map
     {
         public const int mapWidth = 10;
         public const int mapHeight = 10;
 
-        const int houseCount = 15;
-
-        const int waterCount = 20;
+        //                                                    v----edit this
+        const int houseCount = (int)(mapWidth * mapHeight * 0.03); //if value is .03, then there are 3 houses per 100 tiles
+        const int treeCount = (int)(mapWidth * mapHeight * 0.30);
+        const int waterCount = (int)(mapWidth * mapHeight * 0.20);
 
         public Tile[,] mapGrid = new Tile[mapWidth, mapHeight];
 
         Random random = new Random();
 
-        public Map()
+        public Map(bool debug)
         {
-            GenerateMap();
+            GenerateMap(debug);
         }
 
-        void GenerateMap()
+        void GenerateMap(bool debug)
         {
             //Fill the map with grass tiles to start
             for (int i = 0; i < mapWidth; i++)
@@ -41,12 +42,14 @@ namespace DiscordFortniteBot2
                 }
             }
 
-            //Add water
-            RandomlyAddTile(waterCount, TileType.Water);
+            //Add Trees
+            RandomlyAddTile(treeCount, TileType.Tree);
 
-            //Add houses
-            RandomlyAddTile(houseCount, TileType.House);
+            //Add River
+            GenerateRiver();
+            GenerateRiver();
 
+            if (debug) PrintMap();
         }
 
         void RandomlyAddTile(int amount, TileType type)
@@ -66,24 +69,61 @@ namespace DiscordFortniteBot2
             }
         }
 
+        void GenerateRiver()
+        {
+            Random random = new Random();
+
+            bool vertical = random.Next(2) == 0; // 50% chance the river is vertically facing
+
+            if (vertical)
+            {
+                int width = mapWidth / 10;
+                int drawPoint = random.Next(mapWidth - width);
+
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    for (int i = 0; i < width; i++)
+                    {
+                        mapGrid[drawPoint + i, y] = new Tile(TileType.Water);
+                    }
+
+                    if (random.Next(4) == 0)
+                    {
+                        drawPoint = random.Next(2) == 0
+                            ? drawPoint + 1
+                            : drawPoint - 1;
+                    }
+                }
+            }
+            else
+            {
+                int height = mapHeight / 10;
+                int drawPoint = random.Next(mapWidth - height);
+
+                for (int x = 0; x < mapHeight; x++)
+                {
+                    for (int i = 0; i < height; i++)
+                    {
+                        mapGrid[x, drawPoint + i] = new Tile(TileType.Water);
+                    }
+
+                    if (random.Next(4) == 0)
+                    {
+                        drawPoint = random.Next(2) == 0
+                            ? drawPoint + 1
+                            : drawPoint - 1;
+                    }
+                }
+            }
+        }
+
         void PrintMap() //debug function
         {
             for (int i = 0; i < mapWidth; i++)
             {
                 for (int j = 0; j < mapHeight; j++)
                 {
-                    switch (mapGrid[i, j].type)
-                    {
-                        case TileType.Grass:
-                            Console.Write(0);
-                            break;
-                        case TileType.Water:
-                            Console.Write(1);
-                            break;
-                        case TileType.House:
-                            Console.Write(2);
-                            break;
-                    }
+                    Console.Write((int)mapGrid[i, j].type);
                 }
                 Console.WriteLine();
             }
