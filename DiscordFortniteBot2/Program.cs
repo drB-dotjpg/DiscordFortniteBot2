@@ -130,9 +130,9 @@ namespace DiscordFortniteBot2
             return Task.CompletedTask;
         }
 
-        async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            if (_server.GetUser(arg3.UserId).IsBot) return;
+            if (_server.GetUser(arg3.UserId).IsBot) return Task.CompletedTask;
 
             switch (phase)
             {
@@ -140,6 +140,8 @@ namespace DiscordFortniteBot2
                     HandlePregameReaction(arg3);
                     break;
             }
+
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -179,8 +181,6 @@ namespace DiscordFortniteBot2
                 channel = _server.GetTextChannel(newChannel.Id); //you can't convert RestTextChannel to SocketTextChannel for some reason.
             }
 
-            //await PostMap(channel, new Map());
-
             //Prompt users to join
 
             try
@@ -196,7 +196,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 180 : 10;
+            int seconds = !debug ? 180 : 5;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
@@ -236,7 +236,7 @@ namespace DiscordFortniteBot2
             {
                 for (int y = 0; y < Map.mapHeight; y++)
                 {
-                    switch (map.mapGrid[x, y].type)
+                    switch (map.mapGrid[x, y].Type)
                     {
                         case TileType.Grass:
                             emoteMap += "🌳";
