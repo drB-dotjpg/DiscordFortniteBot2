@@ -292,7 +292,11 @@ namespace DiscordFortniteBot2
             Console.WriteLine("Generating map...");
             map = new Map(debug);
 
-
+            foreach (Player player in players)
+            {
+                string mapDisplay = map.GetMapAreaString(player.x, player.y, players);
+                await player.discordUser.SendMessageAsync(mapDisplay);
+            }
 
             await Task.Delay(-1);
         }

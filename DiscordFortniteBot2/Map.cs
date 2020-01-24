@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discord;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +11,8 @@ namespace DiscordFortniteBot2
         Chest,
         Water,
         Wall,
-        Tree
+        Tree,
+        SpikeTrap
     }
 
     public class Map
@@ -20,7 +22,7 @@ namespace DiscordFortniteBot2
 
 
         const int houseCount = 20;
-        const int treeCount = 150;
+        const int treeCount = 200;
         const int riverCount = 3; //river count is randomized, this is a cap to the amount of rivers generated.
 
         public Tile[,] mapGrid = new Tile[mapWidth, mapHeight];
@@ -196,25 +198,35 @@ namespace DiscordFortniteBot2
         {
             Tile[,] mapArea = new Tile[7, 7];
 
-            int xStart = x - 3;
-            int yStart = y - 3;
-            int xEnd = x + 3;
-            int yEnd = y + 3;
+            int xTrack = x - 3;
+            int yTrack = y - 3;
 
-            for (int i = xStart; i < xEnd; i++)
+            int xCap = xTrack + 7;
+            if (xCap >= mapWidth) xCap = mapWidth - 1;
+
+            int yCap = yTrack + 7;
+            if (yCap >= mapHeight) yCap = mapHeight - 1;
+
+            int yMap = 0;
+            while (yMap < 7)
             {
-                for (int j = yStart; j < yEnd; j++)
+                int xMap = 0;
+                while (xMap < 7)
                 {
-                    if (i < 0 || i >= mapWidth - 1 || j < 0 || j >= mapHeight - 1) continue;
+                    if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap)
+                        mapArea[xMap, yMap] = mapGrid[xTrack, yTrack];
 
-                    mapArea[i, j] = mapGrid[i, j];
+                    yMap++;
+                    yTrack++;
                 }
+                yMap++;
+                yTrack++;
             }
 
             return mapArea;
         }
 
-        string GetMapAreaString(int x, int y)
+        public string GetMapAreaString(int x, int y, List<Player> players)
         {
             Tile[,] mapArea = GetMapArea(x, y);
             string mapString = "";
@@ -223,13 +235,24 @@ namespace DiscordFortniteBot2
             {
                 for (int j = 0; j < 7; j++)
                 {
+                    bool playerFound = false;
+                    foreach(Player player in players)
+                    {
+                        if (player.x == i && player.y == j)
+                        {
+                            mapString += player.icon;
+                        }
+                    }
+
+                    if (playerFound) continue;
+
                     switch (mapArea[i, j].Type)
                     {
                         case TileType.Chest:
                             mapString += "🎁";
                             break;
                         case TileType.Grass:
-                            mapString += "�";
+                            mapString += "🟩";
                             break;
                         case TileType.Tree:
                             mapString += "🌳";
@@ -238,7 +261,13 @@ namespace DiscordFortniteBot2
                             mapString += "🧱";
                             break;
                         case TileType.Water:
-                            mapString += "�";
+                            mapString += "🟦";
+                            break;
+                        case TileType.SpikeTrap:
+                            mapString += "⚠";
+                            break;
+                        default:
+                            mapString += "⬛";
                             break;
                     }
                 }
