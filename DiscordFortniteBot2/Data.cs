@@ -23,9 +23,21 @@ namespace DiscordFortniteBot2
         Short, Medium, Far, None
     }
 
-    //Emotes used in reactions
+    //Emotes used in reactions & throughout the game
     public static class Emotes
     {
+        //player icons
+        public static Emoji[] playerIcons = {
+            new Emoji("😀"),
+            new Emoji("😎"),
+            new Emoji("😔"),
+            new Emoji("😜"),
+            new Emoji("😳"),
+            new Emoji("😂"),
+            new Emoji("🤔"),
+            new Emoji("😤"),
+        };
+
         //pregame
         public static Emoji joinGame = new Emoji("🎮"); //used for join button
     }

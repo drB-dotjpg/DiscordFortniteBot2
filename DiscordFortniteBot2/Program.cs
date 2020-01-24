@@ -223,38 +223,19 @@ namespace DiscordFortniteBot2
                 SocketUser reactionUser = _server.GetUser(reaction.UserId); //get the discord user.
                 if (!HasPlayerJoined(reactionUser)) //if they have not joined the game.
                 {
-                    players.Add(new Player(reactionUser)); //add them to the game.
+                    Emoji playerIcon;
+                    do
+                    {
+                        playerIcon = Emotes.playerIcons[new Random().Next(Emotes.playerIcons.Length)];
+                    } while (IsIconTaken(playerIcon));
+
+                    players.Add(new Player(reactionUser, playerIcon)); //add them to the game.
+
+                    reactionUser.SendMessageAsync($"You have been added to the game! You are playing as {playerIcon}.");
+
                     Console.WriteLine($"Added {reactionUser.Username} to the game.");
                 }
             }
-        }
-
-        async Task PostMap(SocketTextChannel channel, Map map)
-        {
-            string emoteMap = "";
-            for (int x = 0; x < Map.mapWidth; x++)
-            {
-                for (int y = 0; y < Map.mapHeight; y++)
-                {
-                    switch (map.mapGrid[x, y].Type)
-                    {
-                        case TileType.Grass:
-                            emoteMap += "🌳";
-                            break;
-                        case TileType.Water:
-                            emoteMap += "🌊";
-                            break;
-                        case TileType.Wall:
-                            emoteMap += "🏠";
-                            break;
-                    }
-                }
-                emoteMap += "\n";
-            }
-
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.AddField("Map", emoteMap);
-            await channel.SendMessageAsync("", false, builder.Build());
         }
 
         string GetPlayersJoined()
@@ -288,6 +269,18 @@ namespace DiscordFortniteBot2
             return false;
         }
 
+        bool IsIconTaken(Emoji icon) //similar to HasPlayerJoined
+        {
+            foreach (Player player in players)
+            {
+                if (player.icon == icon)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         #endregion
 
         #region In Game
@@ -296,7 +289,10 @@ namespace DiscordFortniteBot2
 
         async Task InGame()
         {
+            Console.WriteLine("Generating map...");
             map = new Map(debug);
+
+
 
             await Task.Delay(-1);
         }

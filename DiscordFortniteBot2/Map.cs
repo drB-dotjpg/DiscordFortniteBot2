@@ -73,7 +73,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        void GenerateRiver() //TODO: Array bounds error, might be fixed but the issue shows up at random times
+        void GenerateRiver()
         {
             bool vertical = random.Next(2) == 0; // 50% chance the river is vertically facing
             int noise = random.Next(5); //how smooth the river is
@@ -195,6 +195,63 @@ namespace DiscordFortniteBot2
             }
         }
 
+        Tile[,] GetMapArea(int x, int y) //get info on 7x7 area around the map. x and y represent the center of the 7x7 grid
+        {
+            Tile[,] mapArea = new Tile[7, 7];
+
+            int xStart = x - 3;
+            int yStart = y - 3;
+            int xEnd = x + 3;
+            int yEnd = y + 3;
+
+            for (int i = xStart; i < xEnd; i++)
+            {
+                for (int j = yStart; j < yEnd; j++)
+                {
+                    if (i < 0 || i >= mapWidth - 1 || j < 0 || j >= mapHeight - 1) continue;
+
+                    mapArea[i, j] = mapGrid[i, j];
+                }
+            }
+
+            return mapArea;
+        }
+
+        string GetMapAreaString(int x, int y)
+        {
+            Tile[,] mapArea = GetMapArea(x, y);
+            string mapString = "";
+
+            for (int i = 0; i < 7; i++) //all assuming GetMapArea returns a 7x7 array
+            {
+                for (int j = 0; j < 7; j++)
+                {
+                    switch (mapArea[i, j].Type)
+                    {
+                        case TileType.Chest:
+                            mapString += "🎁";
+                            break;
+                        case TileType.Grass:
+                            mapString += "�";
+                            break;
+                        case TileType.Tree:
+                            mapString += "🌳";
+                            break;
+                        case TileType.Wall:
+                            mapString += "🧱";
+                            break;
+                        case TileType.Water:
+                            mapString += "�";
+                            break;
+                    }
+                }
+
+                mapString += "\n";
+            }
+
+            return mapString;
+        }
+
         public struct Tile //tiles represent a space on the map
         {
             public TileType Type { get; }
@@ -202,7 +259,7 @@ namespace DiscordFortniteBot2
 
             public Tile(TileType type)
             {
-                this.Type = type;
+                Type = type;
                 Items = new Item[0];
             }
 
