@@ -12,10 +12,11 @@ namespace DiscordFortniteBot2
         Wall,
         Tree
     }
+
     public class Map
     {
-        public const int mapWidth = 10;
-        public const int mapHeight = 10;
+        public const int mapWidth = 40;
+        public const int mapHeight = 40;
 
         //                                                    v----edit this
         const int houseCount = (int)(mapWidth * mapHeight * 0.03); //if value is .03, then there are 3 houses per 100 tiles
@@ -69,7 +70,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        void GenerateRiver()
+        void GenerateRiver() //TODO: Array bounds error, might be fixed but the issue shows up at random times
         {
             Random random = new Random();
 
@@ -77,12 +78,12 @@ namespace DiscordFortniteBot2
 
             if (vertical)
             {
-                int width = mapWidth / 10;
+                int width = (int)Math.Ceiling(mapWidth / 15.0);
                 int drawPoint = random.Next(mapWidth - width);
 
                 for (int y = 0; y < mapHeight; y++)
                 {
-                    for (int i = 0; i < width; i++)
+                    for (int i = 0; i < width-1; i++)
                     {
                         mapGrid[drawPoint + i, y] = new Tile(TileType.Water);
                     }
@@ -97,12 +98,12 @@ namespace DiscordFortniteBot2
             }
             else
             {
-                int height = mapHeight / 10;
+                int height = (int)Math.Ceiling(mapHeight / 15.0);
                 int drawPoint = random.Next(mapWidth - height);
 
                 for (int x = 0; x < mapHeight; x++)
                 {
-                    for (int i = 0; i < height; i++)
+                    for (int i = 0; i < height-1; i++)
                     {
                         mapGrid[x, drawPoint + i] = new Tile(TileType.Water);
                     }
