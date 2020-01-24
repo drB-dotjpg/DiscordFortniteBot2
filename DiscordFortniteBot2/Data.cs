@@ -40,6 +40,15 @@ namespace DiscordFortniteBot2
 
         //pregame
         public static Emoji joinGame = new Emoji("🎮"); //used for join button
+
+        //ingame
+        public static Emoji[] arrowEmojis =
+        {
+            new Emoji("⬅️"),
+            new Emoji("➡️"),
+            new Emoji("⬆️"),
+            new Emoji("⬇️")
+        };
     }
 
     //Items that can be created and looted in game

@@ -297,16 +297,20 @@ namespace DiscordFortniteBot2
             public TileType Type { get; }
             public Item[] Items { get; }
 
+            public Item Trap { get; set; }
+
             public Tile(TileType type)
             {
                 Type = type;
                 Items = new Item[0];
+                Trap = null;
             }
 
             public Tile(Item[] items)
             {
                 Type = TileType.Chest;
                 Items = items;
+                Trap = null;
             }
         }
     }

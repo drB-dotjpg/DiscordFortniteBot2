@@ -1,5 +1,6 @@
 ﻿using Discord.WebSocket;
 using Discord;
+using Discord.Rest;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -130,18 +131,21 @@ namespace DiscordFortniteBot2
             return Task.CompletedTask;
         }
 
-        Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            if (_server.GetUser(arg3.UserId).IsBot) return Task.CompletedTask;
+            if (_server.GetUser(arg3.UserId).IsBot) return; //Task.CompletedTask;
 
             switch (phase)
             {
                 case Phase.Pregame:
                     HandlePregameReaction(arg3);
                     break;
+                case Phase.Ingame:
+                    await HandleIngameReaction(arg3);
+                    break;
             }
 
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
 
         #endregion
@@ -292,15 +296,49 @@ namespace DiscordFortniteBot2
             Console.WriteLine("Generating map...");
             map = new Map(debug);
 
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.AddField("Controls", "Click the reactions to control your player.");
+            builder.WithColor(Color.Blue); 
+
             foreach (Player player in players)
             {
                 string mapDisplay = map.GetMapAreaString(player.x, player.y, players);
-                await player.discordUser.SendMessageAsync(mapDisplay);
+                player.localMap = await player.discordUser.SendMessageAsync(mapDisplay) as RestUserMessage;
+                player.controllerMessage = await player.discordUser.SendMessageAsync("", false, builder.Build()) as RestUserMessage;
+                await player.controllerMessage.AddReactionsAsync(Emotes.arrowEmojis);
             }
 
             await Task.Delay(-1);
         }
 
+        async Task HandleIngameReaction(SocketReaction reaction)
+        {
+            Emoji direction = Emotes.arrowEmojis.First(x => x.Name == reaction.Emote.Name);
+            Player player = GetPlayerById(reaction.UserId);
+            switch (direction.Name)
+            {
+                case "⬅️":
+                    if (player.x > 0) player.y--;
+                    break;
+                case "➡️":
+                    if (player.x < Map.mapWidth - 1) player.y++;
+                    break;
+                case "⬆️":
+                    if (player.y > 0) player.x--;
+                    break;
+                case "⬇️":
+                    if (player.y < Map.mapHeight - 1) player.x--;
+                    break;
+            }
+            //await player.controllerMessage.RemoveReactionAsync(direction, player.discordUser);
+            await player.localMap.ModifyAsync(m => m.Content = map.GetMapAreaString(player.x, player.y, players));
+        }
+
         #endregion
+
+        Player GetPlayerById(ulong id)
+        {
+            return players.First(x => x.discordUser.Id == id);
+        }
     }
 }

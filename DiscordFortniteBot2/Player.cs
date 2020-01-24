@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Discord.Rest;
 
 namespace DiscordFortniteBot2
 {
@@ -13,6 +14,8 @@ namespace DiscordFortniteBot2
         public int x { get; set; }
         public int y { get; set; }
         public Emoji icon { get; }
+        public RestUserMessage controllerMessage { get; set; }
+        public RestUserMessage localMap { get; set; }
 
         public Player(SocketUser discordUser, Emoji icon)
         {
