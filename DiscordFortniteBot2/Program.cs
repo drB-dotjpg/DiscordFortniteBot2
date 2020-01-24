@@ -304,8 +304,8 @@ namespace DiscordFortniteBot2
             {
                 string mapDisplay = map.GetMapAreaString(player.x, player.y, players);
                 player.localMap = await player.discordUser.SendMessageAsync(mapDisplay) as RestUserMessage;
-                player.controllerMessage = await player.discordUser.SendMessageAsync("", false, builder.Build()) as RestUserMessage;
-                await player.controllerMessage.AddReactionsAsync(Emotes.arrowEmojis);
+                RestUserMessage msg = await player.discordUser.SendMessageAsync("", false, builder.Build()) as RestUserMessage;
+                await msg.AddReactionsAsync(Emotes.arrowEmojis);
             }
 
             await Task.Delay(-1);
@@ -330,7 +330,7 @@ namespace DiscordFortniteBot2
                     if (player.y < Map.mapHeight - 1) player.x--;
                     break;
             }
-            //await player.controllerMessage.RemoveReactionAsync(direction, player.discordUser);
+            
             await player.localMap.ModifyAsync(m => m.Content = map.GetMapAreaString(player.x, player.y, players));
         }
 
