@@ -198,17 +198,17 @@ namespace DiscordFortniteBot2
         {
             Tile[,] mapArea = new Tile[7, 7];
 
-            int xTrack = x - 3;
+            int xTrack = x - 3; //start the x axis scan 3 slots away from the center.
             int yTrack = y - 3;
 
-            int xCap = xTrack + 7;
-            if (xCap >= mapWidth) xCap = mapWidth - 1;
+            int xCap = xTrack + 7; //the limit to how far the scan can go.
+            if (xCap >= mapWidth) xCap = mapWidth - 1; //make sure its not out of bounds.
 
             int yCap = yTrack + 7;
             if (yCap >= mapHeight) yCap = mapHeight - 1;
 
             int yMap = 0;
-            while (yMap < 7)
+            while (yMap < 7) //start the scan.
             {
                 int xMap = 0;
                 xTrack = xCap - 7;
@@ -218,7 +218,7 @@ namespace DiscordFortniteBot2
                     //Console.Write($"\nxTrack = {xTrack}; yTrack = {yTrack}; xMap = {xMap}; yMap = {yMap}; ");
                     //Console.WriteLine($"mapGrid[xTrack, yTrack] = {mapGrid[xTrack, yTrack].Type.ToString()}");
 
-                    if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap)
+                    if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap) //if its not out of bounds.
                         mapArea[xMap, yMap] = mapGrid[xTrack, yTrack];
 
                     xMap++;
@@ -233,7 +233,7 @@ namespace DiscordFortniteBot2
 
         public string GetMapAreaString(int x, int y, List<Player> players)
         {
-            Tile[,] mapArea = GetMapArea(x, y);
+            Tile[,] mapArea = GetMapArea(x, y); //get a 7x7 area of the map around the x and y coodnates
             string mapString = "";
 
             x -= 3;
@@ -246,7 +246,7 @@ namespace DiscordFortniteBot2
 
                 for (int j = 0; j < 7; j++)
                 {
-                    Console.WriteLine($"GetMapAreaString: x = {x}; y = {y}");
+                    //Console.WriteLine($"GetMapAreaString: x = {x}; y = {y}");
 
                     bool playerFound = false;
                     foreach (Player player in players)

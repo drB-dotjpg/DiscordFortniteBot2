@@ -157,6 +157,8 @@ namespace DiscordFortniteBot2
 
         List<Player> players = new List<Player>();
 
+        bool playerLimitHit = false;
+
         async Task Pregame()
         {
             Console.WriteLine("Entering pregame phase.");
@@ -210,19 +212,21 @@ namespace DiscordFortniteBot2
 
                 if (players.Count >= 2 || debug) seconds--; //only move timer if there are 2 or more players (or debug is on)
 
+                if (playerLimitHit && seconds > 20) seconds = 15;
+
                 string joinedPlayers = GetPlayersJoined();
                 string timeLeft = players.Count >= 2 || debug
                     ? seconds / 60 + ":" + (seconds % 60).ToString("00")
                     : "*Starts when 2 or more players have joined.*";
 
-                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: { joinedPlayers }\n" +
+                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: { joinedPlayers }\n\n" +
                     $" > **Time Left**: { timeLeft }");
             }
         }
 
         void HandlePregameReaction(SocketReaction reaction)
         {
-            if (reaction.Emote.Name == Emotes.joinGame.Name) //if the reaction is the one needed to join game.
+            if (reaction.Emote.Name == Emotes.joinGame.Name && !playerLimitHit) //if the reaction is the one needed to join game and there are less than 8 players already joined.
             {
                 SocketUser reactionUser = _server.GetUser(reaction.UserId); //get the discord user.
                 if (!HasPlayerJoined(reactionUser)) //if they have not joined the game.
@@ -238,19 +242,21 @@ namespace DiscordFortniteBot2
                     reactionUser.SendMessageAsync($"You have been added to the game! You are playing as {playerIcon}.");
 
                     Console.WriteLine($"Added {reactionUser.Username} to the game.");
+
+                    if (players.Count >= 8) playerLimitHit = true;
                 }
             }
         }
 
         string GetPlayersJoined()
         {
-            string builder = "";
+            string builder = players.Count + "/8 slots filled\n";
 
             if (players.Count > 0) //if there are more than 0 players
             {
                 foreach (Player player in players) //for each player in the game, add them to the list.
                 {
-                    builder += "`" + player.discordUser.Username + "`";
+                    builder += player.icon + " - `" + player.discordUser.Username + "`";
                 }
             }
             else //if there are no players
