@@ -310,7 +310,7 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players) //send turn breifings
                 {
-                    var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBreifing(player)) as RestUserMessage; //send turn breifing to all players
+                    var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBriefing(player)) as RestUserMessage; //send turn breifing to all players
                     timerMessages.Add(mapMessage);
                     player.currentMessages.Add(mapMessage); //add it to the active messages (only these accept reactions)
 
@@ -328,13 +328,36 @@ namespace DiscordFortniteBot2
                     await Task.Delay(1000);
                     seconds--;
                 }
+
+                foreach(Player player in players)
+                {
+                    if(player.turnAction == Action.Move)
+                    {
+                        switch (player.turnDirection)
+                        {
+                            case Direction.Right:
+                                if (player.y < Map.mapWidth - 1 ) player.y++;
+                                break;
+                            case Direction.Left:
+                                if (player.y > 0) player.y--;
+                                break;
+                            case Direction.Up:
+                                if (player.x < Map.mapHeight - 1) player.x--;
+                                break;
+                            case Direction.Down:
+                                if (player.x > 0) player.x++;
+                                break;
+
+                        }
+                    }
+                }
                 
             }
 
             await Task.Delay(-1);
         }
 
-        Embed GetTurnBreifing(Player player)
+        Embed GetTurnBriefing(Player player)
         {
             EmbedBuilder builder = new EmbedBuilder();
 
@@ -351,11 +374,11 @@ namespace DiscordFortniteBot2
 
             int shieldBarAmount = player.shield / 10;
             string shieldBar = string.Concat(Enumerable.Repeat("🟦", shieldBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - shieldBarAmount)); //Fill bar with blue squares and gray squares depending on the player's shield
-            builder.AddField("Shield", shieldBar);
+            builder.AddField($"Shield: {player.shield}", shieldBar);
 
             int healthBarAmount = player.health / 10;
             string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
-            builder.AddField("Health", healthBar);
+            builder.AddField($"Health: {player.health}", healthBar);
 
             return builder.Build();
         }
@@ -396,7 +419,7 @@ namespace DiscordFortniteBot2
 
             for (int i = 0; i < Emotes.arrowEmojis.Length; i++)
             {
-                if (emote == Emotes.arrowEmojis[i])
+                if (emote.Name == Emotes.arrowEmojis[i].Name)
                 {
                     player.turnDirection = (Direction)i;
 
