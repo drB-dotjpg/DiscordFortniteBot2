@@ -141,7 +141,7 @@ namespace DiscordFortniteBot2
                     HandlePregameReaction(arg3);
                     break;
                 case Phase.Ingame:
-                    await HandleIngameReaction(arg3);
+                    //await HandleIngameReaction(arg3);
                     break;
             }
 
@@ -300,23 +300,41 @@ namespace DiscordFortniteBot2
         async Task InGame()
         {
             Console.WriteLine("Generating map...");
-            map = new Map(debug);
-
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.AddField("Controls", "Click the reactions to control your player.");
-            builder.WithColor(Color.Blue); 
+            map = new Map(debug); //generate map
 
             foreach (Player player in players)
             {
-                string mapDisplay = map.GetMapAreaString(player.x, player.y, players);
-                player.localMap = await player.discordUser.SendMessageAsync(mapDisplay) as RestUserMessage;
-                RestUserMessage msg = await player.discordUser.SendMessageAsync("", false, builder.Build()) as RestUserMessage;
-                await msg.AddReactionsAsync(Emotes.arrowEmojis);
+                var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBreifing(player)) as RestUserMessage; //send turn breifing to all players
+                player.currentMessages.Add(mapMessage);
+
+                string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
+                var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
+                await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
+                player.currentMessages.Add(actionMessage);
             }
 
             await Task.Delay(-1);
         }
 
+        Embed GetTurnBreifing(Player player)
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+
+            builder.AddField("Map", map.GetMapAreaString(player.x, player.y, players), true);
+
+            string key =
+                "🟩 - Grass\n" +
+                "🟦 - Water\n(Can't shoot in)\n" +
+                "🟫 - Tree \n(Can loot)\n" +
+                "🟨 - Chest\n(Can loot)\n" +
+                "🟥 - Wall \n(Breakable)\n";
+
+            builder.AddField("Key", key, true);
+
+            return builder.Build();
+        }
+
+        /* Old code but still used for reference
         async Task HandleIngameReaction(SocketReaction reaction)
         {
             Emoji direction = Emotes.arrowEmojis.First(x => x.Name == reaction.Emote.Name);
@@ -337,8 +355,9 @@ namespace DiscordFortniteBot2
                     break;
             }
             
-            await player.localMap.ModifyAsync(m => m.Content = map.GetMapAreaString(player.x, player.y, players));
+            await player.currentMessage.ModifyAsync(m => m.Content = map.GetMapAreaString(player.x, player.y, players));
         }
+        */
 
         #endregion
 

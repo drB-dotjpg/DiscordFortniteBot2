@@ -6,7 +6,6 @@ using System.Text;
 
 namespace DiscordFortniteBot2
 {
-
     //Game Logic
     public enum Phase
     {
@@ -21,6 +20,16 @@ namespace DiscordFortniteBot2
     public enum Range
     {
         Short, Medium, Far, None
+    }
+
+    //Player turn data
+    public enum Action
+    {
+        Move, Use, Loot, Equip, Drop, None
+    }
+    public enum Direction
+    {
+        Up, Down, Left, Right, None
     }
 
     //Emotes used in reactions & throughout the game
@@ -48,6 +57,24 @@ namespace DiscordFortniteBot2
             new Emoji("➡️"),
             new Emoji("⬆️"),
             new Emoji("⬇️")
+        };
+
+        public static Emoji[] slotEmojis =
+        {
+            new Emoji("1️⃣"),
+            new Emoji("2️⃣"),
+            new Emoji("3️⃣"),
+            new Emoji("4️⃣"),
+            new Emoji("5️⃣")
+        };
+
+        public static Emoji[] actionEmojis =
+        {
+            new Emoji("👣"),
+            new Emoji("✋"),
+            new Emoji("💼"),
+            new Emoji("🔄"),
+            new Emoji("🗑️")
         };
     }
 

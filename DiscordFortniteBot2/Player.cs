@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Discord.Rest;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DiscordFortniteBot2
 {
@@ -14,7 +16,10 @@ namespace DiscordFortniteBot2
         public int x { get; set; }
         public int y { get; set; }
         public Emoji icon { get; }
-        public RestUserMessage localMap { get; set; }
+        public List<RestUserMessage> currentMessages { get; set; }
+
+        public Action turnAction { get; set; }
+        public Action turnDirection { get; set; }
 
         public Player(SocketUser discordUser, Emoji icon)
         {
@@ -28,6 +33,8 @@ namespace DiscordFortniteBot2
             y = 20;
 
             for (int i = 0; i < inventory.Length; i++) inventory[i] = new Item();
+
+            currentMessages = new List<RestUserMessage>();
         }
     }
 }
