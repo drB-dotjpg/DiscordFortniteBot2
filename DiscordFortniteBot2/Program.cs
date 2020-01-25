@@ -141,7 +141,7 @@ namespace DiscordFortniteBot2
                     HandlePregameReaction(arg3);
                     break;
                 case Phase.Ingame:
-                    //await HandleIngameReaction(arg3);
+                    await HandleIngameReaction(arg3);
                     break;
             }
 
@@ -296,21 +296,40 @@ namespace DiscordFortniteBot2
         #region In Game
 
         Map map;
+        int turn = 0;
 
         async Task InGame()
         {
             Console.WriteLine("Generating map...");
             map = new Map(debug); //generate map
 
-            foreach (Player player in players)
+            while (players.Count == 1 || debug)
             {
-                var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBreifing(player)) as RestUserMessage; //send turn breifing to all players
-                player.currentMessages.Add(mapMessage);
+                int seconds = 20;
+                List<IUserMessage> timerMessages = new List<IUserMessage>();
 
-                string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
-                var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
-                await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
-                player.currentMessages.Add(actionMessage);
+                foreach (Player player in players) //send turn breifings
+                {
+                    timerMessages.Add(await player.discordUser.SendMessageAsync($"Time Remaining: `...`"));
+
+                    var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBreifing(player)) as RestUserMessage; //send turn breifing to all players
+                    player.currentMessages.Add(mapMessage); //add it to the active messages (only these accept reactions)
+
+                    string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
+                    var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
+                    await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
+                    player.currentMessages.Add(actionMessage);
+                }
+
+                while (seconds >= 0)
+                {
+                    foreach(IUserMessage timer in timerMessages)
+                        await timer.ModifyAsync(m => m.Content = $"Time Remaining: `:{seconds.ToString("00")}`");
+
+                    await Task.Delay(1000);
+                    seconds--;
+                }
+                
             }
 
             await Task.Delay(-1);
@@ -334,30 +353,51 @@ namespace DiscordFortniteBot2
             return builder.Build();
         }
 
-        /* Old code but still used for reference
         async Task HandleIngameReaction(SocketReaction reaction)
         {
-            Emoji direction = Emotes.arrowEmojis.First(x => x.Name == reaction.Emote.Name);
+            Emoji emote = new Emoji(reaction.Emote.Name);
             Player player = GetPlayerById(reaction.UserId);
-            switch (direction.Name)
+
+            bool proceed = false;
+            foreach(RestUserMessage message in player.currentMessages) //if the message is an active message, then continue
             {
-                case "⬅️":
-                    if (player.x > 0) player.y--;
-                    break;
-                case "➡️":
-                    if (player.x < Map.mapWidth - 1) player.y++;
-                    break;
-                case "⬆️":
-                    if (player.y > 0) player.x--;
-                    break;
-                case "⬇️":
-                    if (player.y < Map.mapHeight - 1) player.x--;
-                    break;
+                if (message.Id == reaction.MessageId) proceed = true;
             }
-            
-            await player.currentMessage.ModifyAsync(m => m.Content = map.GetMapAreaString(player.x, player.y, players));
+
+            if (!proceed) return;
+
+            for (int i = 0; i < Emotes.actionEmojis.Length; i++) //scan for action emotes
+            {
+                if (emote.Name == Emotes.actionEmojis[i].Name) //if the emote matches
+                {
+                    player.turnAction = (Action)i; //the emote array pos should match the enum
+
+                    if (i == 0 || i == 1 && player.inventory[player.equipped].type == ItemType.Weapon) //if i is 0 (move) or 1 (use) and equipped with weapon 
+                    {
+                        var message = await player.discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
+                        await message.AddReactionsAsync(Emotes.arrowEmojis);
+                        player.currentMessages.Add(message);
+                    }
+                }
+            }
+
+            for (int i = 0; i < Emotes.arrowEmojis.Length; i++)
+            {
+                if (emote == Emotes.arrowEmojis[i])
+                {
+                    player.turnDirection = (Direction)i;
+                }
+            }
+
+            for (int i = 0; i < Emotes.slotEmojis.Length; i++)
+            {
+                if (emote == Emotes.slotEmojis[i])
+                {
+                    player.turnIndex = i;
+                }
+            }
+
         }
-        */
 
         #endregion
 

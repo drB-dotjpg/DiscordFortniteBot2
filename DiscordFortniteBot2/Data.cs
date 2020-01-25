@@ -29,7 +29,7 @@ namespace DiscordFortniteBot2
     }
     public enum Direction
     {
-        Up, Down, Left, Right, None
+        Left, Right, Up, Down, None
     }
 
     //Emotes used in reactions & throughout the game

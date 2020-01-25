@@ -12,6 +12,7 @@ namespace DiscordFortniteBot2
         public int health { get; set; }
         public int shield { get; set; }
         public Item[] inventory { get; set; } = new Item[5];
+        public int equipped { get; set; }
         public int materials { get; set; } //building materials
         public int x { get; set; }
         public int y { get; set; }
@@ -19,7 +20,8 @@ namespace DiscordFortniteBot2
         public List<RestUserMessage> currentMessages { get; set; }
 
         public Action turnAction { get; set; }
-        public Action turnDirection { get; set; }
+        public Direction turnDirection { get; set; }
+        public int turnIndex { get; set; }
 
         public Player(SocketUser discordUser, Emoji icon)
         {
@@ -28,6 +30,7 @@ namespace DiscordFortniteBot2
 
             health = 100;
             shield = 0;
+            equipped = 0;
 
             x = 20; //TODO: Remove this because it is temporary.
             y = 20;
