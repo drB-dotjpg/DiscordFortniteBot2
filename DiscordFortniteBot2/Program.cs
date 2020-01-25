@@ -310,9 +310,8 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players) //send turn breifings
                 {
-                    timerMessages.Add(await player.discordUser.SendMessageAsync($"Time Remaining: `...`"));
-
                     var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBreifing(player)) as RestUserMessage; //send turn breifing to all players
+                    timerMessages.Add(mapMessage);
                     player.currentMessages.Add(mapMessage); //add it to the active messages (only these accept reactions)
 
                     string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
@@ -358,13 +357,16 @@ namespace DiscordFortniteBot2
             Emoji emote = new Emoji(reaction.Emote.Name);
             Player player = GetPlayerById(reaction.UserId);
 
-            bool proceed = false;
-            foreach(RestUserMessage message in player.currentMessages) //if the message is an active message, then continue
-            {
-                if (message.Id == reaction.MessageId) proceed = true;
-            }
+            //if the message is the last active message, then continue
+            if (player.currentMessages.Last().Id != reaction.MessageId) return;
 
-            if (!proceed) return;
+            if (reaction.Emote.Name == Emotes.backButton.Name) //if a back button was pressed
+            {
+                var channel = await player.discordUser.GetOrCreateDMChannelAsync();
+                var message = await channel.GetMessageAsync(reaction.MessageId) as RestUserMessage;
+                await message.DeleteAsync();
+                player.currentMessages.Remove(player.currentMessages.Last());
+            }
 
             for (int i = 0; i < Emotes.actionEmojis.Length; i++) //scan for action emotes
             {
@@ -376,8 +378,11 @@ namespace DiscordFortniteBot2
                     {
                         var message = await player.discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
                         await message.AddReactionsAsync(Emotes.arrowEmojis);
+                        await message.AddReactionAsync(Emotes.backButton);
                         player.currentMessages.Add(message);
                     }
+
+                    return;
                 }
             }
 
@@ -386,6 +391,8 @@ namespace DiscordFortniteBot2
                 if (emote == Emotes.arrowEmojis[i])
                 {
                     player.turnDirection = (Direction)i;
+
+                    return;
                 }
             }
 
@@ -394,6 +401,8 @@ namespace DiscordFortniteBot2
                 if (emote == Emotes.slotEmojis[i])
                 {
                     player.turnIndex = i;
+
+                    return;
                 }
             }
 
