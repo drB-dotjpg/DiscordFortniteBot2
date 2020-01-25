@@ -296,7 +296,7 @@ namespace DiscordFortniteBot2
         #region In Game
 
         Map map;
-        int turn = 0;
+        int turn = 1;
 
         async Task InGame()
         {
@@ -305,14 +305,16 @@ namespace DiscordFortniteBot2
 
             while (players.Count == 1 || debug)
             {
-                int seconds = 20;
+                int seconds = 15;
                 List<IUserMessage> timerMessages = new List<IUserMessage>();
 
-                foreach (Player player in players) //send turn breifings
+                foreach (Player player in players) //Prepare turn
                 {
-                    var mapMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBriefing(player)) as RestUserMessage; //send turn breifing to all players
-                    timerMessages.Add(mapMessage);
-                    player.currentMessages.Add(mapMessage); //add it to the active messages (only these accept reactions)
+                    player.mapMessage = await player.discordUser.SendMessageAsync(null, false, 
+                        new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time
+
+                    timerMessages.Add(player.mapMessage);
+                    player.currentMessages.Add(player.mapMessage); //add it to the active messages (only these accept reactions)
 
                     string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
@@ -320,10 +322,13 @@ namespace DiscordFortniteBot2
                     player.currentMessages.Add(actionMessage);
                 }
 
-                while (seconds >= 0)
+                foreach(Player player in players)
+                    await player.mapMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+
+                while (seconds >= 0) //wait for timer to finish
                 {
                     foreach(IUserMessage timer in timerMessages)
-                        await timer.ModifyAsync(m => m.Content = $"Time Remaining: `:{seconds.ToString("00")}`");
+                        await timer.ModifyAsync(m => m.Content = $"**Turn {turn}** | Time Remaining: `:{seconds.ToString("00")}`");
 
                     await Task.Delay(1000);
                     seconds--;
@@ -351,7 +356,9 @@ namespace DiscordFortniteBot2
                         }
                     }
                 }
-                
+
+
+                turn++;
             }
 
             await Task.Delay(-1);

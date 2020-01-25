@@ -23,6 +23,8 @@ namespace DiscordFortniteBot2
         public Direction turnDirection { get; set; }
         public int turnIndex { get; set; }
 
+        public RestUserMessage mapMessage { get; set; } //used to store map message data breifly
+
         public Player(SocketUser discordUser, Emoji icon)
         {
             this.discordUser = discordUser;
