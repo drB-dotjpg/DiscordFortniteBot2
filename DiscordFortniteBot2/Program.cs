@@ -350,6 +350,14 @@ namespace DiscordFortniteBot2
 
             builder.AddField("Key", key, true);
 
+            int shieldBarAmount = player.shield / 10;
+            string shieldBar = string.Concat(Enumerable.Repeat("🟦", shieldBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - shieldBarAmount)); //Fill bar with blue squares and gray squares depending on the player's shield
+            builder.AddField("Shield", shieldBar);
+
+            int healthBarAmount = player.health / 10;
+            string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
+            builder.AddField("Health", healthBar);
+
             return builder.Build();
         }
 
