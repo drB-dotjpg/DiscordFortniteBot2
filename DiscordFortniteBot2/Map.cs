@@ -17,12 +17,12 @@ namespace DiscordFortniteBot2
 
     public class Map
     {
-        public const int mapWidth = 50;
-        public const int mapHeight = 50;
+        public const int mapWidth = 40;
+        public const int mapHeight = 40;
 
 
-        const int houseCount = 20;
-        const int treeCount = 200;
+        const int houseCount = 18;
+        const int treeCount = 150;
         const int riverCount = 3; //river count is randomized, this is a cap to the amount of rivers generated.
 
         public Tile[,] mapGrid = new Tile[mapWidth, mapHeight];

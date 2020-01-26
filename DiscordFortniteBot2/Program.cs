@@ -219,7 +219,7 @@ namespace DiscordFortniteBot2
                     ? seconds / 60 + ":" + (seconds % 60).ToString("00")
                     : "*Starts when 2 or more players have joined.*";
 
-                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: { joinedPlayers }\n\n" +
+                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: {players.Count}/8 slots filled\n{ joinedPlayers }\n\n" +
                     $" > **Time Left**: { timeLeft }");
             }
         }
@@ -250,7 +250,7 @@ namespace DiscordFortniteBot2
 
         string GetPlayersJoined()
         {
-            string builder = players.Count + "/8 slots filled\n";
+            string builder = "";
 
             if (players.Count > 0) //if there are more than 0 players
             {
@@ -319,6 +319,7 @@ namespace DiscordFortniteBot2
                     string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
+                    await actionMessage.AddReactionAsync(Emotes.infoButton);
                     player.currentMessages.Add(actionMessage);
                 }
 
@@ -410,16 +411,7 @@ namespace DiscordFortniteBot2
         {
             EmbedBuilder builder = new EmbedBuilder();
 
-            builder.AddField("Map", map.GetMapAreaString(player.x, player.y, players), true);
-
-            string key =
-                "🟩 - Grass\n" +
-                "🟦 - Water\n(Can't shoot in)\n" +
-                "🟫 - Tree \n(Can loot)\n" +
-                "🟨 - Chest\n(Can loot)\n" +
-                "🟥 - Wall \n(Breakable)\n";
-
-            builder.AddField("Key", key, true);
+            builder.AddField("Map", map.GetMapAreaString(player.x, player.y, players)); //add map
 
             int shieldBarAmount = player.shield / 10;
             string shieldBar = string.Concat(Enumerable.Repeat("🟦", shieldBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - shieldBarAmount)); //Fill bar with blue squares and gray squares depending on the player's shield
@@ -432,6 +424,26 @@ namespace DiscordFortniteBot2
             return builder.Build();
         }
 
+        Embed GetHelpMessage()
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+
+            string key =
+                "🟩 - Grass\n" +
+                "🟦 - Water\n(Can't use items while standing in)\n" +
+                "🟫 - Tree \n(Can loot for materials)\n" +
+                "🟨 - Chest\n(Can loot for items)\n" +
+                "🟥 - Wall \n(Breakable with weapons)\n";
+
+            builder.AddField("Map Key", key);
+
+            string playersInGame = GetPlayersJoined(); //function located in pregame region
+
+            builder.AddField("Players", playersInGame);
+
+            return builder.Build();
+        }
+
         async Task HandleIngameReaction(SocketReaction reaction)
         {
             Emoji emote = new Emoji(reaction.Emote.Name);
@@ -439,6 +451,12 @@ namespace DiscordFortniteBot2
 
             //if the message is the last active message, then continue
             if (player.currentMessages.Last().Id != reaction.MessageId) return;
+
+            if (reaction.Emote.Name == Emotes.infoButton.Name) //if the info button was pressed
+            {
+                await player.discordUser.SendMessageAsync(null, false, GetHelpMessage()); //send the info menu
+                return;
+            }
 
             if (reaction.Emote.Name == Emotes.backButton.Name) //if a back button was pressed
             {
@@ -449,9 +467,9 @@ namespace DiscordFortniteBot2
                 return;
             }
 
-            if (reaction.Emote.Name == Emotes.sprintButton.Name)
+            if (reaction.Emote.Name == Emotes.sprintButton.Name) //if sprinting button is pressed
             {
-                player.sprinting = true;
+                player.sprinting = true; //the player is sprinting (wow)
                 return;
             }
 
