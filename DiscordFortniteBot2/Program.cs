@@ -304,7 +304,7 @@ namespace DiscordFortniteBot2
 
         Map map;
         int turn = 1;
-
+        const int sprintAmount = 3;
         async Task InGame()
         {
             Console.WriteLine("Generating map...");
@@ -346,56 +346,37 @@ namespace DiscordFortniteBot2
                 {
                     if (player.turnAction == Action.Move)
                     {
-                        const int sprintAmount = 3;
+                        int movementMultiplier = player.sprinting ? sprintAmount : 1;
 
-                        switch (player.turnDirection)
+                        for (int i = 0; i < movementMultiplier; i++)
                         {
-                            case Direction.Right:
-
-                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
-                                {
+                            switch (player.turnDirection)
+                            {
+                                case Direction.Right:
                                     if (player.x < Map.mapWidth - 1
                                         && map.mapGrid[player.x + 1, player.y].Type != TileType.Wall)
                                         player.x++;
-                                }
+                                    break;
 
-                                break;
-
-                            case Direction.Left:
-
-                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
-                                {
+                                case Direction.Left:
                                     if (player.x > 0
-                                    && map.mapGrid[player.x - 1, player.y].Type != TileType.Wall)
+                                        && map.mapGrid[player.x - 1, player.y].Type != TileType.Wall)
                                         player.x--;
-                                }
+                                    break;
 
-                                break;
-
-                            case Direction.Up:
-
-                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
-                                {
+                                case Direction.Up:
                                     if (player.y < Map.mapHeight - 1
-                                    && map.mapGrid[player.x, player.y - 1].Type != TileType.Wall)
+                                        && map.mapGrid[player.x, player.y - 1].Type != TileType.Wall)
                                         player.y--;
-                                }
+                                    break;
 
-                                break;
-
-                            case Direction.Down:
-
-                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
-                                {
+                                case Direction.Down:
                                     if (player.y > 0
-                                    && map.mapGrid[player.x, player.y + 1].Type != TileType.Wall)
+                                        && map.mapGrid[player.x, player.y + 1].Type != TileType.Wall)
                                         player.y++;
-                                }
-
-                                break;
-
+                                    break;
+                            }
                         }
-
                         player.sprinting = false;
                     }
                 }
