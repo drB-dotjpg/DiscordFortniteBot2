@@ -42,5 +42,41 @@ namespace DiscordFortniteBot2
 
             currentMessages = new List<RestUserMessage>();
         }
+
+        public void Move(int sprintAmount, Map map)
+        {
+            int movementMultiplier = sprinting ? sprintAmount : 1;
+
+            for (int i = 0; i < movementMultiplier; i++)
+            {
+                switch (turnDirection)
+                {
+                    case Direction.Right:
+                        if (x < Map.mapWidth - 1
+                            && map.mapGrid[x + 1, y].Type != TileType.Wall)
+                            x++;
+                        break;
+
+                    case Direction.Left:
+                        if (x > 0
+                            && map.mapGrid[x - 1, y].Type != TileType.Wall)
+                            x--;
+                        break;
+
+                    case Direction.Up:
+                        if (y < Map.mapHeight - 1
+                            && map.mapGrid[x, y - 1].Type != TileType.Wall)
+                            y--;
+                        break;
+
+                    case Direction.Down:
+                        if (y > 0
+                            && map.mapGrid[x, y + 1].Type != TileType.Wall)
+                            y++;
+                        break;
+                }
+            }
+            sprinting = false;
+        }
     }
 }

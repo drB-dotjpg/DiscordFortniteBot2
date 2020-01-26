@@ -346,38 +346,7 @@ namespace DiscordFortniteBot2
                 {
                     if (player.turnAction == Action.Move)
                     {
-                        int movementMultiplier = player.sprinting ? sprintAmount : 1;
-
-                        for (int i = 0; i < movementMultiplier; i++)
-                        {
-                            switch (player.turnDirection)
-                            {
-                                case Direction.Right:
-                                    if (player.x < Map.mapWidth - 1
-                                        && map.mapGrid[player.x + 1, player.y].Type != TileType.Wall)
-                                        player.x++;
-                                    break;
-
-                                case Direction.Left:
-                                    if (player.x > 0
-                                        && map.mapGrid[player.x - 1, player.y].Type != TileType.Wall)
-                                        player.x--;
-                                    break;
-
-                                case Direction.Up:
-                                    if (player.y < Map.mapHeight - 1
-                                        && map.mapGrid[player.x, player.y - 1].Type != TileType.Wall)
-                                        player.y--;
-                                    break;
-
-                                case Direction.Down:
-                                    if (player.y > 0
-                                        && map.mapGrid[player.x, player.y + 1].Type != TileType.Wall)
-                                        player.y++;
-                                    break;
-                            }
-                        }
-                        player.sprinting = false;
+                        player.Move(sprintAmount, map);
                     }
                 }
 
