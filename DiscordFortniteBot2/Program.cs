@@ -323,7 +323,7 @@ namespace DiscordFortniteBot2
                     timerMessages.Add(player.mapMessage);
                     player.currentMessages.Add(player.mapMessage); //add it to the active messages (only these accept reactions)
 
-                    string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop";
+                    string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
                     await actionMessage.AddReactionAsync(Emotes.infoButton);
@@ -434,7 +434,8 @@ namespace DiscordFortniteBot2
 
             if (reaction.Emote.Name == Emotes.infoButton.Name) //if the info button was pressed
             {
-                await player.discordUser.SendMessageAsync(null, false, GetHelpMessage()); //send the info menu
+                var infoMessage = await player.discordUser.SendMessageAsync(null, false, GetHelpMessage()); //send the info menu
+                player.currentMessages.Add(infoMessage as RestUserMessage);
                 return;
             }
 
@@ -493,7 +494,7 @@ namespace DiscordFortniteBot2
                 if (emote.Name == reaction.Emote.Name) isActionEmote = true;
             }
 
-            if (!isActionEmote) return; //if the emote is not in the action emote array then don't do anything
+            if (!isActionEmote && reaction.Emote.Name != Emotes.infoButton.Name) return; //if the emote is not in the action emote array (or its not the info button) then don't do anything
 
             Player player = GetPlayerById(reaction.UserId);
 
