@@ -317,11 +317,11 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players) //Prepare turn
                 {
-                    player.mapMessage = await player.discordUser.SendMessageAsync(null, false,
+                    player.turnMessage = await player.discordUser.SendMessageAsync(null, false,
                         new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time
 
-                    timerMessages.Add(player.mapMessage);
-                    player.currentMessages.Add(player.mapMessage); //add it to the active messages (only these accept reactions)
+                    timerMessages.Add(player.turnMessage);
+                    player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
 
                     string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
@@ -331,7 +331,7 @@ namespace DiscordFortniteBot2
                 }
 
                 foreach (Player player in players)
-                    await player.mapMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                    await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
 
                 while (seconds >= 0) //wait for timer to finish
                 {
@@ -370,6 +370,8 @@ namespace DiscordFortniteBot2
             string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
             builder.AddField($"Health: {player.health}", healthBar);
 
+            builder.AddField("Inventory", GetInventoryString(player)); //add Inventory
+
             return builder.Build();
         }
 
@@ -391,6 +393,42 @@ namespace DiscordFortniteBot2
             builder.AddField("Players", playersInGame);
 
             return builder.Build();
+        }
+
+        string GetInventoryString(Player player)
+        {
+            string builder = "";
+
+            for (int i = 0; i < player.inventory.Length; i++)
+            {
+                builder += (i + 1) + ": ";
+
+                if (player.turnIndex == i) builder += "**[Equipped]** ";
+
+                Item item = player.inventory[i];
+
+                string pluralUses = item.ammo > 1 ? "uses" : "use";
+
+                switch (item.type)
+                {
+                    case ItemType.Weapon:
+                        builder += $"{item.name} (Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.Health:
+                        builder += $"{item.name} (Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.Shield:
+                        builder += $"{item.name} (Healing. Heals {item.effectVal} shield. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.HealAll:
+                        builder += $"{item.name} (Healing. Heals {item.effectVal} health & shield. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.Trap:
+                        builder += $"{item.name} (Trap. Deals {item.effectVal} damage on contact. {item.ammo} {pluralUses} left.)"; break;
+                    default:
+                        builder += "Empty slot"; break;
+                }
+
+                builder += "\n";
+            }
+
+            return builder;
         }
 
         async Task HandleIngameReaction(SocketReaction reaction)

@@ -24,7 +24,7 @@ namespace DiscordFortniteBot2
         public int turnIndex { get; set; }
         public bool sprinting { get; set; }
 
-        public RestUserMessage mapMessage { get; set; } //used to store map message data breifly
+        public RestUserMessage turnMessage { get; set; }
 
         public Player(SocketUser discordUser, Emoji icon)
         {
@@ -38,7 +38,7 @@ namespace DiscordFortniteBot2
             x = 20; //TODO: Remove this because it is temporary.
             y = 20;
 
-            for (int i = 0; i < inventory.Length; i++) inventory[i] = new Item();
+            for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
 
             currentMessages = new List<RestUserMessage>();
         }
