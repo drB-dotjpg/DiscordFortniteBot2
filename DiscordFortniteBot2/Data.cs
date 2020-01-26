@@ -77,7 +77,6 @@ namespace DiscordFortniteBot2
             new Emoji("🗑️")
         };
 
-        public static Emoji backButton = new Emoji("🔙");
         public static Emoji sprintButton = new Emoji("🏃‍♂️");
         public static Emoji infoButton = new Emoji("ℹ");
     }

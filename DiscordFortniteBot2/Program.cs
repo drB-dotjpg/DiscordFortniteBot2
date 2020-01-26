@@ -104,6 +104,7 @@ namespace DiscordFortniteBot2
             _client.Log += Log; //subscribe to discord events
             _client.MessageReceived += MessageReceived;
             _client.ReactionAdded += ReactionAdded;
+            _client.ReactionRemoved += ReactionRemoved;
             _client.Ready += OnReady;
 
             await _client.LoginAsync(TokenType.Bot, inputToken);  //login using token & start
@@ -112,6 +113,12 @@ namespace DiscordFortniteBot2
             while (!ready) await Task.Delay(30); //wait for login to finish
 
             _server = _client.Guilds.First(g => g.Name == inputServerName); //get the server by name
+        }
+
+        async Task ReactionRemoved(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        {
+            if (phase == Phase.Ingame)
+                await HandleIngameReactionRemoval(arg3);
         }
 
         private Task Log(LogMessage arg)
@@ -339,67 +346,59 @@ namespace DiscordFortniteBot2
                 {
                     if (player.turnAction == Action.Move)
                     {
-                    sprint: //yes I know its goto but it works in this case
+                        const int sprintAmount = 3;
 
                         switch (player.turnDirection)
                         {
                             case Direction.Right:
 
-                                if (player.x < Map.mapWidth - 1
-                                    && map.mapGrid[player.x + 1, player.y].Type != TileType.Wall)
-                                    player.x++;
-
-                                if (player.sprinting)
+                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
                                 {
-                                    player.sprinting = false;
-                                    goto sprint;
+                                    if (player.x < Map.mapWidth - 1
+                                        && map.mapGrid[player.x + 1, player.y].Type != TileType.Wall)
+                                        player.x++;
                                 }
 
                                 break;
 
                             case Direction.Left:
 
-                                if (player.x > 0
-                                    && map.mapGrid[player.x - 1, player.y].Type != TileType.Wall)
-                                    player.x--;
-
-                                if (player.sprinting)
+                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
                                 {
-                                    player.sprinting = false;
-                                    goto sprint;
+                                    if (player.x > 0
+                                    && map.mapGrid[player.x - 1, player.y].Type != TileType.Wall)
+                                        player.x--;
                                 }
+
                                 break;
 
                             case Direction.Up:
 
-                                if (player.y < Map.mapHeight - 1
-                                    && map.mapGrid[player.x, player.y - 1].Type != TileType.Wall)
-                                    player.y--;
-
-                                if (player.sprinting)
+                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
                                 {
-                                    player.sprinting = false;
-                                    goto sprint;
+                                    if (player.y < Map.mapHeight - 1
+                                    && map.mapGrid[player.x, player.y - 1].Type != TileType.Wall)
+                                        player.y--;
                                 }
+
                                 break;
 
                             case Direction.Down:
 
-                                if (player.y > 0
-                                    && map.mapGrid[player.x, player.y + 1].Type != TileType.Wall)
-                                    player.y++;
-
-                                if (player.sprinting)
+                                for (int i = 0; i < (player.sprinting ? sprintAmount : 1); i++)
                                 {
-                                    player.sprinting = false;
-                                    goto sprint;
+                                    if (player.y > 0
+                                    && map.mapGrid[player.x, player.y + 1].Type != TileType.Wall)
+                                        player.y++;
                                 }
+
                                 break;
 
                         }
+
+                        player.sprinting = false;
                     }
                 }
-
 
                 turn++;
             }
@@ -458,15 +457,6 @@ namespace DiscordFortniteBot2
                 return;
             }
 
-            if (reaction.Emote.Name == Emotes.backButton.Name) //if a back button was pressed
-            {
-                var channel = await player.discordUser.GetOrCreateDMChannelAsync();
-                var message = await channel.GetMessageAsync(reaction.MessageId) as RestUserMessage;
-                await message.DeleteAsync();
-                player.currentMessages.Remove(player.currentMessages.Last());
-                return;
-            }
-
             if (reaction.Emote.Name == Emotes.sprintButton.Name) //if sprinting button is pressed
             {
                 player.sprinting = true; //the player is sprinting (wow)
@@ -484,7 +474,6 @@ namespace DiscordFortniteBot2
                         var message = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to sprint):") as RestUserMessage; //follow up asking for a direction
                         await message.AddReactionsAsync(Emotes.arrowEmojis);
                         await message.AddReactionAsync(Emotes.sprintButton);
-                        await message.AddReactionAsync(Emotes.backButton);
                         player.currentMessages.Add(message);
                     }
 
@@ -512,6 +501,30 @@ namespace DiscordFortniteBot2
                 }
             }
 
+        }
+
+        async Task HandleIngameReactionRemoval(SocketReaction reaction)
+        {
+            bool isActionEmote = false;
+
+            foreach(Emoji emote in Emotes.actionEmojis)
+            {
+                if (emote.Name == reaction.Emote.Name) isActionEmote = true;
+            }
+
+            if (!isActionEmote) return; //if the emote is not in the action emote array then don't do anything
+
+            Player player = GetPlayerById(reaction.UserId);
+
+            if (player.currentMessages.Last().Id == reaction.MessageId) return; //if the message is the latest message, then don't do anything
+
+            player.turnAction = Action.None;
+            player.turnDirection = Direction.None;
+
+            var message = player.currentMessages.Last() as RestUserMessage;
+            await message.DeleteAsync();
+            player.currentMessages.Remove(player.currentMessages.Last());
+            return;
         }
 
         #endregion
