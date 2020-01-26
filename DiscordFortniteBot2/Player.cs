@@ -22,6 +22,7 @@ namespace DiscordFortniteBot2
         public Action turnAction { get; set; }
         public Direction turnDirection { get; set; }
         public int turnIndex { get; set; }
+        public bool sprinting { get; set; }
 
         public RestUserMessage mapMessage { get; set; } //used to store map message data breifly
 

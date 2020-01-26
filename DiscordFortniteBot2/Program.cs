@@ -310,7 +310,7 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players) //Prepare turn
                 {
-                    player.mapMessage = await player.discordUser.SendMessageAsync(null, false, 
+                    player.mapMessage = await player.discordUser.SendMessageAsync(null, false,
                         new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time
 
                     timerMessages.Add(player.mapMessage);
@@ -322,35 +322,77 @@ namespace DiscordFortniteBot2
                     player.currentMessages.Add(actionMessage);
                 }
 
-                foreach(Player player in players)
+                foreach (Player player in players)
                     await player.mapMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
 
                 while (seconds >= 0) //wait for timer to finish
                 {
-                    foreach(IUserMessage timer in timerMessages)
+                    foreach (IUserMessage timer in timerMessages)
                         await timer.ModifyAsync(m => m.Content = $"**Turn {turn}** | Time Remaining: `:{seconds.ToString("00")}`");
 
                     await Task.Delay(1000);
                     seconds--;
                 }
 
-                foreach(Player player in players)
+                foreach (Player player in players)
                 {
-                    if(player.turnAction == Action.Move)
+                    if (player.turnAction == Action.Move)
                     {
+                    sprint: //yes I know its goto but it works in this case
+
                         switch (player.turnDirection)
                         {
                             case Direction.Right:
-                                if (player.y < Map.mapWidth - 1 ) player.y++;
+
+                                if (player.x < Map.mapWidth - 1
+                                    && map.mapGrid[player.x + 1, player.y].Type != TileType.Wall)
+                                    player.x++;
+
+                                if (player.sprinting)
+                                {
+                                    player.sprinting = false;
+                                    goto sprint;
+                                }
+
                                 break;
+
                             case Direction.Left:
-                                if (player.y > 0) player.y--;
+
+                                if (player.x > 0
+                                    && map.mapGrid[player.x - 1, player.y].Type != TileType.Wall)
+                                    player.x--;
+
+                                if (player.sprinting)
+                                {
+                                    player.sprinting = false;
+                                    goto sprint;
+                                }
                                 break;
+
                             case Direction.Up:
-                                if (player.x < Map.mapHeight - 1) player.x--;
+
+                                if (player.y < Map.mapHeight - 1
+                                    && map.mapGrid[player.x, player.y - 1].Type != TileType.Wall)
+                                    player.y--;
+
+                                if (player.sprinting)
+                                {
+                                    player.sprinting = false;
+                                    goto sprint;
+                                }
                                 break;
+
                             case Direction.Down:
-                                if (player.x > 0) player.x++;
+
+                                if (player.y > 0
+                                    && map.mapGrid[player.x, player.y + 1].Type != TileType.Wall)
+                                    player.y++;
+
+                                if (player.sprinting)
+                                {
+                                    player.sprinting = false;
+                                    goto sprint;
+                                }
                                 break;
 
                         }
@@ -404,6 +446,13 @@ namespace DiscordFortniteBot2
                 var message = await channel.GetMessageAsync(reaction.MessageId) as RestUserMessage;
                 await message.DeleteAsync();
                 player.currentMessages.Remove(player.currentMessages.Last());
+                return;
+            }
+
+            if (reaction.Emote.Name == Emotes.sprintButton.Name)
+            {
+                player.sprinting = true;
+                return;
             }
 
             for (int i = 0; i < Emotes.actionEmojis.Length; i++) //scan for action emotes
@@ -414,8 +463,9 @@ namespace DiscordFortniteBot2
 
                     if (i == 0 || i == 1 && player.inventory[player.equipped].type == ItemType.Weapon) //if i is 0 (move) or 1 (use) and equipped with weapon 
                     {
-                        var message = await player.discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
+                        var message = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to sprint):") as RestUserMessage; //follow up asking for a direction
                         await message.AddReactionsAsync(Emotes.arrowEmojis);
+                        await message.AddReactionAsync(Emotes.sprintButton);
                         await message.AddReactionAsync(Emotes.backButton);
                         player.currentMessages.Add(message);
                     }

@@ -260,7 +260,7 @@ namespace DiscordFortniteBot2
 
                     if (playerFound) { y++; continue; }
 
-                    switch (mapArea[i, j].Type)
+                    switch (mapArea[j, i].Type)
                     {
                         case TileType.Chest:
                             mapString += "🟨"; //yellow block
