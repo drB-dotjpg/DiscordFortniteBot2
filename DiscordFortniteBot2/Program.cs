@@ -347,13 +347,16 @@ namespace DiscordFortniteBot2
                         case Action.Move:
                             player.Move(sprintAmount, map);
                             break;
+
                         case Action.Build:
                             map = player.Build(map);
                             break;
-                        case Action.Use:
-                            if (player.inventory[player.equipped].type == ItemType.Empty) return;
 
-                            if (player.inventory[player.equipped].type != ItemType.Weapon && player.inventory[player.equipped].type != ItemType.Trap)
+                        case Action.Use:
+                            ItemType itemType = player.inventory[player.equipped].type;
+                            if (itemType == ItemType.Empty) break; //haha jeff put return here what a dummy
+
+                            if (itemType != ItemType.Weapon && itemType != ItemType.Trap)
                             {
                                 EmbedBuilder builder = new EmbedBuilder();
                                 builder.AddField("Item used", $"You used a {player.inventory[player.equipped].name}");
@@ -362,6 +365,11 @@ namespace DiscordFortniteBot2
 
                                 player.Use(player.equipped);
                             }
+                            else if (itemType == ItemType.Weapon)
+                            {
+
+                            }
+
                             break;
                     }
                 }
@@ -483,6 +491,20 @@ namespace DiscordFortniteBot2
                             await moveMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             await moveMessage.AddReactionAsync(Emotes.sprintButton);
                             player.currentMessages.Add(moveMessage);
+                            break;
+
+                        case Action.Use:
+                            ItemType itemType = player.inventory[player.equipped].type;
+                            if (itemType == ItemType.Weapon || itemType == ItemType.Trap)
+                            {
+                                var useMessage = await player.discordUser.SendMessageAsync($"(Weapon equipped) Select Direction:") as RestUserMessage; //follow up asking for a direction
+                                await useMessage.AddReactionsAsync(Emotes.arrowEmojis);
+                                player.currentMessages.Add(useMessage);
+                            }
+                            else
+                            {
+                                player.ready = true;
+                            }
                             break;
 
                         case Action.Build:

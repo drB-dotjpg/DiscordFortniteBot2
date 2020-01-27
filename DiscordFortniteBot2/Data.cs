@@ -1,8 +1,5 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace DiscordFortniteBot2
 {
@@ -19,7 +16,7 @@ namespace DiscordFortniteBot2
     }
     public enum Range
     {
-        Short, Medium, Far, None
+        None, Short, Medium, Far
     }
 
     //Player turn data

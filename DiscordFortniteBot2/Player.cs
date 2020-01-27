@@ -2,7 +2,6 @@
 using Discord.WebSocket;
 using Discord.Rest;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace DiscordFortniteBot2
 {
@@ -40,7 +39,7 @@ namespace DiscordFortniteBot2
             y = 20;
             materials = 10;
 
-            for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
+            for (int i = 0; i < inventory.Length; i++) inventory[i] = new Item();
 
             ready = false;
 

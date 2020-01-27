@@ -1,7 +1,5 @@
-﻿using Discord;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DiscordFortniteBot2
 {
@@ -303,13 +301,23 @@ namespace DiscordFortniteBot2
             public Tile(TileType type)
             {
                 Type = type;
-                Items = new Item[0];
+                Items = new Item[5];
+                for (int i = 0; i < Items.Length; i++) Items[i] = new Item();
                 Trap = null;
             }
 
             public Tile(Item[] items)
             {
                 Type = TileType.Chest;
+                Items = new Item[5];
+                for (int i = 0; i < Math.Min(items.Length, Items.Length); i++)
+                {
+                    Items[i] = items[i];
+                }
+                for (int i = 0; i < Items.Length; i++)
+                {
+                    if (Items[i] == null) Items[i] = new Item();
+                }
                 Items = items;
                 Trap = null;
             }

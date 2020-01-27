@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DiscordFortniteBot2
+﻿namespace DiscordFortniteBot2
 {
     public class Item
     {
@@ -12,7 +8,11 @@ namespace DiscordFortniteBot2
         public int effectVal { get; } //damage done / healing applied based on the type of weapon.
         public int ammo { get; set; }
 
-        public Item() => type = ItemType.Empty;
+        public Item()
+        {
+            type = ItemType.Empty;
+            ammo = 0;
+        }
 
         public Item(string name, ItemType type, Range range, int effectVal, int ammo)
         {
