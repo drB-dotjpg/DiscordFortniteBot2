@@ -305,6 +305,7 @@ namespace DiscordFortniteBot2
         Map map;
         int turn = 1;
         const int sprintAmount = 3;
+
         async Task InGame()
         {
             Console.WriteLine("Generating map...");
@@ -312,15 +313,13 @@ namespace DiscordFortniteBot2
 
             while (players.Count == 1 || debug)
             {
-                int seconds = 15;
-                List<IUserMessage> timerMessages = new List<IUserMessage>();
+                int seconds = 20;
 
                 foreach (Player player in players) //Prepare turn
                 {
                     player.turnMessage = await player.discordUser.SendMessageAsync(null, false,
                         new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time
 
-                    timerMessages.Add(player.turnMessage);
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
 
                     string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 🔨=Build | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
@@ -335,9 +334,6 @@ namespace DiscordFortniteBot2
 
                 while (seconds >= 0) //wait for timer to finish
                 {
-                    foreach (IUserMessage timer in timerMessages)
-                        await timer.ModifyAsync(m => m.Content = $"**Turn {turn}** | Time Remaining: `:{seconds.ToString("00")}`");
-
                     await Task.Delay(1000);
                     seconds--;
                 }
@@ -492,6 +488,12 @@ namespace DiscordFortniteBot2
                             await buildMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             player.currentMessages.Add(buildMessage);
                             break;
+
+                        case Action.Equip:
+                            var equipMessage = await player.discordUser.SendMessageAsync($"Select Slot: ") as RestUserMessage;
+                            await equipMessage.AddReactionsAsync(Emotes.slotEmojis);
+                            player.currentMessages.Add(equipMessage);
+                            break;
                     }
 
                     return;
@@ -510,9 +512,17 @@ namespace DiscordFortniteBot2
 
             for (int i = 0; i < Emotes.slotEmojis.Length; i++)
             {
-                if (emote == Emotes.slotEmojis[i])
+                if (emote.Name == Emotes.slotEmojis[i].Name)
                 {
                     player.turnIndex = i;
+
+                    switch (player.turnAction)
+                    {
+                        case Action.Equip:
+                            player.equipped = player.turnIndex - 1;
+                            await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                            break;
+                    }
 
                     return;
                 }
