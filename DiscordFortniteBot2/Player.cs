@@ -18,6 +18,7 @@ namespace DiscordFortniteBot2
         public int y { get; set; }
         public Emoji icon { get; }
         public List<RestUserMessage> currentMessages { get; set; }
+        public bool ready { get; set; }
 
         public Action turnAction { get; set; }
         public Direction turnDirection { get; set; }
@@ -40,8 +41,8 @@ namespace DiscordFortniteBot2
             materials = 10;
 
             for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
-            
 
+            ready = false;
 
             currentMessages = new List<RestUserMessage>();
         }

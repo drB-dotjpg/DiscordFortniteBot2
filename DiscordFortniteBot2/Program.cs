@@ -226,7 +226,7 @@ namespace DiscordFortniteBot2
                     ? seconds / 60 + ":" + (seconds % 60).ToString("00")
                     : "*Starts when 2 or more players have joined.*";
 
-                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: {players.Count}/8 slots filled\n{ joinedPlayers }\n\n" +
+                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: {players.Count}/8 slots filled\n{ joinedPlayers }" +
                     $" > **Time Left**: { timeLeft }");
             }
         }
@@ -268,7 +268,7 @@ namespace DiscordFortniteBot2
             }
             else //if there are no players
             {
-                builder = "None";
+                builder = "None\n";
             }
 
             return builder;
@@ -313,7 +313,7 @@ namespace DiscordFortniteBot2
 
             while (players.Count == 1 || debug)
             {
-                int seconds = 20;
+                int seconds = 60;
 
                 foreach (Player player in players) //Prepare turn
                 {
@@ -332,7 +332,7 @@ namespace DiscordFortniteBot2
                 foreach (Player player in players)
                     await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
 
-                while (seconds >= 0) //wait for timer to finish
+                while (seconds >= 0 && !ArePlayersReady()) //wait for timer to finish
                 {
                     await Task.Delay(1000);
                     seconds--;
@@ -340,6 +340,8 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players)
                 {
+                    player.ready = false;
+
                     switch (player.turnAction)
                     {
                         case Action.Move:
@@ -505,6 +507,7 @@ namespace DiscordFortniteBot2
                 if (emote.Name == Emotes.arrowEmojis[i].Name)
                 {
                     player.turnDirection = (Direction)i;
+                    player.ready = true;
 
                     return;
                 }
@@ -544,6 +547,7 @@ namespace DiscordFortniteBot2
             Player player = GetPlayerById(reaction.UserId);
 
             if (player.currentMessages.Last().Id == reaction.MessageId) return; //if the message is the latest message, then don't do anything
+            if (player.currentMessages.Count < 2) return; //if there is 1 message in the thingy then don't do the thingy
 
             player.turnAction = Action.None;
             player.turnDirection = Direction.None;
@@ -551,7 +555,17 @@ namespace DiscordFortniteBot2
             var message = player.currentMessages.Last() as RestUserMessage;
             await message.DeleteAsync();
             player.currentMessages.Remove(player.currentMessages.Last());
-            return;
+
+            player.ready = false;
+        }
+
+        bool ArePlayersReady()
+        {
+            foreach(Player player in players)
+            {
+                if (!player.ready) return false;
+            }
+            return true;
         }
 
         #endregion
