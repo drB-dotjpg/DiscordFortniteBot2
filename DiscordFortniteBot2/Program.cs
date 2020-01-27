@@ -145,7 +145,7 @@ namespace DiscordFortniteBot2
             switch (phase)
             {
                 case Phase.Pregame:
-                    HandlePregameReaction(arg3);
+                    await HandlePregameReaction(arg3);
                     break;
                 case Phase.Ingame:
                     await HandleIngameReaction(arg3);
@@ -231,7 +231,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        void HandlePregameReaction(SocketReaction reaction)
+        async Task HandlePregameReaction(SocketReaction reaction)
         {
             if (reaction.Emote.Name == Emotes.joinGame.Name && !playerLimitHit) //if the reaction is the one needed to join game and there are less than 8 players already joined.
             {
@@ -246,12 +246,23 @@ namespace DiscordFortniteBot2
 
                     players.Add(new Player(reactionUser, playerIcon)); //add them to the game.
 
-                    reactionUser.SendMessageAsync($"You have been added to the game! You are playing as {playerIcon}.");
+                    var joinMessage = await reactionUser.SendMessageAsync($"You have been added to the game! You are playing as {playerIcon}.\n" +
+                        $"Press {Emotes.leaveGame} to leave.") as RestUserMessage;
+
+                    await joinMessage.AddReactionAsync(Emotes.leaveGame);
 
                     Console.WriteLine($"Added {reactionUser.Username} to the game.");
 
                     if (players.Count >= 8) playerLimitHit = true;
                 }
+            }
+            else if (reaction.Emote.Name == Emotes.leaveGame.Name && HasPlayerJoined(_server.GetUser(reaction.UserId)))
+            {
+                Player player = GetPlayerById(reaction.UserId);
+                await player.discordUser.SendMessageAsync("You have left the game.");
+                players.Remove(player);
+
+                Console.WriteLine($"{player.discordUser.Username} left the game.");
             }
         }
 
