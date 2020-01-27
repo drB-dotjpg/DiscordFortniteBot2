@@ -352,6 +352,19 @@ namespace DiscordFortniteBot2
                         case Action.Build:
                             map = player.Build(map);
                             break;
+                        case Action.Use:
+                            if (player.inventory[player.equipped].type == ItemType.Empty) return;
+
+                            if (player.inventory[player.equipped].type != ItemType.Weapon && player.inventory[player.equipped].type != ItemType.Trap)
+                            {
+                                EmbedBuilder builder = new EmbedBuilder();
+                                builder.AddField("Item used", $"You used a {player.inventory[player.equipped].name}");
+
+                                await player.discordUser.SendMessageAsync("", false, builder.Build());
+
+                                player.Use(player.equipped);
+                            }
+                            break;
                     }
                 }
 

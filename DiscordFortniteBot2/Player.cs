@@ -40,6 +40,8 @@ namespace DiscordFortniteBot2
             materials = 10;
 
             for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
+            
+
 
             currentMessages = new List<RestUserMessage>();
         }
@@ -126,6 +128,43 @@ namespace DiscordFortniteBot2
             }
 
             return map;
+        }
+
+        public void Use(int slot)
+        {
+            Item item = inventory[slot];
+            switch (item.type)
+            {
+                case ItemType.Health:
+                    if (health + item.effectVal > 100) health = 100;
+                    else health += item.effectVal;
+                    break;
+                case ItemType.Shield:
+                    if (shield + item.effectVal > 100) shield = 100;
+                    else shield += item.effectVal;
+                    break;
+                case ItemType.HealAll:
+                    if (health + item.effectVal > 100) health = 100;
+                    else health += item.effectVal;
+
+                    if (shield + item.effectVal > 100) shield = 100;
+                    else shield += item.effectVal;
+                    break;
+                default:
+                    return;
+            }
+            item.ammo--;
+
+            if (inventory[equipped].ammo <= 0)
+            {
+                RemoveItem(equipped);
+            }
+            
+        }
+
+        private void RemoveItem(int slot)
+        {
+            inventory[slot] = new Item();
         }
     }
 }
