@@ -209,7 +209,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 180 : 5;
+            int seconds = !debug ? 180 : 10;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
@@ -263,7 +263,7 @@ namespace DiscordFortniteBot2
             {
                 foreach (Player player in players) //for each player in the game, add them to the list.
                 {
-                    builder += player.icon + " - `" + player.discordUser.Username + "`";
+                    builder += player.icon + " - `" + player.discordUser.Username + "`\n";
                 }
             }
             else //if there are no players

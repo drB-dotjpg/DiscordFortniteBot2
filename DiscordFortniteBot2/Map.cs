@@ -255,6 +255,7 @@ namespace DiscordFortniteBot2
                         {
                             mapString += player.icon;
                             playerFound = true;
+                            break;
                         }
                     }
 
