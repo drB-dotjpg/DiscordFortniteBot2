@@ -371,6 +371,21 @@ namespace DiscordFortniteBot2
                             }
 
                             break;
+
+                        case Action.Loot:
+                            if (map.mapGrid[player.x, player.y].Type == TileType.Chest)
+                            {
+                                if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex]))
+                                {
+                                    map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item();
+                                }
+                            }
+                            else if (map.mapGrid[player.x,player.y].Type == TileType.Tree)
+                            {
+                                player.materials += 10;
+                                map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass);
+                            }
+                            break;
                     }
                 }
 
@@ -418,6 +433,43 @@ namespace DiscordFortniteBot2
 
             builder.AddField("Players", playersInGame);
 
+            return builder.Build();
+        }
+
+        Embed GetLootMessage(Player player)
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+
+            List<Item> items = map.mapGrid[player.x, player.y].Items.ToList();
+            int index = 1;
+            string s = "";
+
+            foreach(Item item in items)
+            {
+                string pluralUses = item.ammo > 1 ? "uses" : "use";
+
+                switch (item.type)
+                {
+                    case ItemType.Weapon:
+                        s += $"{item.name} (Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.Health:
+                        s += $"{item.name} (Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.Shield:
+                        s += $"{item.name} (Healing. Heals {item.effectVal} shield. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.HealAll:
+                        s += $"{item.name} (Healing. Heals {item.effectVal} health & shield. {item.ammo} {pluralUses} left.)"; break;
+                    case ItemType.Trap:
+                        s += $"{item.name} (Trap. Deals {item.effectVal} damage on contact. {item.ammo} {pluralUses} left.)"; break;
+                    default:
+                        s += "Empty slot"; break;
+                }
+
+                s += "\n";
+
+                index++;
+            }
+
+            builder.AddField("Chest", s);
             return builder.Build();
         }
 
@@ -513,6 +565,15 @@ namespace DiscordFortniteBot2
                             player.currentMessages.Add(buildMessage);
                             break;
 
+                        case Action.Loot:
+                            if (map.mapGrid[player.x, player.y].Type == TileType.Chest)
+                            {
+                                var lootMessage = await player.discordUser.SendMessageAsync(null, false, GetLootMessage(player)) as RestUserMessage;
+                                await lootMessage.AddReactionsAsync(Emotes.slotEmojis);
+                                player.currentMessages.Add(lootMessage);
+                            }
+                            break;
+
                         case Action.Equip:
                             var equipMessage = await player.discordUser.SendMessageAsync($"Select Slot: ") as RestUserMessage;
                             await equipMessage.AddReactionsAsync(Emotes.slotEmojis);
@@ -546,6 +607,10 @@ namespace DiscordFortniteBot2
                         case Action.Equip:
                             player.equipped = player.turnIndex - 1;
                             await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                            break;
+
+                        case Action.Loot:
+                            player.ready = true;
                             break;
                     }
 
