@@ -35,8 +35,9 @@ namespace DiscordFortniteBot2
             shield = 0;
             equipped = 0;
 
-            x = 20; //TODO: Remove this because it is temporary.
+            x = 20; //TODO: Remove these because they are temporary.
             y = 20;
+            materials = 10;
 
             for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
 
@@ -76,7 +77,55 @@ namespace DiscordFortniteBot2
                         break;
                 }
             }
+
             sprinting = false;
+        }
+
+        public Map Build(Map map)
+        {
+            if (materials <= 0) return map;
+
+            switch (turnDirection)
+            {
+                case Direction.Right:
+                    if (x < Map.mapWidth - 1
+                        && map.mapGrid[x + 1, y].Type != TileType.Wall)
+                    {
+                        materials -= 10;
+                        map.mapGrid[x + 1, y] = new Map.Tile(TileType.Wall);
+                    }
+
+                    break;
+
+                case Direction.Left:
+                    if (x > 0
+                        && map.mapGrid[x - 1, y].Type != TileType.Wall)
+                    {
+                        materials -= 10;
+                        map.mapGrid[x - 1, y] = new Map.Tile(TileType.Wall);
+                    }
+                    break;
+
+                case Direction.Up:
+                    if (y < Map.mapHeight - 1
+                        && map.mapGrid[x, y - 1].Type != TileType.Wall)
+                    {
+                        materials -= 10;
+                        map.mapGrid[x, y - 1] = new Map.Tile(TileType.Wall);
+                    }
+                    break;
+
+                case Direction.Down:
+                    if (y > 0
+                        && map.mapGrid[x, y + 1].Type != TileType.Wall)
+                    {
+                        materials -= 10;
+                        map.mapGrid[x, y + 1] = new Map.Tile(TileType.Wall);
+                    }
+                    break;
+            }
+
+            return map;
         }
     }
 }

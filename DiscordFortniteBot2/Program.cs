@@ -323,7 +323,7 @@ namespace DiscordFortniteBot2
                     timerMessages.Add(player.turnMessage);
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
 
-                    string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
+                    string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 🔨=Build | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
                     await actionMessage.AddReactionAsync(Emotes.infoButton);
@@ -344,9 +344,14 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players)
                 {
-                    if (player.turnAction == Action.Move)
+                    switch (player.turnAction)
                     {
-                        player.Move(sprintAmount, map);
+                        case Action.Move:
+                            player.Move(sprintAmount, map);
+                            break;
+                        case Action.Build:
+                            map = player.Build(map);
+                            break;
                     }
                 }
 
@@ -369,6 +374,8 @@ namespace DiscordFortniteBot2
             int healthBarAmount = player.health / 10;
             string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
             builder.AddField($"Health: {player.health}", healthBar);
+
+            builder.AddField("Materials", player.materials);
 
             builder.AddField("Inventory", GetInventoryString(player)); //add Inventory
 
@@ -458,12 +465,20 @@ namespace DiscordFortniteBot2
                 {
                     player.turnAction = (Action)i; //the emote array pos should match the enum
 
-                    if (i == 0 || i == 1 && player.inventory[player.equipped].type == ItemType.Weapon) //if i is 0 (move) or 1 (use) and equipped with weapon 
+                    switch ((Action)i)
                     {
-                        var message = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to sprint):") as RestUserMessage; //follow up asking for a direction
-                        await message.AddReactionsAsync(Emotes.arrowEmojis);
-                        await message.AddReactionAsync(Emotes.sprintButton);
-                        player.currentMessages.Add(message);
+                        case Action.Move:
+                            var moveMessage = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to sprint):") as RestUserMessage; //follow up asking for a direction
+                            await moveMessage.AddReactionsAsync(Emotes.arrowEmojis);
+                            await moveMessage.AddReactionAsync(Emotes.sprintButton);
+                            player.currentMessages.Add(moveMessage);
+                            break;
+
+                        case Action.Build:
+                            var buildMessage = await player.discordUser.SendMessageAsync($"Select Direction:") as RestUserMessage; //follow up asking for a direction
+                            await buildMessage.AddReactionsAsync(Emotes.arrowEmojis);
+                            player.currentMessages.Add(buildMessage);
+                            break;
                     }
 
                     return;
@@ -496,7 +511,7 @@ namespace DiscordFortniteBot2
         {
             bool isActionEmote = false;
 
-            foreach(Emoji emote in Emotes.actionEmojis)
+            foreach (Emoji emote in Emotes.actionEmojis)
             {
                 if (emote.Name == reaction.Emote.Name) isActionEmote = true;
             }

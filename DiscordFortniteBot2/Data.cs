@@ -25,7 +25,7 @@ namespace DiscordFortniteBot2
     //Player turn data
     public enum Action
     {
-        Move, Use, Loot, Equip, Drop, None
+        Move, Use, Build, Loot, Equip, Drop, None
     }
     public enum Direction
     {
@@ -72,6 +72,7 @@ namespace DiscordFortniteBot2
         {
             new Emoji("👣"),
             new Emoji("✋"),
+            new Emoji("🔨"),
             new Emoji("💼"),
             new Emoji("🔄"),
             new Emoji("🗑️")
