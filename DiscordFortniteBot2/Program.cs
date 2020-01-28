@@ -365,20 +365,29 @@ namespace DiscordFortniteBot2
 
                         case Action.Use:
                             ItemType itemType = player.inventory[player.equipped].type;
-                            if (itemType == ItemType.Empty) break; //haha jeff put return here what a dummy
-
-                            if (itemType != ItemType.Weapon && itemType != ItemType.Trap)
+                            switch (itemType)
                             {
-                                EmbedBuilder builder = new EmbedBuilder();
-                                builder.AddField("Item used", $"You used a {player.inventory[player.equipped].name}");
+                                case ItemType.Empty:
+                                    break; //haha jeff put return here what a dummy //shut up jpg
+                                case ItemType.Weapon:
+                                    break;
+                                case ItemType.Trap:
+                                    EmbedBuilder builder = new EmbedBuilder();
+                                    builder.AddField("Item used", $"You placed a {player.inventory[player.equipped].name}");
 
-                                await player.discordUser.SendMessageAsync("", false, builder.Build());
+                                    await player.discordUser.SendMessageAsync("", false, builder.Build());
+                                    player.PlaceTrap(map, player.equipped);
+                                    break;
+                                case ItemType.Health:
+                                case ItemType.Shield:
+                                case ItemType.HealAll:
+                                    builder = new EmbedBuilder();
+                                    builder.AddField("Item used", $"You used a {player.inventory[player.equipped].name}");
 
-                                player.Use(player.equipped);
-                            }
-                            else if (itemType == ItemType.Weapon)
-                            {
+                                    await player.discordUser.SendMessageAsync("", false, builder.Build());
 
+                                    player.Use(player.equipped);
+                                    break;
                             }
 
                             break;

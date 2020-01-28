@@ -302,14 +302,14 @@ namespace DiscordFortniteBot2
             public TileType Type { get; set; }
             public Item[] Items { get; }
 
-            public Item Trap { get; set; }
+            public Trap trap { get; set; }
 
             public Tile(TileType type)
             {
                 Type = type;
                 Items = new Item[5];
                 for (int i = 0; i < Items.Length; i++) Items[i] = new Item();
-                Trap = null;
+                trap = null;
             }
 
             public Tile(Item[] items)
@@ -327,7 +327,7 @@ namespace DiscordFortniteBot2
                 }
                 
                 Items = items;
-                Trap = null;
+                trap = null;
             }
 
             public bool AddChestItem(Item item) //returns true if item was added
@@ -345,6 +345,19 @@ namespace DiscordFortniteBot2
                 if (added) Type = TileType.Chest;
                 return added;
             }
+        }
+        
+    }
+    public class Trap
+    {
+        public Player placedBy { get; }
+
+        public Item trapType { get; }
+
+        public Trap(Player player, Item type)
+        {
+            placedBy = player;
+            trapType = type;
         }
     }
 }

@@ -78,6 +78,11 @@ namespace DiscordFortniteBot2
                             y++;
                         break;
                 }
+                if(map.mapGrid[x,y].trap != null && map.mapGrid[x,y].trap.placedBy != this) //Check if the player has walked on another person's trap
+                {
+                    TakeDamage(map.mapGrid[x, y].trap.trapType.effectVal);
+                    map.mapGrid[x, y].trap = null;
+                }
             }
 
             sprinting = false;
@@ -178,6 +183,67 @@ namespace DiscordFortniteBot2
 
             return canLoot;
         }
+
+        public void PlaceTrap(Map map, int slot)
+        {
+            Trap trap = new Trap(this, inventory[slot]);
+            switch (turnDirection)
+            {
+                case Direction.Right:
+                    if (x < Map.mapWidth - 1
+                        && map.mapGrid[x + 1, y].Type != TileType.Wall && map.mapGrid[x + 1, y].Type != TileType.Water)
+                    {
+                        map.mapGrid[x + 1, y].trap = trap;
+                    }
+                    break;
+
+                case Direction.Left:
+                    if (x > 0
+                        && map.mapGrid[x - 1, y].Type != TileType.Wall && map.mapGrid[x - 1, y].Type != TileType.Water)
+                    {
+                        map.mapGrid[x - 1, y].trap = trap;
+                    }
+                    break;
+
+                case Direction.Up:
+                    if (y < Map.mapHeight - 1
+                        && map.mapGrid[x, y - 1].Type != TileType.Wall && map.mapGrid[x, y - 1].Type != TileType.Water)
+                    {
+                        map.mapGrid[x, y - 1].trap = trap;
+                    }
+                    break;
+
+                case Direction.Down:
+                    if (y > 0
+                        && map.mapGrid[x, y + 1].Type != TileType.Wall && map.mapGrid[x, y + 1].Type != TileType.Water)
+                    {
+                        map.mapGrid[x, y + 1].trap = trap;
+                    }
+                    break;
+            }
+            inventory[slot].ammo--;
+            
+            if(inventory[slot].ammo <= 0)
+            {
+                RemoveItem(equipped);
+            }
+        }
+
+        public void TakeDamage(int amount)
+        {
+            if(amount >= shield)
+            {
+                amount -= shield; //If damage is greater than shield, substract shield from damage and set shield to 0
+                shield = 0;
+            }
+            else
+            {
+                shield -= amount; //If damage is less than shield, don't need to go forward with the hp path so just return
+                return;
+            }
+            health -= amount;
+        }
+
 
         private void RemoveItem(int slot)
         {
