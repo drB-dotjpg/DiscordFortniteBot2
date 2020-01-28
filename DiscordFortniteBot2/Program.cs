@@ -592,20 +592,20 @@ namespace DiscordFortniteBot2
                         case Action.Loot:
                             if (map.mapGrid[player.x, player.y].Type == TileType.Chest)
                             {
-                                var lootMessage = await player.discordUser.SendMessageAsync(null, false, GetLootMessage(player)) as RestUserMessage;
+                                var lootMessage = await player.discordUser.SendMessageAsync(null, false, GetLootMessage(player)) as RestUserMessage; //follow up asking for the slot number
                                 await lootMessage.AddReactionsAsync(Emotes.slotEmojis);
                                 player.currentMessages.Add(lootMessage);
                             }
                             break;
 
                         case Action.Equip:
-                            var equipMessage = await player.discordUser.SendMessageAsync($"Select Slot: ") as RestUserMessage;
+                            var equipMessage = await player.discordUser.SendMessageAsync($"Select Slot: ") as RestUserMessage; //follow up asking for the slot number
                             await equipMessage.AddReactionsAsync(Emotes.slotEmojis);
                             player.currentMessages.Add(equipMessage);
                             break;
 
                         case Action.Drop:
-                            var dropMessage = await player.discordUser.SendMessageAsync("Select Slot: ") as RestUserMessage;
+                            var dropMessage = await player.discordUser.SendMessageAsync("Select Slot: ") as RestUserMessage; //follow up asking for the slot number
                             await dropMessage.AddReactionsAsync(Emotes.slotEmojis);
                             player.currentMessages.Add(dropMessage);
                             break;
@@ -615,18 +615,18 @@ namespace DiscordFortniteBot2
                 }
             }
 
-            for (int i = 0; i < Emotes.arrowEmojis.Length; i++)
+            for (int i = 0; i < Emotes.arrowEmojis.Length; i++) //if the emotes are any of the arrow emotes
             {
                 if (emote.Name == Emotes.arrowEmojis[i].Name)
                 {
-                    player.turnDirection = (Direction)i;
+                    player.turnDirection = (Direction)i; //change the turn direction value to the arrow emote value
                     player.ready = true;
 
                     return;
                 }
             }
 
-            for (int i = 0; i < Emotes.slotEmojis.Length; i++)
+            for (int i = 0; i < Emotes.slotEmojis.Length; i++) //if the emotes are any of the number emotes
             {
                 if (emote.Name == Emotes.slotEmojis[i].Name)
                 {
@@ -635,23 +635,23 @@ namespace DiscordFortniteBot2
                     switch (player.turnAction)
                     {
                         case Action.Equip:
-                            player.equipped = player.turnIndex;
-                            await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                            player.equipped = player.turnIndex; //do the equip
+                            await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //edit the turn message
                             break;
 
                         case Action.Loot:
-                            player.ready = true;
+                            player.ready = true; //commit loot next turn
                             break;
 
                         case Action.Drop:
-                            Item item = player.inventory[player.turnIndex];
+                            Item item = player.inventory[player.turnIndex]; //get the item the player is dropping
 
-                            bool added = map.mapGrid[player.x, player.y].AddChestItem(item);
+                            bool added = map.mapGrid[player.x, player.y].AddChestItem(item); //add an item to a chest if possible
 
-                            if (added)
+                            if (added) //if its possible
                             {
-                                player.inventory[player.turnIndex] = new Item();
-                                await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                                player.inventory[player.turnIndex] = new Item(); //remove the item from the players inventory
+                                await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //change the turn message because the inventory changed 5head
                             }
                             break;
                     }
@@ -671,17 +671,17 @@ namespace DiscordFortniteBot2
                 if (emote.Name == reaction.Emote.Name) isActionEmote = true;
             }
 
-            if (!isActionEmote && reaction.Emote.Name != Emotes.infoButton.Name) return; //if the emote is not in the action emote array (or its not the info button) then don't do anything
+            if (!isActionEmote && reaction.Emote.Name != Emotes.infoButton.Name) return; //if the emote is not in the action emote array (and its not the info button) then don't do anything
 
             Player player = GetPlayerById(reaction.UserId);
 
             if (player.currentMessages.Last().Id == reaction.MessageId) return; //if the message is the latest message, then don't do anything
             if (player.currentMessages.Count < 2) return; //if there is 1 message in the thingy then don't do the thingy
 
-            player.turnAction = Action.None;
+            player.turnAction = Action.None; //reset the actions so the turn does not end with unintended moves
             player.turnDirection = Direction.None;
 
-            var message = player.currentMessages.Last() as RestUserMessage;
+            var message = player.currentMessages.Last() as RestUserMessage; //delete the message of the removed reaction
             await message.DeleteAsync();
             player.currentMessages.Remove(player.currentMessages.Last());
 
