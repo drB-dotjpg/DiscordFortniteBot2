@@ -18,7 +18,7 @@ namespace DiscordFortniteBot2
         public const int mapWidth = 40;
         public const int mapHeight = 40;
 
-
+        //Amount of things that will be generated
         const int houseCount = 18;
         const int treeCount = 150;
         const int riverCount = 3; //river count is randomized, this is a cap to the amount of rivers generated.
@@ -52,7 +52,7 @@ namespace DiscordFortniteBot2
 
             if (debug) PrintMap();
         }
-
+        
         void RandomlyAddTile(int amount, TileType type)
         {
             int numberLeft = amount;
@@ -80,7 +80,7 @@ namespace DiscordFortniteBot2
                 int width = (int)Math.Ceiling(mapWidth / 15.0); //get how wide the river is based on map size
                 int drawPoint = random.Next(mapWidth - width); //the point on the x axis the river starts drawing on
 
-                for (int y = 0; y < mapHeight; y++) //for each collum of map tiles
+                for (int y = 0; y < mapHeight; y++) //for each column of map tiles
                 {
                     for (int i = 0; i < width - 1; i++) //loop iterates the number of times width is worth.
                     {
@@ -130,7 +130,7 @@ namespace DiscordFortniteBot2
             int numberLeft = houseCount;
             while (numberLeft > 0)
             {
-                bool safe = true;
+                bool safe = true; //If the building can generate
                 int x = 0;
                 int y = 0;
 
@@ -138,15 +138,16 @@ namespace DiscordFortniteBot2
                 {
                     safe = true;
 
-                    x = random.Next(1, mapWidth - 1);
+                    x = random.Next(1, mapWidth - 1);  //Pick random set of coords to generate the building at
                     y = random.Next(1, mapHeight - 1);
 
+                    //Check if the building can generate (cannot generate on chests or walls)
                     for (int hor = x; hor < x + 2; hor++)
                     {
                         for (int vert = y; vert < y + 2; vert++)
                         {
                             if (mapGrid[hor, vert].Type == TileType.Chest || mapGrid[hor, vert].Type == TileType.Wall)
-                                safe = false;
+                                safe = false; 
                         }
                     }
                 } while (!safe);
@@ -168,7 +169,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        Item[] GenerateItems()
+        Item[] GenerateItems() //Generate items for chests
         {
             Item[] items = new Item[5];
 
@@ -253,7 +254,7 @@ namespace DiscordFortniteBot2
                     //Console.WriteLine($"GetMapAreaString: x = {x}; y = {y}");
 
                     bool playerFound = false;
-                    foreach (Player player in players)
+                    foreach (Player player in players) //Check for players in the area
                     {
                         if (player.x == x && player.y == y)
                         {
@@ -350,9 +351,9 @@ namespace DiscordFortniteBot2
     }
     public class Trap
     {
-        public Player placedBy { get; }
+        public Player placedBy { get; } //The player that placed the trap
 
-        public Item trapType { get; }
+        public Item trapType { get; } //The type of trap (ex: Spike Trap)
 
         public Trap(Player player, Item type)
         {
