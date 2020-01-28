@@ -316,6 +316,7 @@ namespace DiscordFortniteBot2
         Map map;
         int turn = 1;
         const int sprintAmount = 3;
+        const int turnSeconds = 60;
 
         async Task InGame()
         {
@@ -324,34 +325,35 @@ namespace DiscordFortniteBot2
 
             while (players.Count == 1 || debug)
             {
-                int seconds = 60;
+                int seconds = turnSeconds; //set the turn timer
 
-                foreach (Player player in players) //Prepare turn
+                foreach (Player player in players) //
                 {
                     player.turnMessage = await player.discordUser.SendMessageAsync(null, false,
-                        new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time
+                        new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time (May be removed)
 
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
 
+                    //send the reactions to the players
                     string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 🔨=Build | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
                     await actionMessage.AddReactionAsync(Emotes.infoButton);
-                    player.currentMessages.Add(actionMessage);
+                    player.currentMessages.Add(actionMessage); //add it to the players current messages so the reaction handler accepts this message
                 }
 
                 foreach (Player player in players)
-                    await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                    await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //show the map to all players
 
-                while (seconds >= 0 && !ArePlayersReady()) //wait for timer to finish
+                while (seconds >= 0 && !ArePlayersReady()) //wait for timer to finish or all players to be ready
                 {
                     await Task.Delay(1000);
                     seconds--;
                 }
 
-                foreach (Player player in players)
+                foreach (Player player in players) //process turn data
                 {
-                    player.ready = false;
+                    player.ready = false; //reset player ready state
 
                     switch (player.turnAction)
                     {
@@ -368,7 +370,7 @@ namespace DiscordFortniteBot2
                             switch (itemType)
                             {
                                 case ItemType.Empty:
-                                    break; //haha jeff put return here what a dummy //shut up jpg
+                                    break; //haha jeff put return here what a dummy //shut up jpg //my b
                                 case ItemType.Weapon:
                                     break;
                                 case ItemType.Trap:
@@ -393,24 +395,23 @@ namespace DiscordFortniteBot2
                             break;
 
                         case Action.Loot:
-                            if (map.mapGrid[player.x, player.y].Type == TileType.Chest)
+                            if (map.mapGrid[player.x, player.y].Type == TileType.Chest) //if the player is on a chest
                             {
-                                if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex]))
+                                if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
                                 {
-                                    map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item();
+                                    map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
                                 }
                             }
-                            else if (map.mapGrid[player.x, player.y].Type == TileType.Tree)
+                            else if (map.mapGrid[player.x, player.y].Type == TileType.Tree) //if the player is on a tree (they climbed it)
                             {
-                                player.materials += 10;
-                                map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass);
+                                player.materials += 10; //give them materials
+                                map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //the tree turns into grass
                             }
                             break;
 
                     }
                 }
 
-                seconds = 60;
                 turn++;
             }
 
@@ -423,6 +424,7 @@ namespace DiscordFortniteBot2
 
             builder.AddField("Map", map.GetMapAreaString(player.x, player.y, players)); //add map
 
+            //add health and shield bars
             int shieldBarAmount = player.shield / 10;
             string shieldBar = string.Concat(Enumerable.Repeat("🟦", shieldBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - shieldBarAmount)); //Fill bar with blue squares and gray squares depending on the player's shield
             builder.AddField($"Shield: {player.shield}", shieldBar);
@@ -430,8 +432,8 @@ namespace DiscordFortniteBot2
             int healthBarAmount = player.health / 10;
             string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
             builder.AddField($"Health: {player.health}", healthBar);
-
-            builder.AddField("Materials", player.materials);
+            
+            builder.AddField("Materials", player.materials); //Materials are easy
 
             builder.AddField("Inventory", GetInventoryString(player)); //add Inventory
 
@@ -449,11 +451,11 @@ namespace DiscordFortniteBot2
                 "🟨 - Chest\n(Can loot for items)\n" +
                 "🟥 - Wall \n(Breakable with weapons)\n";
 
-            builder.AddField("Map Key", key);
+            builder.AddField("Map Key", key); //Show the map key
 
             string playersInGame = GetPlayersJoined(); //function located in pregame region
 
-            builder.AddField("Players", playersInGame);
+            builder.AddField("Players", playersInGame); //Show the player list
 
             return builder.Build();
         }
@@ -462,13 +464,13 @@ namespace DiscordFortniteBot2
         {
             EmbedBuilder builder = new EmbedBuilder();
 
-            List<Item> items = map.mapGrid[player.x, player.y].Items.ToList();
+            List<Item> items = map.mapGrid[player.x, player.y].Items.ToList(); //get items in the chest the player is standing on
             int index = 1;
             string s = "";
 
-            foreach (Item item in items)
+            foreach (Item item in items) //add each item discription into a string
             {
-                string pluralUses = item.ammo > 1 ? "uses" : "use";
+                string pluralUses = item.ammo > 1 ? "uses" : "use"; //don't have it say '1 uses' that is cringe
 
                 switch (item.type)
                 {
@@ -499,17 +501,17 @@ namespace DiscordFortniteBot2
         {
             string builder = "";
 
-            for (int i = 0; i < player.inventory.Length; i++)
+            for (int i = 0; i < player.inventory.Length; i++) //for each slot in the player's inventory
             {
-                builder += (i + 1) + ": ";
+                builder += (i + 1) + ": "; //add the slot number
 
-                if (player.equipped == i) builder += "**[Equipped]** ";
+                if (player.equipped == i) builder += "**[Equipped]** "; //if its equipped then let them know that
 
-                Item item = player.inventory[i];
+                Item item = player.inventory[i]; //get the specific item type
 
-                string pluralUses = item.ammo > 1 ? "uses" : "use";
+                string pluralUses = item.ammo > 1 ? "uses" : "use"; //improper grammer will reset your vbucks
 
-                switch (item.type)
+                switch (item.type) //add the item data to the string
                 {
                     case ItemType.Weapon:
                         builder += $"{item.name} `Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
