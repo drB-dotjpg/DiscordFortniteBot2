@@ -1,12 +1,12 @@
-﻿using Discord.WebSocket;
-using Discord;
+﻿using Discord;
 using Discord.Rest;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DiscordFortniteBot2
 {
@@ -391,15 +391,17 @@ namespace DiscordFortniteBot2
                                     map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item();
                                 }
                             }
-                            else if (map.mapGrid[player.x,player.y].Type == TileType.Tree)
+                            else if (map.mapGrid[player.x, player.y].Type == TileType.Tree)
                             {
                                 player.materials += 10;
                                 map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass);
                             }
                             break;
+
                     }
                 }
 
+                seconds = 60;
                 turn++;
             }
 
@@ -455,23 +457,23 @@ namespace DiscordFortniteBot2
             int index = 1;
             string s = "";
 
-            foreach(Item item in items)
+            foreach (Item item in items)
             {
                 string pluralUses = item.ammo > 1 ? "uses" : "use";
 
                 switch (item.type)
                 {
                     case ItemType.Weapon:
-                        s += $"{item.name} (Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.)"; break;
+                        s += $"{item.name} `Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Health:
-                        s += $"{item.name} (Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.)"; break;
+                        s += $"{item.name} `Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Shield:
-                        s += $"{item.name} (Healing. Heals {item.effectVal} shield. {item.ammo} {pluralUses} left.)"; break;
+                        s += $"{item.name} `Healing. Heals {item.effectVal} shield. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.HealAll:
-                        s += $"{item.name} (Healing. Heals {item.effectVal} health & shield. {item.ammo} {pluralUses} left.)"; break;
+                        s += $"{item.name} `Healing. Heals {item.effectVal} health & shield. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Trap:
-                        s += $"{item.name} (Trap. Deals {item.effectVal} damage on contact. {item.ammo} {pluralUses} left.)"; break;
-                    default:
+                        s += $"{item.name} `Trap. Deals {item.effectVal} damage on contact. {item.ammo} {pluralUses} left.`"; break;
+                    case ItemType.Empty:
                         s += "Empty slot"; break;
                 }
 
@@ -492,7 +494,7 @@ namespace DiscordFortniteBot2
             {
                 builder += (i + 1) + ": ";
 
-                if (player.turnIndex == i) builder += "**[Equipped]** ";
+                if (player.equipped == i) builder += "**[Equipped]** ";
 
                 Item item = player.inventory[i];
 
@@ -501,15 +503,15 @@ namespace DiscordFortniteBot2
                 switch (item.type)
                 {
                     case ItemType.Weapon:
-                        builder += $"{item.name} (Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.)"; break;
+                        builder += $"{item.name} `Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Health:
-                        builder += $"{item.name} (Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.)"; break;
+                        builder += $"{item.name} `Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Shield:
-                        builder += $"{item.name} (Healing. Heals {item.effectVal} shield. {item.ammo} {pluralUses} left.)"; break;
+                        builder += $"{item.name} `Healing. Heals {item.effectVal} shield. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.HealAll:
-                        builder += $"{item.name} (Healing. Heals {item.effectVal} health & shield. {item.ammo} {pluralUses} left.)"; break;
+                        builder += $"{item.name} `Healing. Heals {item.effectVal} health & shield. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Trap:
-                        builder += $"{item.name} (Trap. Deals {item.effectVal} damage on contact. {item.ammo} {pluralUses} left.)"; break;
+                        builder += $"{item.name} `Trap. Deals {item.effectVal} damage on contact. {item.ammo} {pluralUses} left.`"; break;
                     default:
                         builder += "Empty slot"; break;
                 }
@@ -590,6 +592,12 @@ namespace DiscordFortniteBot2
                             await equipMessage.AddReactionsAsync(Emotes.slotEmojis);
                             player.currentMessages.Add(equipMessage);
                             break;
+
+                        case Action.Drop:
+                            var dropMessage = await player.discordUser.SendMessageAsync("Select Slot: ") as RestUserMessage;
+                            await dropMessage.AddReactionsAsync(Emotes.slotEmojis);
+                            player.currentMessages.Add(dropMessage);
+                            break;
                     }
 
                     return;
@@ -616,12 +624,24 @@ namespace DiscordFortniteBot2
                     switch (player.turnAction)
                     {
                         case Action.Equip:
-                            player.equipped = player.turnIndex - 1;
+                            player.equipped = player.turnIndex;
                             await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
                             break;
 
                         case Action.Loot:
                             player.ready = true;
+                            break;
+
+                        case Action.Drop:
+                            Item item = player.inventory[player.turnIndex];
+
+                            bool added = map.mapGrid[player.x, player.y].AddChestItem(item);
+
+                            if (added)
+                            {
+                                player.inventory[player.turnIndex] = new Item();
+                                await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player));
+                            }
                             break;
                     }
 
@@ -659,7 +679,7 @@ namespace DiscordFortniteBot2
 
         bool ArePlayersReady()
         {
-            foreach(Player player in players)
+            foreach (Player player in players)
             {
                 if (!player.ready) return false;
             }

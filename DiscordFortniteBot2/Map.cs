@@ -51,8 +51,6 @@ namespace DiscordFortniteBot2
             GenerateBuildings();
 
             if (debug) PrintMap();
-
-            if (debug) mapGrid[21, 20] = new Tile(new Item[] { Spawnables.GetRandomSpawnable(), Spawnables.GetRandomSpawnable() });
         }
 
         void RandomlyAddTile(int amount, TileType type)
@@ -172,9 +170,15 @@ namespace DiscordFortniteBot2
 
         Item[] GenerateItems()
         {
-            Item[] items = new Item[random.Next(4)];
+            Item[] items = new Item[5];
+
+            int amount = random.Next(items.Length);
 
             for (int i = 0; i < items.Length; i++)
+            {
+                items[i] = new Item();
+            }
+            for (int i = 0; i < amount; i++)
             {
                 items[i] = Spawnables.GetRandomSpawnable();
             }
@@ -295,7 +299,7 @@ namespace DiscordFortniteBot2
 
         public struct Tile //tiles represent a space on the map
         {
-            public TileType Type { get; }
+            public TileType Type { get; set; }
             public Item[] Items { get; }
 
             public Item Trap { get; set; }
@@ -324,6 +328,22 @@ namespace DiscordFortniteBot2
                 
                 Items = items;
                 Trap = null;
+            }
+
+            public bool AddChestItem(Item item) //returns true if item was added
+            {
+                bool added = false;
+                for (int i = 0; i < Items.Length; i++)
+                {
+                    if (Items[i].type == ItemType.Empty)
+                    {
+                        added = true;
+                        Items[i] = item;
+                        break;
+                    }
+                }
+                if (added) Type = TileType.Chest;
+                return added;
             }
         }
     }
