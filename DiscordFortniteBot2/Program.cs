@@ -372,21 +372,22 @@ namespace DiscordFortniteBot2
                                 case ItemType.Empty:
                                     break; //haha jeff put return here what a dummy //shut up jpg //my b
                                 case ItemType.Weapon:
+                                    await HandleShootAction(player, player.equipped);
+                                    player.inventory[player.equipped].ammo--;
+                                    if(player.inventory[player.equipped].ammo <= 0)
+                                    {
+                                        player.inventory[player.equipped] = new Item();
+                                    }
                                     break;
                                 case ItemType.Trap:
-                                    EmbedBuilder builder = new EmbedBuilder();
-                                    builder.AddField("Item used", $"You placed a {player.inventory[player.equipped].name}");
+                                    await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Item used", $"You used a {player.inventory[player.equipped].name}"));
 
-                                    await player.discordUser.SendMessageAsync("", false, builder.Build());
                                     player.PlaceTrap(map, player.equipped);
                                     break;
                                 case ItemType.Health:
                                 case ItemType.Shield:
                                 case ItemType.HealAll:
-                                    builder = new EmbedBuilder();
-                                    builder.AddField("Item used", $"You used a {player.inventory[player.equipped].name}");
-
-                                    await player.discordUser.SendMessageAsync("", false, builder.Build());
+                                    await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Item used", $"You used a {player.inventory[player.equipped].name}"));
 
                                     player.Use(player.equipped);
                                     break;
@@ -416,6 +417,14 @@ namespace DiscordFortniteBot2
             }
 
             await Task.Delay(-1);
+        }
+
+        Embed GetEmbeddedMessage(string title, string text)
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.AddField(title, text);
+            builder.WithColor(114, 137, 218); //blurple
+            return builder.Build();
         }
 
         Embed GetTurnBriefing(Player player)
@@ -573,7 +582,7 @@ namespace DiscordFortniteBot2
                             ItemType itemType = player.inventory[player.equipped].type;
                             if (itemType == ItemType.Weapon || itemType == ItemType.Trap)
                             {
-                                var useMessage = await player.discordUser.SendMessageAsync($"(Weapon equipped) Select Direction:") as RestUserMessage; //follow up asking for a direction
+                                var useMessage = await player.discordUser.SendMessageAsync($"({itemType.ToString()} equipped) Select Direction:") as RestUserMessage; //follow up asking for a direction
                                 await useMessage.AddReactionsAsync(Emotes.arrowEmojis);
                                 player.currentMessages.Add(useMessage);
                             }
@@ -686,6 +695,84 @@ namespace DiscordFortniteBot2
             player.currentMessages.Remove(player.currentMessages.Last());
 
             player.ready = false;
+        }
+
+        async Task HandleShootAction(Player player, int slot) //Returns true if a player is hit
+        {
+            Item weapon = player.inventory[slot];
+            Player playerHit;
+            for (int i = 1; i < (int)weapon.range + 1; i++) //loop through all tiles in the weapon's range (1,2 or 3)
+            {
+                switch (player.turnDirection)
+                {
+                    case Direction.Right:
+                        if (player.x + i > Map.mapWidth - 1) return;
+                        if (CheckForWallHitAtTile(player.x + i, player.y)) return;
+
+                        if(CheckForPlayerHitAtTile(player.x + i, player.y, weapon, out playerHit))
+                        {
+                            await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit player", $"You hit {playerHit.discordUser.Username} for {weapon.effectVal} damage."));
+                            return;
+                        }
+                        break;
+                    case Direction.Left: //etc
+                        if (player.x - i < 0) return;
+                        if (CheckForWallHitAtTile(player.x - i, player.y)) return;
+
+                        if (CheckForPlayerHitAtTile(player.x - i, player.y, weapon, out playerHit))
+                        {
+                            await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit player", $"You hit {playerHit.discordUser.Username} for {weapon.effectVal} damage."));
+                            return;
+                        }
+                        break;
+                    case Direction.Up:
+                        if (player.y - i < 0) return;
+                        if (CheckForWallHitAtTile(player.x, player.y - i)) return;
+
+                        if (CheckForPlayerHitAtTile(player.x, player.y - i, weapon, out playerHit))
+                        {
+                            await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit player", $"You hit {playerHit.discordUser.Username} for {weapon.effectVal} damage."));
+                            return;
+                        }
+                        break;
+                    case Direction.Down:
+                        if (player.y + i > Map.mapHeight - 1) return;
+                        if (CheckForWallHitAtTile(player.x, player.y + i)) return;
+
+                        if (CheckForPlayerHitAtTile(player.x, player.y + i, weapon, out playerHit))
+                        {
+                            await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit player", $"You hit {playerHit.discordUser.Username} for {weapon.effectVal} damage."));
+                            return;
+                        }
+                        break;
+                }
+            }
+            
+        }
+
+        bool CheckForWallHitAtTile(int x, int y) //Returns true if it hits a wall
+        {
+            if (map.mapGrid[x, y].Type == TileType.Wall)
+            {
+                map.mapGrid[x, y].Type = TileType.Grass;
+                return true;
+            }
+            return false;
+        }
+
+        bool CheckForPlayerHitAtTile(int x, int y, Item weapon, out Player hitPlayer) //Returns true if it hits a player
+        {
+            foreach (Player otherPlayer in players)
+            {
+                if (otherPlayer.x == x && otherPlayer.y == y)
+                {
+                    otherPlayer.TakeDamage(weapon.effectVal);
+                    hitPlayer = otherPlayer;
+                    return true;
+                }
+            }
+            hitPlayer = null;
+            return false;
         }
 
         bool ArePlayersReady()
