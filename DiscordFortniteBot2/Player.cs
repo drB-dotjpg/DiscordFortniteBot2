@@ -18,6 +18,7 @@ namespace DiscordFortniteBot2
         public Emoji icon { get; }
         public List<RestUserMessage> currentMessages { get; set; }
         public bool ready { get; set; }
+        public string briefing { get; set; }
 
         public Action turnAction { get; set; }
         public Direction turnDirection { get; set; }

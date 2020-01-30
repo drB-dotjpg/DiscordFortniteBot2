@@ -227,7 +227,7 @@ namespace DiscordFortniteBot2
                     : "*Starts when 2 or more players have joined.*";
 
                 await usersJoinedMessage.ModifyAsync(m => m.Content = $"**Players Joined**: {players.Count}/8 slots filled\n{ joinedPlayers }" +
-                    $"**Time Left**: { timeLeft }");
+                    $"\n**Time Left**: { timeLeft }");
             }
         }
 
@@ -349,6 +349,7 @@ namespace DiscordFortniteBot2
                             {
                                 case ItemType.Empty:
                                     break; //haha jeff put return here what a dummy //shut up jpg //my b
+
                                 case ItemType.Weapon:
                                     await HandleShootAction(player, player.equipped);
                                     player.inventory[player.equipped].ammo--;
@@ -357,16 +358,14 @@ namespace DiscordFortniteBot2
                                         player.inventory[player.equipped] = new Item();
                                     }
                                     break;
-                                case ItemType.Trap:
-                                    await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Item used", $"You used a {player.inventory[player.equipped].name}"));
 
+                                case ItemType.Trap:
                                     player.PlaceTrap(map, player.equipped);
                                     break;
+
                                 case ItemType.Health:
                                 case ItemType.Shield:
                                 case ItemType.HealAll:
-                                    await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Item used", $"You used a {player.inventory[player.equipped].name}"));
-
                                     player.Use(player.equipped);
                                     break;
                             }
@@ -423,6 +422,10 @@ namespace DiscordFortniteBot2
             builder.AddField("Materials", player.materials); //Materials are easy
 
             builder.AddField("Inventory", GetInventoryString(player)); //add Inventory
+
+            string briefing = "You are standing on " + map.mapGrid[player.x, player.y].Type.ToString().ToLower() + ".\n";
+            briefing += player.briefing;
+            builder.AddField("Briefing", briefing);
 
             return builder.Build();
         }
@@ -551,8 +554,8 @@ namespace DiscordFortniteBot2
                     {
                         case Action.Move:
                             var moveMessage = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to sprint):") as RestUserMessage; //follow up asking for a direction
-                            await moveMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             await moveMessage.AddReactionAsync(Emotes.sprintButton);
+                            await moveMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             player.currentMessages.Add(moveMessage);
                             break;
 
@@ -566,15 +569,14 @@ namespace DiscordFortniteBot2
                             }
                             else
                             {
-                                var useMessage = await player.discordUser.SendMessageAsync($"Using item next turn") as RestUserMessage;
-                                await useMessage.AddReactionsAsync(Emotes.arrowEmojis);
+                                var useMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
                                 player.currentMessages.Add(useMessage);
                                 player.ready = true;
                             }
                             break;
 
                         case Action.Build:
-                            var buildMessage = await player.discordUser.SendMessageAsync($"Select Direction:") as RestUserMessage; //follow up asking for a direction
+                            var buildMessage = await player.discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
                             await buildMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             player.currentMessages.Add(buildMessage);
                             break;
@@ -612,6 +614,9 @@ namespace DiscordFortniteBot2
                     player.turnDirection = (Direction)i; //change the turn direction value to the arrow emote value
                     player.ready = true;
 
+                    var arrowConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                    player.currentMessages.Add(arrowConfirmMessage);
+
                     return;
                 }
             }
@@ -631,6 +636,10 @@ namespace DiscordFortniteBot2
 
                         case Action.Loot:
                             player.ready = true; //commit loot next turn
+
+                            var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                            player.currentMessages.Add(lootConfirmMessage);
+
                             break;
 
                         case Action.Drop:
@@ -787,7 +796,7 @@ namespace DiscordFortniteBot2
             }
             else //if there are no players
             {
-                builder = "None\n";
+                builder = "\n";
             }
 
             return builder;
