@@ -226,8 +226,8 @@ namespace DiscordFortniteBot2
                     ? seconds / 60 + ":" + (seconds % 60).ToString("00")
                     : "*Starts when 2 or more players have joined.*";
 
-                await usersJoinedMessage.ModifyAsync(m => m.Content = $"> **Players Joined**: {players.Count}/8 slots filled\n{ joinedPlayers }" +
-                    $" > **Time Left**: { timeLeft }");
+                await usersJoinedMessage.ModifyAsync(m => m.Content = $"**Players Joined**: {players.Count}/8 slots filled\n{ joinedPlayers }" +
+                    $"**Time Left**: { timeLeft }");
             }
         }
 
@@ -264,25 +264,6 @@ namespace DiscordFortniteBot2
 
                 Console.WriteLine($"{player.discordUser.Username} left the game.");
             }
-        }
-
-        string GetPlayersJoined()
-        {
-            string builder = "";
-
-            if (players.Count > 0) //if there are more than 0 players
-            {
-                foreach (Player player in players) //for each player in the game, add them to the list.
-                {
-                    builder += player.icon + " - `" + player.discordUser.Username + "`\n";
-                }
-            }
-            else //if there are no players
-            {
-                builder = "None\n";
-            }
-
-            return builder;
         }
 
         bool HasPlayerJoined(SocketUser user)
@@ -329,21 +310,18 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players) //
                 {
-                    player.turnMessage = await player.discordUser.SendMessageAsync(null, false,
-                        new EmbedBuilder() { Title = "Preparing Turn..." }.Build()) as RestUserMessage; //send message without map so all players see the map at the same time (May be removed)
+                    player.turnMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBriefing(player)) as RestUserMessage; //send turn briefing
 
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
 
                     //send the reactions to the players
-                    string actionPrompt = "Choose an action: 👣=Walk | ✋=Use | 🔨=Build | 💼=Loot | 🔄=Equip | 🗑️=Drop | ℹ=Help";
+                    string actionPrompt = "Choose an action: (Remove reaction to pick a different action)\n👣 Walk | ✋ Use | 🔨 Build | 💼 Loot | 🔄 Equip | 🗑️ Drop | ℹ Help";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
                     await actionMessage.AddReactionAsync(Emotes.infoButton);
                     player.currentMessages.Add(actionMessage); //add it to the players current messages so the reaction handler accepts this message
                 }
 
-                foreach (Player player in players)
-                    await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //show the map to all players
 
                 while (seconds >= 0 && !ArePlayersReady()) //wait for timer to finish or all players to be ready
                 {
@@ -374,7 +352,7 @@ namespace DiscordFortniteBot2
                                 case ItemType.Weapon:
                                     await HandleShootAction(player, player.equipped);
                                     player.inventory[player.equipped].ammo--;
-                                    if(player.inventory[player.equipped].ammo <= 0)
+                                    if (player.inventory[player.equipped].ammo <= 0)
                                     {
                                         player.inventory[player.equipped] = new Item();
                                     }
@@ -441,7 +419,7 @@ namespace DiscordFortniteBot2
             int healthBarAmount = player.health / 10;
             string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
             builder.AddField($"Health: {player.health}", healthBar);
-            
+
             builder.AddField("Materials", player.materials); //Materials are easy
 
             builder.AddField("Inventory", GetInventoryString(player)); //add Inventory
@@ -462,7 +440,7 @@ namespace DiscordFortniteBot2
 
             builder.AddField("Map Key", key); //Show the map key
 
-            string playersInGame = GetPlayersJoined(); //function located in pregame region
+            string playersInGame = GetPlayersJoined(showReady: true);
 
             builder.AddField("Players", playersInGame); //Show the player list
 
@@ -588,6 +566,9 @@ namespace DiscordFortniteBot2
                             }
                             else
                             {
+                                var useMessage = await player.discordUser.SendMessageAsync($"Using item next turn") as RestUserMessage;
+                                await useMessage.AddReactionsAsync(Emotes.arrowEmojis);
+                                player.currentMessages.Add(useMessage);
                                 player.ready = true;
                             }
                             break;
@@ -709,7 +690,7 @@ namespace DiscordFortniteBot2
                         if (player.x + i > Map.mapWidth - 1) return;
                         if (CheckForWallHitAtTile(player.x + i, player.y)) return;
 
-                        if(CheckForPlayerHitAtTile(player.x + i, player.y, weapon, out playerHit))
+                        if (CheckForPlayerHitAtTile(player.x + i, player.y, weapon, out playerHit))
                         {
                             await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit player", $"You hit {playerHit.discordUser.Username} for {weapon.effectVal} damage."));
                             return;
@@ -747,7 +728,7 @@ namespace DiscordFortniteBot2
                         break;
                 }
             }
-            
+
         }
 
         bool CheckForWallHitAtTile(int x, int y) //Returns true if it hits a wall
@@ -789,6 +770,27 @@ namespace DiscordFortniteBot2
         Player GetPlayerById(ulong id)
         {
             return players.First(x => x.discordUser.Id == id);
+        }
+
+        string GetPlayersJoined(bool showReady = false)
+        {
+            string builder = "";
+
+            if (players.Count > 0) //if there are more than 0 players
+            {
+                foreach (Player player in players) //for each player in the game, add them to the list.
+                {
+                    builder += player.icon + " - `" + player.discordUser.Username + "`";
+                    if (showReady) builder += " Ready";
+                    builder += "\n";
+                }
+            }
+            else //if there are no players
+            {
+                builder = "None\n";
+            }
+
+            return builder;
         }
     }
 }
