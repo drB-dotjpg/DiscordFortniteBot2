@@ -588,6 +588,12 @@ namespace DiscordFortniteBot2
                                 await lootMessage.AddReactionsAsync(Emotes.slotEmojis);
                                 player.currentMessages.Add(lootMessage);
                             }
+                            else if (map.mapGrid[player.x, player.y].Type == TileType.Tree)
+                            {
+                                var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                                player.currentMessages.Add(lootConfirmMessage);
+                                player.ready = true;
+                            }
                             break;
 
                         case Action.Equip:
