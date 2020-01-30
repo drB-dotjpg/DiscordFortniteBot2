@@ -136,7 +136,7 @@ namespace DiscordFortniteBot2
             return map;
         }
 
-        public void Use(int slot)
+        public void UseHealingItem(int slot)
         {
             Item item = inventory[slot];
             switch (item.type)
