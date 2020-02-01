@@ -10,7 +10,7 @@ namespace DiscordFortniteBot2
         Water,
         Wall,
         Tree,
-        SpikeTrap
+        Storm
     }
 
     public class Map
@@ -224,7 +224,7 @@ namespace DiscordFortniteBot2
                     //Console.WriteLine($"mapGrid[xTrack, yTrack] = {mapGrid[xTrack, yTrack].Type.ToString()}");
 
                     if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap) //if its not out of bounds.
-                        mapArea[xMap, yMap] = mapGrid[xTrack, yTrack];
+                        mapArea[yMap, xMap] = mapGrid[yTrack, xTrack];
 
                     xMap++;
                     xTrack++;
@@ -243,11 +243,11 @@ namespace DiscordFortniteBot2
 
             x -= 3;
             y -= 3;
-            int yStore = y;
+            int xStore = x;
 
             for (int i = 0; i < 7; i++) //all assuming GetMapArea returns a 7x7 array
             {
-                y = yStore;
+                x = xStore;
 
                 for (int j = 0; j < 7; j++)
                 {
@@ -264,9 +264,9 @@ namespace DiscordFortniteBot2
                         }
                     }
 
-                    if (playerFound) { y++; continue; }
+                    if (playerFound) { x++; continue; }
 
-                    switch (mapArea[j, i].Type)
+                    switch (mapArea[i, j].Type)
                     {
                         case TileType.Chest:
                             mapString += "🟨"; //yellow block
@@ -283,15 +283,18 @@ namespace DiscordFortniteBot2
                         case TileType.Water:
                             mapString += "🟦"; //blue block
                             break;
+                        case TileType.Storm:
+                            mapString += "⛈️"; //thundercloud
+                            break;
                         default:
                             mapString += "⬛"; //grey block
                             break;
                     }
 
-                    y++;
+                    x++;
                 }
 
-                x++;
+                y++;
                 mapString += "\n";
             }
 
