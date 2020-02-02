@@ -16,26 +16,32 @@ namespace DiscordFortniteBot2
 
     public class Map
     {
-        public const int mapWidth = 40;
-        public const int mapHeight = 40;
+        public const int MAPWIDTH = 40;
+        public const int MAPHEIGHT = 40;
 
         //Amount of things that will be generated
         const int houseCount = 18;
         const int treeCount = 150;
         const int riverCount = 3; //river count is randomized, this is a cap to the amount of rivers generated.
 
-        public Tile[,] mapGrid = new Tile[mapWidth, mapHeight];
+        public Tile[,] mapGrid = new Tile[MAPWIDTH, MAPHEIGHT];
 
         Random random = new Random();
 
-        public Map(bool debug) => GenerateMap(debug);
+        private StormGenerator stormGen;
+
+        public Map(bool debug)
+        {
+            GenerateMap(debug);
+            stormGen = new StormGenerator(MAPWIDTH, MAPHEIGHT);
+        }
 
         void GenerateMap(bool debug)
         {
             //Fill the map with grass tiles to start
-            for (int i = 0; i < mapWidth; i++)
+            for (int i = 0; i < MAPWIDTH; i++)
             {
-                for (int j = 0; j < mapHeight; j++)
+                for (int j = 0; j < MAPHEIGHT; j++)
                 {
                     mapGrid[i, j] = new Tile(TileType.Grass);
                 }
@@ -59,8 +65,8 @@ namespace DiscordFortniteBot2
             int numberLeft = amount;
             while (numberLeft > 0)
             {
-                int x = random.Next(0, mapWidth);
-                int y = random.Next(0, mapHeight);
+                int x = random.Next(0, MAPWIDTH);
+                int y = random.Next(0, MAPHEIGHT);
 
                 //If the randomly chosen tile is a grass tile, place new item, otherwise try again.
                 if (mapGrid[x, y].Type == TileType.Grass)
@@ -78,10 +84,10 @@ namespace DiscordFortniteBot2
 
             if (vertical)
             {
-                int width = (int)Math.Ceiling(mapWidth / 15.0); //get how wide the river is based on map size
-                int drawPoint = random.Next(mapWidth - width); //the point on the x axis the river starts drawing on
+                int width = (int)Math.Ceiling(MAPWIDTH / 15.0); //get how wide the river is based on map size
+                int drawPoint = random.Next(MAPWIDTH - width); //the point on the x axis the river starts drawing on
 
-                for (int y = 0; y < mapHeight; y++) //for each column of map tiles
+                for (int y = 0; y < MAPHEIGHT; y++) //for each column of map tiles
                 {
                     for (int i = 0; i < width - 1; i++) //loop iterates the number of times width is worth.
                     {
@@ -96,16 +102,16 @@ namespace DiscordFortniteBot2
                             ? drawPoint + 1
                             : drawPoint - 1;
 
-                        if (drawPoint > mapWidth - width || drawPoint < 0) drawPoint = oldpoint;
+                        if (drawPoint > MAPWIDTH - width || drawPoint < 0) drawPoint = oldpoint;
                     }
                 }
             }
             else //code below is very similar to above
             {
-                int height = (int)Math.Ceiling(mapHeight / 15.0);
-                int drawPoint = random.Next(mapWidth - height);
+                int height = (int)Math.Ceiling(MAPHEIGHT / 15.0);
+                int drawPoint = random.Next(MAPWIDTH - height);
 
-                for (int x = 0; x < mapHeight; x++)
+                for (int x = 0; x < MAPHEIGHT; x++)
                 {
                     for (int i = 0; i < height - 1; i++)
                     {
@@ -120,7 +126,7 @@ namespace DiscordFortniteBot2
                             ? drawPoint + 1
                             : drawPoint - 1;
 
-                        if (drawPoint > mapHeight - height || drawPoint < 0) drawPoint = oldPoint;
+                        if (drawPoint > MAPHEIGHT - height || drawPoint < 0) drawPoint = oldPoint;
                     }
                 }
             }
@@ -139,8 +145,8 @@ namespace DiscordFortniteBot2
                 {
                     safe = true;
 
-                    x = random.Next(1, mapWidth - 1);  //Pick random set of coords to generate the building at
-                    y = random.Next(1, mapHeight - 1);
+                    x = random.Next(1, MAPWIDTH - 1);  //Pick random set of coords to generate the building at
+                    y = random.Next(1, MAPHEIGHT - 1);
 
                     //Check if the building can generate (cannot generate on chests or walls)
                     for (int hor = x; hor < x + 2; hor++)
@@ -190,9 +196,9 @@ namespace DiscordFortniteBot2
 
         void PrintMap() //debug function
         {
-            for (int i = 0; i < mapWidth; i++)
+            for (int i = 0; i < MAPWIDTH; i++)
             {
-                for (int j = 0; j < mapHeight; j++)
+                for (int j = 0; j < MAPHEIGHT; j++)
                 {
                     Console.Write((int)mapGrid[i, j].Type);
                 }
@@ -208,10 +214,10 @@ namespace DiscordFortniteBot2
             int yTrack = y - 3;
 
             int xCap = xTrack + 7; //the limit to how far the scan can go.
-            if (xCap >= mapWidth) xCap = mapWidth - 1; //make sure its not out of bounds.
+            if (xCap >= MAPWIDTH) xCap = MAPWIDTH - 1; //make sure its not out of bounds.
 
             int yCap = yTrack + 7;
-            if (yCap >= mapHeight) yCap = mapHeight - 1;
+            if (yCap >= MAPHEIGHT) yCap = MAPHEIGHT - 1;
 
             int yMap = 0;
             while (yMap < 7) //start the scan.
@@ -308,11 +314,11 @@ namespace DiscordFortniteBot2
         {
             string mapString = "World Map (1/2 scale)\n0 = You | . = Ground | # = Water | ! = Storm\n\n";
 
-            for (int i = 0; i < mapWidth; i += 2)
+            for (int i = 0; i < MAPWIDTH; i += 2)
             {
-                for (int j = 0; j < mapHeight; j += 2)
+                for (int j = 0; j < MAPHEIGHT; j += 2)
                 {
-                    if (player.x == j && player.y == i || player.x == j-1 && player.y == i-1)
+                    if (player.x == j && player.y == i || player.x == j - 1 && player.y == i - 1)
                     {
                         mapString += "0 ";
                         continue;
@@ -336,6 +342,19 @@ namespace DiscordFortniteBot2
             }
 
             return mapString;
+        }
+
+        public void UpdateStorm(int turn)
+        {
+            bool[,] storm = stormGen.GetStormCircle(turn);
+
+            for (int i = 0; i < MAPWIDTH; i++)
+            {
+                for (int j = 0; j < MAPHEIGHT; j++)
+                {
+                    if (storm[j, i]) mapGrid[j,i] = new Tile(TileType.Storm);
+                }
+            }
         }
 
         public struct Tile //tiles represent a space on the map
@@ -399,6 +418,103 @@ namespace DiscordFortniteBot2
         {
             placedBy = player;
             trapType = type;
+        }
+    }
+
+    public class StormGenerator
+    {
+        const int DELAY = 3; //how many turns before the storm starts closing in
+        const int SPEED = 15; //how many turns it takes to close fully
+        const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
+        const float PRECISION = .01f; //keep at 0.01f or lower
+
+        int width { get; } //map width
+        int height { get; } //map height
+        private int x; //where the storm is centered on
+        private int y;
+        private int[] turnSizes; //how big the storm is on the index representing the turn number
+
+        public StormGenerator(int width, int height)
+        {
+            this.width = width; //set width and height
+            this.height = height;
+
+            Random rand = new Random(); //mark the center of the storm
+            x = rand.Next(width / 2) + width / 2;
+            y = rand.Next(height / 2) + height / 2;
+
+            GenerateTurnSizes();
+        }
+
+        private void GenerateTurnSizes()
+        {
+            turnSizes = new int[DELAY + SPEED];
+
+            int maxWidth = Math.Max(x - width, width - x); //get the longest distance from the center to the edge of the screen
+            int maxHeight = Math.Max(y - height, height - y);
+            int maxSize = (int)Math.Sqrt(Math.Pow(maxWidth, 2) + Math.Pow(maxHeight, 2)); //using TRIANGLES
+            double radius = maxSize;
+            double rate = maxSize / SPEED;
+
+            for (int i = 0; i < DELAY; i++)
+                turnSizes[i] = maxSize + 1;
+
+            for (int i = DELAY; i < SPEED; i++)
+            {
+                turnSizes[i] = (int)radius;
+                radius -= rate;
+            }
+
+            foreach (int i in turnSizes)
+                Console.Write($"{i}, ");
+        }
+
+        public bool[,] GetStormCircle(int turn)
+        {
+            bool[,] storm = new bool[height, width];
+
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                    storm[i, j] = true;
+
+            float r = turnSizes[turn];
+
+            while (r >= 0)
+            {
+                float xDraw = 0f;
+                float yDraw = 0f;
+
+                while (xDraw < LIMIT - PRECISION && yDraw < LIMIT - PRECISION)
+                {
+                    xDraw += PRECISION;
+                    yDraw += PRECISION;
+
+                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * r / 2) + y; //use WAVES to make circles
+                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * r / 2) + x;
+
+                    //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
+
+                    if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
+                        continue;
+
+                    storm[xGrid, yGrid] = false;
+                }
+
+                r -= PRECISION*100;
+            }
+
+            string draw = "";
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                    draw += (storm[i, j] ? "#" : ".");
+
+                draw += "\n";
+            }
+
+            Console.WriteLine(draw);
+
+            return storm;
         }
     }
 }

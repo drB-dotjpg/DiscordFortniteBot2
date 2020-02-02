@@ -391,6 +391,8 @@ namespace DiscordFortniteBot2
                 }
 
                 turn++;
+
+                map.UpdateStorm(turn);
             }
 
             await Task.Delay(-1);
@@ -720,8 +722,8 @@ namespace DiscordFortniteBot2
             {
                 int newX = i * xDir;
                 int newY = i * yDir;
-                if (player.x + newX >= 0 && player.x + newX < Map.mapWidth
-                && player.y + newY >= 0 && player.y + newY < Map.mapHeight) //Check if the tile to be checked is within the bounds of the array
+                if (player.x + newX >= 0 && player.x + newX < Map.MAPWIDTH
+                && player.y + newY >= 0 && player.y + newY < Map.MAPHEIGHT) //Check if the tile to be checked is within the bounds of the array
                 {
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY)) return;
 
