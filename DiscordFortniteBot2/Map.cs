@@ -440,8 +440,10 @@ namespace DiscordFortniteBot2
             this.height = height;
 
             Random rand = new Random(); //mark the center of the storm
-            x = rand.Next(width / 2) + width / 2;
-            y = rand.Next(height / 2) + height / 2;
+            x = rand.Next(width / 2) + width / 4;
+            y = rand.Next(height / 2) + height / 4;
+
+            Console.WriteLine($"Map x = {x}; y = {y}");
 
             GenerateTurnSizes();
         }
@@ -450,19 +452,19 @@ namespace DiscordFortniteBot2
         {
             turnSizes = new int[DELAY + SPEED];
 
-            int maxWidth = Math.Max(x - width, width - x); //get the longest distance from the center to the edge of the screen
-            int maxHeight = Math.Max(y - height, height - y);
-            int maxSize = (int)Math.Sqrt(Math.Pow(maxWidth, 2) + Math.Pow(maxHeight, 2)); //using TRIANGLES
-            double radius = maxSize;
-            double rate = maxSize / SPEED;
+            int maxWidth = Math.Max(x, Math.Abs(width - x)); //get the longest distance from the center to the edge of the screen
+            int maxHeight = Math.Max(y, Math.Abs(height - y));
+            int maxDiameter = (int)Math.Ceiling(Math.Sqrt(Math.Pow(maxWidth, 2) + Math.Pow(maxHeight, 2))) * 2; //using TRIANGLES
+            double diameter = maxDiameter;
+            double rate = maxDiameter / (double)SPEED;
 
             for (int i = 0; i < DELAY; i++)
-                turnSizes[i] = maxSize + 1;
+                turnSizes[i] = maxDiameter + 1;
 
             for (int i = DELAY; i < SPEED; i++)
             {
-                turnSizes[i] = (int)radius;
-                radius -= rate;
+                turnSizes[i] = (int)diameter;
+                diameter -= rate;
             }
 
             foreach (int i in turnSizes)
@@ -477,9 +479,9 @@ namespace DiscordFortniteBot2
                 for (int j = 0; j < width; j++)
                     storm[i, j] = true;
 
-            float r = turnSizes[turn];
+            float d = turnSizes[turn];
 
-            while (r >= 0)
+            while (d >= 0)
             {
                 float xDraw = 0f;
                 float yDraw = 0f;
@@ -489,8 +491,8 @@ namespace DiscordFortniteBot2
                     xDraw += PRECISION;
                     yDraw += PRECISION;
 
-                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * r / 2) + y; //use WAVES to make circles
-                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * r / 2) + x;
+                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //use WAVES to make circles
+                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x;
 
                     //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
 
@@ -500,7 +502,7 @@ namespace DiscordFortniteBot2
                     storm[xGrid, yGrid] = false;
                 }
 
-                r -= PRECISION*100;
+                d -= PRECISION*100;
             }
 
             string draw = "";
