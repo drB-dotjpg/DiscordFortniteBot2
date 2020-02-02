@@ -57,32 +57,32 @@ namespace DiscordFortniteBot2
                 {
                     case Direction.Right:
                         if (x < Map.mapWidth - 1
-                            && map.mapGrid[x + 1, y].Type != TileType.Wall)
+                            && map.mapGrid[y, x + 1].Type != TileType.Wall)
                             x++;
                         break;
 
                     case Direction.Left:
                         if (x > 0
-                            && map.mapGrid[x - 1, y].Type != TileType.Wall)
+                            && map.mapGrid[y, x - 1].Type != TileType.Wall)
                             x--;
                         break;
 
                     case Direction.Up:
                         if (y > 0
-                            && map.mapGrid[x, y - 1].Type != TileType.Wall)
+                            && map.mapGrid[y - 1, x].Type != TileType.Wall)
                             y--;
                         break;
 
                     case Direction.Down:
                         if (y < Map.mapHeight - 1
-                            && map.mapGrid[x, y + 1].Type != TileType.Wall)
+                            && map.mapGrid[y + 1, x].Type != TileType.Wall)
                             y++;
                         break;
                 }
-                if (map.mapGrid[x, y].trap != null && map.mapGrid[x, y].trap.placedBy != this) //Check if the player has walked on another person's trap
+                if (map.mapGrid[y, x].trap != null && map.mapGrid[y, x].trap.placedBy != this) //Check if the player has walked on another person's trap
                 {
-                    TakeDamage(map.mapGrid[x, y].trap.trapType.effectVal);
-                    map.mapGrid[x, y].trap = null;
+                    TakeDamage(map.mapGrid[y, x].trap.trapType.effectVal);
+                    map.mapGrid[y, x].trap = null;
                 }
             }
 
@@ -97,38 +97,38 @@ namespace DiscordFortniteBot2
             {
                 case Direction.Right:
                     if (x < Map.mapWidth - 1
-                        && map.mapGrid[x, y + 1].Type != TileType.Wall)
+                        && map.mapGrid[y, x + 1].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[x, y + 1] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y, x + 1] = new Map.Tile(TileType.Wall);
                     }
 
                     break;
 
                 case Direction.Left:
                     if (x > 0
-                        && map.mapGrid[x, y - 1].Type != TileType.Wall)
+                        && map.mapGrid[y, x - 1].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[x, y - 1] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y, x - 1] = new Map.Tile(TileType.Wall);
                     }
                     break;
 
                 case Direction.Up:
                     if (y > 0
-                        && map.mapGrid[x - 1, y].Type != TileType.Wall)
+                        && map.mapGrid[y - 1, x].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[x - 1, y] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y - 1, x] = new Map.Tile(TileType.Wall);
                     }
                     break;
 
                 case Direction.Down:
                     if (y < Map.mapHeight - 1
-                        && map.mapGrid[x + 1, y].Type != TileType.Wall)
+                        && map.mapGrid[y + 1, x].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[x + 1, y] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y + 1, x] = new Map.Tile(TileType.Wall);
                     }
                     break;
             }
@@ -192,33 +192,33 @@ namespace DiscordFortniteBot2
             {
                 case Direction.Right:
                     if (x < Map.mapWidth - 1
-                        && map.mapGrid[x + 1, y].Type != TileType.Wall && map.mapGrid[x + 1, y].Type != TileType.Water)
+                        && map.mapGrid[y, x + 1].Type != TileType.Wall && map.mapGrid[x + 1, y].Type != TileType.Water)
                     {
-                        map.mapGrid[x + 1, y].trap = trap;
+                        map.mapGrid[y, x + 1].trap = trap;
                     }
                     break;
 
                 case Direction.Left:
                     if (x > 0
-                        && map.mapGrid[x - 1, y].Type != TileType.Wall && map.mapGrid[x - 1, y].Type != TileType.Water)
+                        && map.mapGrid[y, x - 1].Type != TileType.Wall && map.mapGrid[x - 1, y].Type != TileType.Water)
                     {
-                        map.mapGrid[x - 1, y].trap = trap;
+                        map.mapGrid[y, x - 1].trap = trap;
                     }
                     break;
 
                 case Direction.Up:
                     if (y < Map.mapHeight - 1
-                        && map.mapGrid[x, y - 1].Type != TileType.Wall && map.mapGrid[x, y - 1].Type != TileType.Water)
+                        && map.mapGrid[y - 1, x].Type != TileType.Wall && map.mapGrid[x, y - 1].Type != TileType.Water)
                     {
-                        map.mapGrid[x, y - 1].trap = trap;
+                        map.mapGrid[y - 1, x].trap = trap;
                     }
                     break;
 
                 case Direction.Down:
                     if (y > 0
-                        && map.mapGrid[x, y + 1].Type != TileType.Wall && map.mapGrid[x, y + 1].Type != TileType.Water)
+                        && map.mapGrid[y + 1, x].Type != TileType.Wall && map.mapGrid[x, y + 1].Type != TileType.Water)
                     {
-                        map.mapGrid[x, y + 1].trap = trap;
+                        map.mapGrid[y + 1, x].trap = trap;
                     }
                     break;
             }
