@@ -533,7 +533,7 @@ namespace DiscordFortniteBot2
 
             if (reaction.Emote.Name == Emotes.infoButton.Name) //if the info button was pressed
             {
-                var infoMessage = await player.discordUser.SendMessageAsync(null, false, GetHelpMessage()); //send the info menu
+                var infoMessage = await player.discordUser.SendMessageAsync($"```{map.GetWorldMapString(player)}```", false, GetHelpMessage()); //send the info menu
                 player.currentMessages.Add(infoMessage as RestUserMessage);
                 return;
             }
@@ -785,7 +785,7 @@ namespace DiscordFortniteBot2
                 foreach (Player player in players) //for each player in the game, add them to the list.
                 {
                     builder += player.icon + " - `" + player.discordUser.Username + "`";
-                    if (showReady) builder += " Ready";
+                    if (showReady && player.ready) builder += " Ready";
                     builder += "\n";
                 }
             }

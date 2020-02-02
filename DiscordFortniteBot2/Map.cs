@@ -10,7 +10,8 @@ namespace DiscordFortniteBot2
         Water,
         Wall,
         Tree,
-        Storm
+        Storm,
+        Bounds
     }
 
     public class Map
@@ -52,7 +53,7 @@ namespace DiscordFortniteBot2
 
             if (debug) PrintMap();
         }
-        
+
         void RandomlyAddTile(int amount, TileType type)
         {
             int numberLeft = amount;
@@ -147,7 +148,7 @@ namespace DiscordFortniteBot2
                         for (int vert = y; vert < y + 2; vert++)
                         {
                             if (mapGrid[hor, vert].Type == TileType.Chest || mapGrid[hor, vert].Type == TileType.Wall)
-                                safe = false; 
+                                safe = false;
                         }
                     }
                 } while (!safe);
@@ -225,6 +226,8 @@ namespace DiscordFortniteBot2
 
                     if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap) //if its not out of bounds.
                         mapArea[yMap, xMap] = mapGrid[yTrack, xTrack];
+                    else
+                        mapArea[yMap, xMap] = new Tile(TileType.Bounds);
 
                     xMap++;
                     xTrack++;
@@ -286,8 +289,8 @@ namespace DiscordFortniteBot2
                         case TileType.Storm:
                             mapString += "⛈️"; //thundercloud
                             break;
-                        default:
-                            mapString += "⬛"; //grey block
+                        case TileType.Bounds:
+                            mapString += "⬛"; //black block
                             break;
                     }
 
@@ -295,6 +298,40 @@ namespace DiscordFortniteBot2
                 }
 
                 y++;
+                mapString += "\n";
+            }
+
+            return mapString;
+        }
+
+        public string GetWorldMapString(Player player = null)
+        {
+            string mapString = "World Map (1/2 scale)\n0 = You | . = Ground | # = Water | ! = Storm\n\n";
+
+            for (int i = 0; i < mapWidth; i += 2)
+            {
+                for (int j = 0; j < mapHeight; j += 2)
+                {
+                    if (player.x == j && player.y == i || player.x == j-1 && player.y == i-1)
+                    {
+                        mapString += "0 ";
+                        continue;
+                    }
+
+                    switch (mapGrid[i, j].Type)
+                    {
+
+                        case TileType.Water:
+                            mapString += "# "; //blue block
+                            break;
+                        case TileType.Storm:
+                            mapString += "! "; //thundercloud
+                            break;
+                        default:
+                            mapString += ". "; //green block
+                            break;
+                    }
+                }
                 mapString += "\n";
             }
 
@@ -329,7 +366,7 @@ namespace DiscordFortniteBot2
                 {
                     Items[i] = items[i];
                 }
-                
+
                 Items = items;
                 trap = null;
             }
@@ -350,8 +387,8 @@ namespace DiscordFortniteBot2
                 return added;
             }
         }
-        
     }
+
     public class Trap
     {
         public Player placedBy { get; } //The player that placed the trap
