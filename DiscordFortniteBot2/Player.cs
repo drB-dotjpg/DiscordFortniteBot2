@@ -38,7 +38,7 @@ namespace DiscordFortniteBot2
 
             x = 10; //TODO: Remove these because they are temporary.
             y = 10;
-            materials = 10;
+            materials = 100000;
 
             for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
 
@@ -68,18 +68,18 @@ namespace DiscordFortniteBot2
                         break;
 
                     case Direction.Up:
-                        if (y < Map.mapHeight - 1
+                        if (y > 0
                             && map.mapGrid[x, y - 1].Type != TileType.Wall)
                             y--;
                         break;
 
                     case Direction.Down:
-                        if (y > 0
+                        if (y < Map.mapHeight - 1
                             && map.mapGrid[x, y + 1].Type != TileType.Wall)
                             y++;
                         break;
                 }
-                if(map.mapGrid[x,y].trap != null && map.mapGrid[x,y].trap.placedBy != this) //Check if the player has walked on another person's trap
+                if (map.mapGrid[x, y].trap != null && map.mapGrid[x, y].trap.placedBy != this) //Check if the player has walked on another person's trap
                 {
                     TakeDamage(map.mapGrid[x, y].trap.trapType.effectVal);
                     map.mapGrid[x, y].trap = null;
@@ -97,25 +97,16 @@ namespace DiscordFortniteBot2
             {
                 case Direction.Right:
                     if (x < Map.mapWidth - 1
-                        && map.mapGrid[x + 1, y].Type != TileType.Wall)
+                        && map.mapGrid[x, y + 1].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[x + 1, y] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[x, y + 1] = new Map.Tile(TileType.Wall);
                     }
 
                     break;
 
                 case Direction.Left:
                     if (x > 0
-                        && map.mapGrid[x - 1, y].Type != TileType.Wall)
-                    {
-                        materials -= 10;
-                        map.mapGrid[x - 1, y] = new Map.Tile(TileType.Wall);
-                    }
-                    break;
-
-                case Direction.Up:
-                    if (y < Map.mapHeight - 1
                         && map.mapGrid[x, y - 1].Type != TileType.Wall)
                     {
                         materials -= 10;
@@ -123,12 +114,21 @@ namespace DiscordFortniteBot2
                     }
                     break;
 
-                case Direction.Down:
+                case Direction.Up:
                     if (y > 0
-                        && map.mapGrid[x, y + 1].Type != TileType.Wall)
+                        && map.mapGrid[x - 1, y].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[x, y + 1] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[x - 1, y] = new Map.Tile(TileType.Wall);
+                    }
+                    break;
+
+                case Direction.Down:
+                    if (y < Map.mapHeight - 1
+                        && map.mapGrid[x + 1, y].Type != TileType.Wall)
+                    {
+                        materials -= 10;
+                        map.mapGrid[x + 1, y] = new Map.Tile(TileType.Wall);
                     }
                     break;
             }
@@ -165,7 +165,7 @@ namespace DiscordFortniteBot2
             {
                 RemoveItem(equipped);
             }
-            
+
         }
 
         public bool Loot(Item newItem) //returns true if the loot was successful
@@ -223,8 +223,8 @@ namespace DiscordFortniteBot2
                     break;
             }
             inventory[slot].ammo--;
-            
-            if(inventory[slot].ammo <= 0)
+
+            if (inventory[slot].ammo <= 0)
             {
                 RemoveItem(equipped);
             }
@@ -232,7 +232,7 @@ namespace DiscordFortniteBot2
 
         public void TakeDamage(int amount)
         {
-            if(amount >= shield)
+            if (amount >= shield)
             {
                 amount -= shield; //If damage is greater than shield, substract shield from damage and set shield to 0
                 shield = 0;
