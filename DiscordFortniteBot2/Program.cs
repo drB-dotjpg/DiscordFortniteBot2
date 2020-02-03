@@ -315,7 +315,7 @@ namespace DiscordFortniteBot2
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
 
                     //send the reactions to the players
-                    string actionPrompt = "Choose an action: (Remove reaction to pick a different action)\n👣 Walk | ✋ Use | 🔨 Build | 💼 Loot | 🔄 Equip | 🗑️ Drop | ℹ Help";
+                    string actionPrompt = "Choose an action: (Remove reaction to pick a different action)\n👣 Walk | ✋ Use Item | 🔨 Build Wall | 💼 Loot Chest/Tree | 🔄 Equip Item | 🗑️ Drop Item | ℹ World map/Map key/Player list.";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
                     await actionMessage.AddReactionAsync(Emotes.infoButton);
@@ -378,6 +378,8 @@ namespace DiscordFortniteBot2
                                 if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
                                 {
                                     map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
+
+                                    if (map.mapGrid[player.x, player.y].IsEmpty()) map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //remove the chest if its empty
                                 }
                             }
                             else if (map.mapGrid[player.x, player.y].Type == TileType.Tree) //if the player is on a tree (they climbed it)
@@ -390,9 +392,11 @@ namespace DiscordFortniteBot2
                     }
                 }
 
+                map.UpdateStorm(turn);
+
                 turn++;
 
-                map.UpdateStorm(turn);
+
             }
 
             await Task.Delay(-1);
@@ -563,7 +567,13 @@ namespace DiscordFortniteBot2
 
                         case Action.Use:
                             ItemType itemType = player.inventory[player.equipped].type;
-                            if (itemType == ItemType.Weapon || itemType == ItemType.Trap)
+
+                            if (map.mapGrid[player.y, player.x].Type == TileType.Water)
+                            {
+                                var warnMessage = await player.discordUser.SendMessageAsync($"You cannot use items while in water!") as RestUserMessage;
+                                player.currentMessages.Add(warnMessage);
+                            }
+                            else if (itemType == ItemType.Weapon || itemType == ItemType.Trap)
                             {
                                 var useMessage = await player.discordUser.SendMessageAsync($"({itemType.ToString()} equipped) Select Direction:") as RestUserMessage; //follow up asking for a direction
                                 await useMessage.AddReactionsAsync(Emotes.arrowEmojis);
@@ -578,6 +588,13 @@ namespace DiscordFortniteBot2
                             break;
 
                         case Action.Build:
+                            if (player.materials < 10)
+                            {
+                                var warnMessage = await player.discordUser.SendMessageAsync($"Building requires 10 materials!") as RestUserMessage;
+                                player.currentMessages.Add(warnMessage);
+                                break;
+                            }
+
                             var buildMessage = await player.discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
                             await buildMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             player.currentMessages.Add(buildMessage);
@@ -595,6 +612,11 @@ namespace DiscordFortniteBot2
                                 var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
                                 player.currentMessages.Add(lootConfirmMessage);
                                 player.ready = true;
+                            }
+                            else
+                            {
+                                var warnMessage = await player.discordUser.SendMessageAsync($"You can only loot trees for materials or chests for items!") as RestUserMessage;
+                                player.currentMessages.Add(warnMessage);
                             }
                             break;
 
@@ -728,7 +750,7 @@ namespace DiscordFortniteBot2
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY)) return;
 
                     Player hitPlayer = CheckForPlayerHitAtTile(player.x + newX, player.y + newY, weapon);
-                    if(hitPlayer != null)
+                    if (hitPlayer != null)
                     {
                         await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit", $"Dealt {weapon.effectVal} damage to {hitPlayer.discordUser.Username}."));
                         return;

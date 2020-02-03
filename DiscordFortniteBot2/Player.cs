@@ -245,7 +245,6 @@ namespace DiscordFortniteBot2
             health -= amount;
         }
 
-
         private void RemoveItem(int slot)
         {
             inventory[slot] = new Item();

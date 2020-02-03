@@ -6,8 +6,8 @@ namespace DiscordFortniteBot2
 {
     public class StormGenerator
     {
-        const int DELAY = 3; //how many turns before the storm starts closing in
-        const int SPEED = 15; //how many turns it takes to close fully
+        const int DELAY = 20; //how many turns before the storm starts closing in
+        const int SPEED = 60; //how many turns it takes to close fully
         const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
         const float PRECISION = .01f; //keep at 0.01f or lower
 
@@ -26,7 +26,7 @@ namespace DiscordFortniteBot2
             x = rand.Next(width / 2) + width / 4;
             y = rand.Next(height / 2) + height / 4;
 
-            Console.WriteLine($"Map x = {x}; y = {y}");
+            //Console.WriteLine($"Map x = {x}; y = {y}");
 
             GenerateTurnSizes();
         }
@@ -41,10 +41,10 @@ namespace DiscordFortniteBot2
             double diameter = maxDiameter;
             double rate = maxDiameter / (double)SPEED;
 
-            for (int i = 0; i < DELAY; i++)
+            for (int i = 0; i < DELAY; i++) //keep the storm circle at max diameter (just outside the map) for as many turns the delay const is worth
                 turnSizes[i] = maxDiameter + 1;
 
-            for (int i = DELAY; i < SPEED; i++)
+            for (int i = DELAY; i < SPEED + DELAY; i++) //shrink the storm at a constant rate so it takes the amount of turns the speed const is worth
             {
                 turnSizes[i] = (int)diameter;
                 diameter -= rate;
@@ -54,17 +54,17 @@ namespace DiscordFortniteBot2
                 Console.Write($"{i}, ");
         }
 
-        public bool[,] GetStormCircle(int turn)
+        public bool[,] GetStormCircle(int turn) //oh boy here I go commenting this mess
         {
-            bool[,] storm = new bool[height, width];
+            bool[,] storm = new bool[height, width]; //this function returns a 2d array of booleon types, true is storm, false is not storm
 
-            for (int i = 0; i < height; i++)
+            for (int i = 0; i < height; i++) //make all the values true, for now.
                 for (int j = 0; j < width; j++)
                     storm[i, j] = true;
 
-            float d = turnSizes[turn];
+            float d = turnSizes[turn]; //d is diameter, the value is grabbed from the turnsizes array created in the generateturnsizes function
 
-            while (d >= 0)
+            while (d >= 0) //while the diameter is above 0 (d shrinks each loop)
             {
                 float xDraw = 0f;
                 float yDraw = 0f;
@@ -74,8 +74,8 @@ namespace DiscordFortniteBot2
                     xDraw += PRECISION;
                     yDraw += PRECISION;
 
-                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //use WAVES to make circles
-                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x;
+                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //ok everything here is weird, just look at this gif its what we did to make a circle
+                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //https://tenor.com/view/math-curve-circle-sine-cosine-gif-4839795
 
                     //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
 
@@ -88,6 +88,7 @@ namespace DiscordFortniteBot2
                 d -= PRECISION * 100;
             }
 
+            /*
             string draw = "";
             for (int i = 0; i < height; i++)
             {
@@ -96,8 +97,9 @@ namespace DiscordFortniteBot2
 
                 draw += "\n";
             }
-
+            
             Console.WriteLine(draw);
+            */
 
             return storm;
         }

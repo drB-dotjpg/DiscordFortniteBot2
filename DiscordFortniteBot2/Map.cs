@@ -405,6 +405,15 @@ namespace DiscordFortniteBot2
                 if (added) Type = TileType.Chest;
                 return added;
             }
+
+            public bool IsEmpty()
+            {
+                foreach(Item item in Items)
+                {
+                    if (item.type != ItemType.Empty) return false;
+                }
+                return true;
+            }
         }
     }
 }
