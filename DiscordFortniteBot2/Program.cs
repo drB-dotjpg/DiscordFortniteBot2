@@ -429,7 +429,22 @@ namespace DiscordFortniteBot2
 
             builder.AddField("Inventory", GetInventoryString(player)); //add Inventory
 
-            string briefing = "You are standing on " + map.mapGrid[player.x, player.y].Type.ToString().ToLower() + ".\n";
+            string link;
+            TileType type = map.mapGrid[player.y, player.x].Type;
+            switch (type)
+            {
+                case TileType.Chest:
+                case TileType.Tree:
+                    link = "near a"; break;
+                case TileType.Water:
+                    link = "in"; break;
+                case TileType.Storm:
+                    link = "in the"; break;
+                default:
+                    link = "on"; break;
+            }
+
+            string briefing = "You are standing " + link + " " + map.mapGrid[player.y, player.x].Type.ToString().ToLower() + ".\n";
             briefing += player.briefing;
             builder.AddField("Briefing", briefing);
 
@@ -601,13 +616,13 @@ namespace DiscordFortniteBot2
                             break;
 
                         case Action.Loot:
-                            if (map.mapGrid[player.x, player.y].Type == TileType.Chest)
+                            if (map.mapGrid[player.y, player.x].Type == TileType.Chest)
                             {
                                 var lootMessage = await player.discordUser.SendMessageAsync(null, false, GetLootMessage(player)) as RestUserMessage; //follow up asking for the slot number
                                 await lootMessage.AddReactionsAsync(Emotes.slotEmojis);
                                 player.currentMessages.Add(lootMessage);
                             }
-                            else if (map.mapGrid[player.x, player.y].Type == TileType.Tree)
+                            else if (map.mapGrid[player.y, player.x].Type == TileType.Tree)
                             {
                                 var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
                                 player.currentMessages.Add(lootConfirmMessage);
@@ -675,7 +690,7 @@ namespace DiscordFortniteBot2
                         case Action.Drop:
                             Item item = player.inventory[player.turnIndex]; //get the item the player is dropping
 
-                            bool added = map.mapGrid[player.x, player.y].AddChestItem(item); //add an item to a chest if possible
+                            bool added = map.mapGrid[player.y, player.x].AddChestItem(item); //add an item to a chest if possible
 
                             if (added) //if its possible
                             {

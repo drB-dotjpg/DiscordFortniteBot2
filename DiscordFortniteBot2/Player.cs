@@ -38,7 +38,7 @@ namespace DiscordFortniteBot2
 
             x = 10; //TODO: Remove these because they are temporary.
             y = 10;
-            materials = 100000;
+            materials = 0;
 
             for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
 

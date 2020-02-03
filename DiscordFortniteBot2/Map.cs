@@ -137,9 +137,9 @@ namespace DiscordFortniteBot2
             int numberLeft = houseCount;
             while (numberLeft > 0)
             {
-                bool safe = true; //If the building can generate
-                int x = 0;
-                int y = 0;
+                int y;
+                int x;
+                bool safe;
 
                 do
                 {
@@ -153,7 +153,9 @@ namespace DiscordFortniteBot2
                     {
                         for (int vert = y; vert < y + 2; vert++)
                         {
-                            if (mapGrid[hor, vert].Type == TileType.Chest || mapGrid[hor, vert].Type == TileType.Wall)
+                            if (mapGrid[hor, vert].Type == TileType.Chest 
+                                || mapGrid[hor, vert].Type == TileType.Wall
+                                || mapGrid[hor, vert].Type == TileType.Water)
                                 safe = false;
                         }
                     }
@@ -310,7 +312,7 @@ namespace DiscordFortniteBot2
             return mapString;
         }
 
-        public string GetWorldMapString(Player player = null) //TODO: Player does not show up on map in certain positions
+        public string GetWorldMapString(Player player = null)
         {
             string mapString = "World Map (1/2 scale)\n0 = You | . = Ground | # = Water | ! = Storm\n\n";
 
@@ -318,7 +320,10 @@ namespace DiscordFortniteBot2
             {
                 for (int j = 0; j < MAPHEIGHT; j += 2)
                 {
-                    if (player.x == j && player.y == i || player.x == j - 1 && player.y == i - 1)
+                    if (player.x == j && player.y == i 
+                        || player.x == j - 1 && player.y == i
+                        || player.x == j && player.y == i-1
+                        || player.x == j - 1 && player.y == i - 1)
                     {
                         mapString += "0 ";
                         continue;
