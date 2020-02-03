@@ -778,9 +778,9 @@ namespace DiscordFortniteBot2
 
         bool CheckForWallHitAtTile(int x, int y) //If hits a wall, destroys it and then returns true
         {
-            if (map.mapGrid[x, y].Type == TileType.Wall)
+            if (map.mapGrid[y, x].Type == TileType.Wall)
             {
-                map.mapGrid[x, y].Type = TileType.Grass;
+                map.mapGrid[y, x].Type = TileType.Grass;
                 return true;
             }
             return false;
