@@ -475,7 +475,7 @@ namespace DiscordFortniteBot2
         {
             EmbedBuilder builder = new EmbedBuilder();
 
-            List<Item> items = map.mapGrid[player.x, player.y].Items.ToList(); //get items in the chest the player is standing on
+            List<Item> items = map.mapGrid[player.y, player.x].Items.ToList(); //get items in the chest the player is standing on
             int index = 1;
             string s = "";
 
@@ -642,7 +642,7 @@ namespace DiscordFortniteBot2
                             break;
 
                         case Action.Drop:
-                            var dropMessage = await player.discordUser.SendMessageAsync("Select Slot: ") as RestUserMessage; //follow up asking for the slot number
+                            var dropMessage = await player.discordUser.SendMessageAsync("Select Slot: (Items will be dropped into a chest)") as RestUserMessage; //follow up asking for the slot number
                             await dropMessage.AddReactionsAsync(Emotes.slotEmojis);
                             player.currentMessages.Add(dropMessage);
                             break;
