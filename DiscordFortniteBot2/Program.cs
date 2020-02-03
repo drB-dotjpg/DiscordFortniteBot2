@@ -329,77 +329,101 @@ namespace DiscordFortniteBot2
                     seconds--;
                 }
 
-                foreach (Player player in players) //process turn data
-                {
-                    player.ready = false; //reset player ready state
-
-                    switch (player.turnAction)
-                    {
-                        case Action.Move:
-                            player.Move(sprintAmount, map);
-                            break;
-
-                        case Action.Build:
-                            map = player.Build(map);
-                            break;
-
-                        case Action.Use:
-                            ItemType itemType = player.inventory[player.equipped].type;
-                            switch (itemType)
-                            {
-                                case ItemType.Empty:
-                                    break; //haha jeff put return here what a dummy //shut up jpg //my b
-
-                                case ItemType.Weapon:
-                                    await HandleShootAction(player, player.equipped);
-                                    player.inventory[player.equipped].ammo--;
-                                    if (player.inventory[player.equipped].ammo <= 0)
-                                    {
-                                        player.inventory[player.equipped] = new Item();
-                                    }
-                                    break;
-
-                                case ItemType.Trap:
-                                    player.PlaceTrap(map, player.equipped);
-                                    break;
-
-                                case ItemType.Health:
-                                case ItemType.Shield:
-                                case ItemType.HealAll:
-                                    player.UseHealingItem(player.equipped);
-                                    break;
-                            }
-
-                            break;
-
-                        case Action.Loot:
-                            if (map.mapGrid[player.x, player.y].Type == TileType.Chest) //if the player is on a chest
-                            {
-                                if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
-                                {
-                                    map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
-
-                                    if (map.mapGrid[player.x, player.y].IsEmpty()) map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //remove the chest if its empty
-                                }
-                            }
-                            else if (map.mapGrid[player.x, player.y].Type == TileType.Tree) //if the player is on a tree (they climbed it)
-                            {
-                                player.materials += 10; //give them materials
-                                map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //the tree turns into grass
-                            }
-                            break;
-
-                    }
-                }
+                await ProcessEndOfTurn(); //process the end of turn (this comment helped)
 
                 map.UpdateStorm(turn);
 
                 turn++;
-
-
             }
 
             await Task.Delay(-1);
+        }
+
+        async Task ProcessEndOfTurn()
+        {
+            foreach (Player player in players) //start processing turn data, items take priority so they're first
+            {
+                if (player.turnAction == Action.Use)
+                {
+                    ItemType itemType = player.inventory[player.equipped].type;
+                    switch (itemType)
+                    {
+                        case ItemType.Empty:
+                            break; //haha jeff put return here what a dummy //shut up jpg //my b
+
+                        case ItemType.Weapon:
+                            await HandleShootAction(player, player.equipped);
+                            player.inventory[player.equipped].ammo--;
+                            if (player.inventory[player.equipped].ammo <= 0)
+                            {
+                                player.inventory[player.equipped] = new Item();
+                            }
+                            break;
+
+                        case ItemType.Trap:
+                            player.PlaceTrap(map, player.equipped);
+                            break;
+
+                        case ItemType.Health:
+                        case ItemType.Shield:
+                        case ItemType.HealAll:
+                            player.UseHealingItem(player.equipped);
+                            break;
+                    }
+                }
+            }
+
+            foreach (Player player in players.ToList()) //make sure players are not dead, so they cannot continue doing stuff
+            {
+                if (player.health <= 0)
+                {
+                    foreach (Player p in players)
+                        await p.discordUser.SendMessageAsync(embed:
+                        new EmbedBuilder() { Title = player.discordUser.Username + " has died!" }.WithColor(Color.Gold).Build());
+
+                    map.mapGrid[player.y, player.x] = new Map.Tile(player.inventory);
+
+                    players.Remove(player); //they're out bye bye
+                }
+            }
+
+            foreach (Player player in players) //then process building (so players cannot stand on walls that get built on them)
+            {
+                if (player.turnAction == Action.Build)
+                {
+                    map = player.Build(map);
+                }
+            }
+
+            foreach (Player player in players) //process the rest of the turn data
+            {
+                player.ready = false; //reset player ready state
+
+                switch (player.turnAction)
+                {
+                    case Action.Move:
+                        player.Move(sprintAmount, map);
+                        break;
+
+                    case Action.Loot:
+                        if (map.mapGrid[player.x, player.y].Type == TileType.Chest) //if the player is on a chest
+                        {
+                            if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
+                            {
+                                map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
+
+                                if (map.mapGrid[player.x, player.y].IsEmpty()) map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //remove the chest if its empty
+                            }
+                        }
+                        else if (map.mapGrid[player.x, player.y].Type == TileType.Tree) //if the player is on a tree (they climbed it)
+                        {
+                            player.materials += 10; //give them materials
+                            map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //the tree turns into grass
+                        }
+                        break;
+
+                }
+            }
         }
 
         Embed GetEmbeddedMessage(string title, string text)
