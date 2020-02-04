@@ -402,7 +402,7 @@ namespace DiscordFortniteBot2
                 switch (player.turnAction)
                 {
                     case Action.Move:
-                        player.Move(sprintAmount, map);
+                        player.Move(map);
                         break;
 
                     case Action.Loot:
@@ -443,11 +443,11 @@ namespace DiscordFortniteBot2
             //add health and shield bars
             int shieldBarAmount = player.shield / 10;
             string shieldBar = string.Concat(Enumerable.Repeat("🟦", shieldBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - shieldBarAmount)); //Fill bar with blue squares and gray squares depending on the player's shield
-            builder.AddField($"Shield: {player.shield}", shieldBar);
+            builder.AddField($"Shield: {player.shield}", shieldBar, true);
 
             int healthBarAmount = player.health / 10;
             string healthBar = string.Concat(Enumerable.Repeat("🟩", healthBarAmount)) + string.Concat(Enumerable.Repeat("⬛", 10 - healthBarAmount));
-            builder.AddField($"Health: {player.health}", healthBar);
+            builder.AddField($"Health: {player.health}", healthBar, true);
 
             builder.AddField("Materials", player.materials); //Materials are easy
 
@@ -583,9 +583,14 @@ namespace DiscordFortniteBot2
                 return;
             }
 
-            if (reaction.Emote.Name == Emotes.sprintButton.Name) //if sprinting button is pressed
+            if (reaction.Emote.Name == Emotes.sprintFastButton.Name) //if fast sprinting button is pressed
             {
-                player.sprinting = true; //the player is sprinting (wow)
+                player.movementSpeed = 3; //the player is sprinting (wow)
+                return;
+            }
+            else if (reaction.Emote.Name == Emotes.sprintButton.Name) //if sprinting button is pressed
+            {
+                player.movementSpeed = 2;
                 return;
             }
 
@@ -598,8 +603,9 @@ namespace DiscordFortniteBot2
                     switch ((Action)i)
                     {
                         case Action.Move:
-                            var moveMessage = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to sprint):") as RestUserMessage; //follow up asking for a direction
+                            var moveMessage = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to move 2 tiles, {Emotes.sprintFastButton} to move 3.):") as RestUserMessage; //follow up asking for a direction
                             await moveMessage.AddReactionAsync(Emotes.sprintButton);
+                            await moveMessage.AddReactionAsync(Emotes.sprintFastButton);
                             await moveMessage.AddReactionsAsync(Emotes.arrowEmojis);
                             player.currentMessages.Add(moveMessage);
                             break;

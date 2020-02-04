@@ -23,7 +23,7 @@ namespace DiscordFortniteBot2
         public Action turnAction { get; set; }
         public Direction turnDirection { get; set; }
         public int turnIndex { get; set; }
-        public bool sprinting { get; set; }
+        public int movementSpeed { get; set; }
 
         public RestUserMessage turnMessage { get; set; }
 
@@ -47,11 +47,9 @@ namespace DiscordFortniteBot2
             currentMessages = new List<RestUserMessage>();
         }
 
-        public void Move(int sprintAmount, Map map)
+        public void Move(Map map)
         {
-            int movementMultiplier = sprinting ? sprintAmount : 1;
-
-            for (int i = 0; i < movementMultiplier; i++)
+            for (int i = 0; i < movementSpeed; i++)
             {
                 switch (turnDirection)
                 {
@@ -86,7 +84,7 @@ namespace DiscordFortniteBot2
                 }
             }
 
-            sprinting = false;
+            movementSpeed = 1;
         }
 
         public Map Build(Map map)
