@@ -74,8 +74,8 @@ namespace DiscordFortniteBot2
                     xDraw += PRECISION;
                     yDraw += PRECISION;
 
-                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //ok everything here is weird, just look at this gif its what we did to make a circle
-                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //https://tenor.com/view/math-curve-circle-sine-cosine-gif-4839795
+                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //Calculate circle coordinates
+                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //The coordinates of any point on a circle can be expressed as (cos(x) * r, sin(x) * r) 
 
                     //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
 
