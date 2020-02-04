@@ -6,8 +6,8 @@ namespace DiscordFortniteBot2
 {
     public class StormGenerator
     {
-        const int DELAY = 20; //how many turns before the storm starts closing in
-        const int SPEED = 60; //how many turns it takes to close fully
+        const int DELAY = 1; //how many turns before the storm starts closing in
+        const int SPEED = 30; //how many turns it takes to close fully
         const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
         const float PRECISION = .01f; //keep at 0.01f or lower
 
@@ -54,6 +54,18 @@ namespace DiscordFortniteBot2
                 Console.Write($"{i}, ");
         }
 
+        void FloodFill(int startX, int startY, bool[,] storm)
+        {
+            if (startX >= width || startX < 0 || startY >= height || startY < 0) return;
+            if (!storm[startY, startX]) return;
+            else storm[startY, startX] = false;
+            FloodFill(startX + 1, startY, storm);
+            FloodFill(startX - 1, startY, storm);
+            FloodFill(startX, startY - 1, storm);
+            FloodFill(startX, startY + 1, storm);
+
+        }
+
         public bool[,] GetStormCircle(int turn) //oh boy here I go commenting this mess
         {
             bool[,] storm = new bool[height, width]; //this function returns a 2d array of booleon types, true is storm, false is not storm
@@ -64,42 +76,38 @@ namespace DiscordFortniteBot2
 
             float d = turnSizes[turn]; //d is diameter, the value is grabbed from the turnsizes array created in the generateturnsizes function
 
-            while (d >= 0) //while the diameter is above 0 (d shrinks each loop)
+
+            float xDraw = 0f;
+            float yDraw = 0f;
+
+            while (xDraw < LIMIT - PRECISION && yDraw < LIMIT - PRECISION)
             {
-                float xDraw = 0f;
-                float yDraw = 0f;
+                xDraw += PRECISION;
+                yDraw += PRECISION;
 
-                while (xDraw < LIMIT - PRECISION && yDraw < LIMIT - PRECISION)
-                {
-                    xDraw += PRECISION;
-                    yDraw += PRECISION;
+                int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //Calculate circle coordinates
+                int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //The coordinates of any point on a circle can be expressed as (cos(x) * r, sin(x) * r) 
 
-                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //Calculate circle coordinates
-                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //The coordinates of any point on a circle can be expressed as (cos(x) * r, sin(x) * r) 
+                Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
 
-                    //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
+                if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
+                    continue;
 
-                    if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
-                        continue;
-
-                    storm[xGrid, yGrid] = false;
-                }
-
-                d -= PRECISION * 100;
+                storm[xGrid, yGrid] = false;
             }
 
-            /*
+            FloodFill(x, y, storm); //Fill in the circle
+
             string draw = "";
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                     draw += (storm[i, j] ? "#" : ".");
-
                 draw += "\n";
             }
             
             Console.WriteLine(draw);
-            */
+            
 
             return storm;
         }
