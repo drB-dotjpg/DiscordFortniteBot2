@@ -298,14 +298,20 @@ namespace DiscordFortniteBot2
         int turn = 1;
         const int sprintAmount = 3;
         const int turnSeconds = 60;
+        RestUserMessage spectatorMesasge;
 
         async Task InGame()
         {
             Console.WriteLine("Generating map...");
             map = new Map(debug); //generate map
 
+            await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync());
+            spectatorMesasge = await channel.SendMessageAsync("Starting game...");
+
             while (players.Count == 1 || debug)
             {
+                await spectatorMesasge.ModifyAsync(x => x.Content = GetSpectatorMessage());
+
                 int seconds = turnSeconds; //set the turn timer
 
                 foreach (Player player in players) //
@@ -530,6 +536,16 @@ namespace DiscordFortniteBot2
 
             builder.AddField("Chest", s);
             return builder.Build();
+        }
+
+        string GetSpectatorMessage()
+        {
+            string builder = "";
+
+            builder += "```" + map.GetWorldMapString() + "```\n";
+            builder += "Players Alive:\n" + GetPlayersJoined(true);
+
+            return builder;
         }
 
         string GetInventoryString(Player player)

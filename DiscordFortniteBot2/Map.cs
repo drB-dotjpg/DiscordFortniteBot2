@@ -320,13 +320,16 @@ namespace DiscordFortniteBot2
             {
                 for (int j = 0; j < MAPHEIGHT; j += 2)
                 {
-                    if (player.x == j && player.y == i 
-                        || player.x == j - 1 && player.y == i
-                        || player.x == j && player.y == i-1
-                        || player.x == j - 1 && player.y == i - 1)
+                    if (player != null)
                     {
-                        mapString += "0 ";
-                        continue;
+                        if (player.x == j && player.y == i
+                            || player.x == j - 1 && player.y == i
+                            || player.x == j && player.y == i - 1
+                            || player.x == j - 1 && player.y == i - 1)
+                        {
+                            mapString += "0 ";
+                            continue;
+                        }
                     }
 
                     switch (mapGrid[i, j].Type)

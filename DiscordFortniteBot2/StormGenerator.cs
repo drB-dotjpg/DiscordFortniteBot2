@@ -7,7 +7,7 @@ namespace DiscordFortniteBot2
     public class StormGenerator
     {
         const int DELAY = 1; //how many turns before the storm starts closing in
-        const int SPEED = 30; //how many turns it takes to close fully
+        const int SPEED = 20; //how many turns it takes to close fully
         const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
         const float PRECISION = .01f; //keep at 0.01f or lower
 
