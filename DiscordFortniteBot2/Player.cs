@@ -18,7 +18,11 @@ namespace DiscordFortniteBot2
         public Emoji icon { get; }
         public List<RestUserMessage> currentMessages { get; set; }
         public bool ready { get; set; }
-        public string briefing { get; set; }
+        public string briefing { get; set; } //briefing is edited during a turn while currentBriefing keeps its value
+        public string currentBriefing
+        {
+            get; set;
+        }
 
         public Action turnAction { get; set; }
         public Direction turnDirection { get; set; }
@@ -99,7 +103,10 @@ namespace DiscordFortniteBot2
                     {
                         materials -= 10;
                         map.mapGrid[y, x + 1] = new Map.Tile(TileType.Wall);
+                        briefing += "\n" + $"You built a wall on your right.";
                     }
+                    else
+                        briefing += "\n" + $"Cannot build a wall here!";
 
                     break;
 
@@ -109,7 +116,11 @@ namespace DiscordFortniteBot2
                     {
                         materials -= 10;
                         map.mapGrid[y, x - 1] = new Map.Tile(TileType.Wall);
+                        briefing += "\n" + $"You built a wall on your left.";
                     }
+                    else
+                        briefing += "\n" + $"Cannot build a wall here!";
+
                     break;
 
                 case Direction.Up:
@@ -118,7 +129,11 @@ namespace DiscordFortniteBot2
                     {
                         materials -= 10;
                         map.mapGrid[y - 1, x] = new Map.Tile(TileType.Wall);
+                        briefing += "\n" + $"You built a wall upward.";
                     }
+                    else
+                        briefing += "\n" + $"Cannot build a wall here!";
+
                     break;
 
                 case Direction.Down:
@@ -127,7 +142,11 @@ namespace DiscordFortniteBot2
                     {
                         materials -= 10;
                         map.mapGrid[y + 1, x] = new Map.Tile(TileType.Wall);
+                        briefing += "\n" + $"You built a wall downward.";
                     }
+                    else
+                        briefing += "\n" + $"Cannot build a wall here!";
+
                     break;
             }
 
@@ -137,6 +156,10 @@ namespace DiscordFortniteBot2
         public void UseHealingItem(int slot)
         {
             Item item = inventory[slot];
+
+            int oldHeath = health;
+            int oldShield = shield;
+
             switch (item.type)
             {
                 case ItemType.Health:
@@ -164,6 +187,8 @@ namespace DiscordFortniteBot2
                 RemoveItem(equipped);
             }
 
+            briefing += "\n" + $"Used {item.name} and healed {health - oldHeath} health and {shield - oldShield} shield.";
+
         }
 
         public bool Loot(Item newItem) //returns true if the loot was successful
@@ -176,6 +201,15 @@ namespace DiscordFortniteBot2
                 {
                     canLoot = true;
                     inventory[i] = newItem;
+
+                    string a = "a ";
+                    if (newItem.name.StartsWith('a'))
+                        a = "an ";
+                    else if (newItem.name.EndsWith('s'))
+                        a = "";
+
+                    briefing += "\n" + $"You picked up {a}{newItem.name}.";
+
                     break;
                 }
             }
@@ -193,7 +227,10 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y, x + 1].Type != TileType.Wall && map.mapGrid[x + 1, y].Type != TileType.Water)
                     {
                         map.mapGrid[y, x + 1].trap = trap;
+                        briefing += "\n" + $"You placed a trap to your right.";
                     }
+                    else
+                        briefing += "\n" + "You cannot place a trap here!";
                     break;
 
                 case Direction.Left:
@@ -201,7 +238,10 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y, x - 1].Type != TileType.Wall && map.mapGrid[x - 1, y].Type != TileType.Water)
                     {
                         map.mapGrid[y, x - 1].trap = trap;
+                        briefing += "\n" + $"You placed a trap to your left.";
                     }
+                    else
+                        briefing += "\n" + "You cannot place a trap here!";
                     break;
 
                 case Direction.Up:
@@ -209,7 +249,10 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y - 1, x].Type != TileType.Wall && map.mapGrid[x, y - 1].Type != TileType.Water)
                     {
                         map.mapGrid[y - 1, x].trap = trap;
+                        briefing += "\n" + $"You placed a trap upward.";
                     }
+                    else
+                        briefing += "\n" + "You cannot place a trap here!";
                     break;
 
                 case Direction.Down:
@@ -217,7 +260,10 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y + 1, x].Type != TileType.Wall && map.mapGrid[x, y + 1].Type != TileType.Water)
                     {
                         map.mapGrid[y + 1, x].trap = trap;
+                        briefing += "\n" + $"You placed a trap downward.";
                     }
+                    else
+                        briefing += "\n" + "You cannot place a trap here!";
                     break;
             }
             inventory[slot].ammo--;

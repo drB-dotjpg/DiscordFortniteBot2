@@ -296,7 +296,6 @@ namespace DiscordFortniteBot2
 
         Map map;
         int turn = 1;
-        const int sprintAmount = 3;
         const int turnSeconds = 60;
         RestUserMessage spectatorMesasge;
 
@@ -316,6 +315,9 @@ namespace DiscordFortniteBot2
 
                 foreach (Player player in players) //
                 {
+                    player.currentBriefing = player.briefing;
+                    player.briefing = "";
+
                     player.turnMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBriefing(player)) as RestUserMessage; //send turn briefing
 
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
@@ -358,7 +360,7 @@ namespace DiscordFortniteBot2
                             break; //haha jeff put return here what a dummy //shut up jpg //my b
 
                         case ItemType.Weapon:
-                            await HandleShootAction(player, player.equipped);
+                            HandleShootAction(player, player.equipped);
                             player.inventory[player.equipped].ammo--;
                             if (player.inventory[player.equipped].ammo <= 0)
                             {
@@ -412,32 +414,25 @@ namespace DiscordFortniteBot2
                         break;
 
                     case Action.Loot:
-                        if (map.mapGrid[player.x, player.y].Type == TileType.Chest) //if the player is on a chest
+                        if (map.mapGrid[player.y, player.x].Type == TileType.Chest) //if the player is on a chest
                         {
-                            if (player.Loot(map.mapGrid[player.x, player.y].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
+                            if (player.Loot(map.mapGrid[player.y, player.x].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
                             {
-                                map.mapGrid[player.x, player.y].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
+                                map.mapGrid[player.y, player.x].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
 
-                                if (map.mapGrid[player.x, player.y].IsEmpty()) map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //remove the chest if its empty
+                                if (map.mapGrid[player.y, player.x].IsEmpty()) map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //remove the chest if its empty
                             }
                         }
-                        else if (map.mapGrid[player.x, player.y].Type == TileType.Tree) //if the player is on a tree (they climbed it)
+                        else if (map.mapGrid[player.y, player.x].Type == TileType.Tree) //if the player is on a tree (they climbed it)
                         {
                             player.materials += 10; //give them materials
-                            map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //the tree turns into grass
+                            player.briefing += "\n" + "You chopped down a tree and got +10 materials.";
+                            map.mapGrid[player.y, player.x] = new Map.Tile(TileType.Grass); //the tree turns into grass
                         }
                         break;
 
                 }
             }
-        }
-
-        Embed GetEmbeddedMessage(string title, string text)
-        {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.AddField(title, text);
-            builder.WithColor(114, 137, 218); //blurple
-            return builder.Build();
         }
 
         Embed GetTurnBriefing(Player player)
@@ -474,8 +469,8 @@ namespace DiscordFortniteBot2
                     link = "on"; break;
             }
 
-            string briefing = "You are standing " + link + " " + map.mapGrid[player.y, player.x].Type.ToString().ToLower() + ".\n";
-            briefing += player.briefing;
+            string briefing = "You are standing " + link + " " + map.mapGrid[player.y, player.x].Type.ToString().ToLower() + ".";
+            briefing += player.currentBriefing;
             builder.AddField("Briefing", briefing);
 
             return builder.Build();
@@ -778,7 +773,7 @@ namespace DiscordFortniteBot2
             player.ready = false;
         }
 
-        async Task HandleShootAction(Player player, int slot) //Returns true if a player is hit
+        void HandleShootAction(Player player, int slot) //Returns true if a player is hit
         {
             Item weapon = player.inventory[slot];
 
@@ -808,12 +803,17 @@ namespace DiscordFortniteBot2
                 if (player.x + newX >= 0 && player.x + newX < Map.MAPWIDTH
                 && player.y + newY >= 0 && player.y + newY < Map.MAPHEIGHT) //Check if the tile to be checked is within the bounds of the array
                 {
-                    if (CheckForWallHitAtTile(player.x + newX, player.y + newY)) return;
+                    if (CheckForWallHitAtTile(player.x + newX, player.y + newY))
+                    {
+                        player.briefing += "\n" + "You shot and broke a wall.";
+                        return;
+                    }
 
                     Player hitPlayer = CheckForPlayerHitAtTile(player.x + newX, player.y + newY, weapon);
                     if (hitPlayer != null)
                     {
-                        await player.discordUser.SendMessageAsync("", false, GetEmbeddedMessage("Hit", $"Dealt {weapon.effectVal} damage to {hitPlayer.discordUser.Username}."));
+                        player.briefing += "\n" + $"You shot {hitPlayer.discordUser.Username} and did {weapon.effectVal} damage.";
+                        hitPlayer.briefing += "\n" + $"You got shot by {player.discordUser.Username} and took {weapon.effectVal} damage";
                         return;
                     }
                 }

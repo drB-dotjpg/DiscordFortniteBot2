@@ -6,7 +6,7 @@ namespace DiscordFortniteBot2
 {
     public class StormGenerator
     {
-        const int DELAY = 1; //how many turns before the storm starts closing in
+        public const int DELAY = 1; //how many turns before the storm starts closing in
         const int SPEED = 20; //how many turns it takes to close fully
         const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
         const float PRECISION = .01f; //keep at 0.01f or lower
@@ -50,8 +50,8 @@ namespace DiscordFortniteBot2
                 diameter -= rate;
             }
 
-            foreach (int i in turnSizes)
-                Console.Write($"{i}, ");
+            //foreach (int i in turnSizes)
+            //    Console.Write($"{i}, ");
         }
 
         void FloodFill(int startX, int startY, bool[,] storm)
@@ -88,7 +88,7 @@ namespace DiscordFortniteBot2
                 int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //Calculate circle coordinates
                 int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //The coordinates of any point on a circle can be expressed as (cos(x) * r, sin(x) * r) 
 
-                Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
+                //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
 
                 if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
                     continue;
@@ -98,6 +98,7 @@ namespace DiscordFortniteBot2
 
             FloodFill(x, y, storm); //Fill in the circle
 
+            /*
             string draw = "";
             for (int i = 0; i < height; i++)
             {
@@ -107,6 +108,7 @@ namespace DiscordFortniteBot2
             }
             
             Console.WriteLine(draw);
+            */
             
 
             return storm;
