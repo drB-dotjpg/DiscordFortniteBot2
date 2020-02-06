@@ -299,6 +299,7 @@ namespace DiscordFortniteBot2
         const int TURN_SECONDS = 40;
         const int INACTIVIY_LIMIT = 2;
         RestUserMessage spectatorMesasge;
+        List<Player> deadPlayers = new List<Player>();
 
         async Task InGame()
         {
@@ -414,6 +415,9 @@ namespace DiscordFortniteBot2
 
                     map.mapGrid[player.y, player.x] = new Map.Tile(player.inventory);
 
+                    await player.discordUser.SendMessageAsync("**Final stats:**\n" + player.stats.GetAllStats()); //send them stats
+
+                    deadPlayers.Add(player); //join the club
                     players.Remove(player); //they're out bye bye
                 }
             }
@@ -575,6 +579,7 @@ namespace DiscordFortniteBot2
 
             builder += "```" + map.GetWorldMapString() + "```\n";
             builder += "Players Alive:\n" + GetPlayersJoined(true);
+            builder += "\n\nPlayers Dead:\n" + GetDeadPlayers();
 
             return builder;
         }
@@ -890,6 +895,18 @@ namespace DiscordFortniteBot2
                 if (!player.ready) return false;
             }
             return true;
+        }
+
+        string GetDeadPlayers()
+        {
+            string builder = "";
+
+            foreach(Player player in deadPlayers)
+            {
+                builder += player.icon + " - `" + player.discordUser.Username + "`\n";
+            }
+
+            return builder;
         }
 
         #endregion
