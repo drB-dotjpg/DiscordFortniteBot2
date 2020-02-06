@@ -374,6 +374,9 @@ namespace DiscordFortniteBot2
                 if (player.turnAction == Action.Use && player.health != 0)
                 {
                     ItemType itemType = player.inventory[player.equipped].type;
+
+                    player.stats.totalItemsUsed++;
+
                     switch (itemType)
                     {
                         case ItemType.Empty:
@@ -447,11 +450,14 @@ namespace DiscordFortniteBot2
                         {
                             player.materials += 10; //give them materials
                             player.briefing += "\n" + "You chopped down a tree and got +10 materials.";
+                            player.stats.totalTreesCut++;
                             map.mapGrid[player.y, player.x] = new Map.Tile(TileType.Grass); //the tree turns into grass
                         }
                         break;
 
                 }
+
+                player.stats.totalTurnsAlive++;
             }
         }
 
@@ -767,6 +773,7 @@ namespace DiscordFortniteBot2
                             {
                                 player.inventory[player.turnIndex] = new Item(); //remove the item from the players inventory
                                 await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //change the turn message because the inventory changed 5head
+                                player.stats.totalItemsDropped++;
                             }
                             break;
                     }
@@ -835,7 +842,8 @@ namespace DiscordFortniteBot2
                 {
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY))
                     {
-                        player.briefing += "\n" + "You shot and broke a wall.";
+                        player.briefing += "\n" + "You shot and destroyed a wall.";
+                        player.stats.totalWallsDestroyed++;
                         return;
                     }
 
