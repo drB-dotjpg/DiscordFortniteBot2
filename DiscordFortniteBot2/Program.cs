@@ -296,7 +296,8 @@ namespace DiscordFortniteBot2
 
         Map map;
         int turn = 1;
-        const int turnSeconds = 60;
+        const int TURN_SECONDS = 40;
+        const int INACTIVIY_LIMIT = 2;
         RestUserMessage spectatorMesasge;
 
         async Task InGame()
@@ -311,7 +312,7 @@ namespace DiscordFortniteBot2
             {
                 await spectatorMesasge.ModifyAsync(x => x.Content = GetSpectatorMessage());
 
-                int seconds = turnSeconds; //set the turn timer
+                int seconds = TURN_SECONDS; //set the turn timer
 
                 foreach (Player player in players) //
                 {
@@ -333,6 +334,12 @@ namespace DiscordFortniteBot2
 
                 while (seconds >= 0 && !ArePlayersReady()) //wait for timer to finish or all players to be ready
                 {
+                    if (seconds == 10)
+                    {
+                        foreach (Player player in players)
+                            await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player, true));
+                    }
+
                     await Task.Delay(1000);
                     seconds--;
                 }
@@ -347,11 +354,24 @@ namespace DiscordFortniteBot2
             await Task.Delay(-1);
         }
 
-        async Task ProcessEndOfTurn()
+        async Task ProcessEndOfTurn() //tldr: player list loops
         {
+            foreach (Player player in players) //check for inactivity
+            {
+                if (!player.ready) //if the player is not ready (turn timer ran out)
+                {
+                    player.inactiveTurns++;
+
+                    if (player.inactiveTurns >= INACTIVIY_LIMIT) //if they're at the inactivity limit
+                    {
+                        player.health = 0; //bye bye
+                    }
+                }
+            }
+
             foreach (Player player in players) //start processing turn data, items take priority so they're first
             {
-                if (player.turnAction == Action.Use)
+                if (player.turnAction == Action.Use && player.health != 0)
                 {
                     ItemType itemType = player.inventory[player.equipped].type;
                     switch (itemType)
@@ -435,7 +455,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        Embed GetTurnBriefing(Player player)
+        Embed GetTurnBriefing(Player player, bool timeWarning = false)
         {
             EmbedBuilder builder = new EmbedBuilder();
 
@@ -472,6 +492,16 @@ namespace DiscordFortniteBot2
             string briefing = "You are standing " + link + " " + map.mapGrid[player.y, player.x].Type.ToString().ToLower() + ".";
             briefing += player.currentBriefing;
             builder.AddField("Briefing", briefing);
+
+            if (timeWarning)
+            {
+                builder.WithFooter("10 second warning! Please finish your turn.");
+            }
+            else if (player.inactiveTurns > 0)
+            {
+                string plural = player.inactiveTurns > 1 ? "s" : "";
+                builder.WithFooter($"WARNING: You've been inactive for {player.inactiveTurns} turn{plural}. To keep the pace of the game for the other players, you will be kicked if you reach {INACTIVIY_LIMIT} inactive turns.");
+            }
 
             return builder.Build();
         }

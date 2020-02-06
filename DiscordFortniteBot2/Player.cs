@@ -19,10 +19,8 @@ namespace DiscordFortniteBot2
         public List<RestUserMessage> currentMessages { get; set; }
         public bool ready { get; set; }
         public string briefing { get; set; } //briefing is edited during a turn while currentBriefing keeps its value
-        public string currentBriefing
-        {
-            get; set;
-        }
+        public string currentBriefing { get; set; }
+        public int inactiveTurns { get; set; }
 
         public Action turnAction { get; set; }
         public Direction turnDirection { get; set; }
@@ -39,6 +37,7 @@ namespace DiscordFortniteBot2
             health = 100;
             shield = 0;
             equipped = 0;
+            inactiveTurns = 0;
 
             x = 10; //TODO: Remove these because they are temporary.
             y = 10;
