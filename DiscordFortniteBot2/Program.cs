@@ -298,6 +298,9 @@ namespace DiscordFortniteBot2
         int turn = 1;
         const int TURN_SECONDS = 40;
         const int INACTIVIY_LIMIT = 2;
+        const int SUPPLY_DROP_DELAY = 20; //Amount of turns before supply drops start appearing
+        int supplyDropCooldown = 5; //Turns between each supply drop, once it reaches 5 a supply drop will drop somewhere
+
         RestUserMessage spectatorMesasge;
         List<Player> deadPlayers = new List<Player>();
 
@@ -348,6 +351,16 @@ namespace DiscordFortniteBot2
                 await ProcessEndOfTurn(); //process the end of turn (this comment helped)
 
                 map.UpdateStorm(turn);
+
+                if(turn > SUPPLY_DROP_DELAY) //Check if the delay has passed
+                {
+                    supplyDropCooldown++;
+                    if(supplyDropCooldown >= 5) //Drop one every 5 turns
+                    {
+                        supplyDropCooldown = 0;
+                        map.DropSupplyDrop();
+                    }
+                }
 
                 turn++;
             }
