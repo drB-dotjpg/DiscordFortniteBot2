@@ -302,7 +302,8 @@ namespace DiscordFortniteBot2
         int supplyDropCooldown = 5; //Turns between each supply drop, once it reaches 5 a supply drop will drop somewhere
 
         RestUserMessage spectatorMesasge;
-         
+        List<Player> deadPlayers = new List<Player>();
+
         async Task InGame()
         {
             Console.WriteLine("Generating map...");
@@ -427,6 +428,9 @@ namespace DiscordFortniteBot2
 
                     map.mapGrid[player.y, player.x] = new Map.Tile(player.inventory);
 
+                    await player.discordUser.SendMessageAsync("**Final stats:**\n" + player.stats.GetAllStats()); //send them stats
+
+                    deadPlayers.Add(player); //join the club
                     players.Remove(player); //they're out bye bye
                 }
             }
@@ -588,6 +592,7 @@ namespace DiscordFortniteBot2
 
             builder += "```" + map.GetWorldMapString() + "```\n";
             builder += "Players Alive:\n" + GetPlayersJoined(true);
+            builder += "\n\nPlayers Dead:\n" + GetDeadPlayers();
 
             return builder;
         }
@@ -903,6 +908,18 @@ namespace DiscordFortniteBot2
                 if (!player.ready) return false;
             }
             return true;
+        }
+
+        string GetDeadPlayers()
+        {
+            string builder = "";
+
+            foreach(Player player in deadPlayers)
+            {
+                builder += player.icon + " - `" + player.discordUser.Username + "`\n";
+            }
+
+            return builder;
         }
 
         #endregion
