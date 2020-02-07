@@ -24,6 +24,7 @@ namespace DiscordFortniteBot2
         const int treeCount = 150;
         const int riverCount = 3; //river count is randomized, this is a cap to the amount of rivers generated.
 
+
         public Tile[,] mapGrid = new Tile[MAPWIDTH, MAPHEIGHT];
 
         Random random = new Random();
@@ -175,6 +176,23 @@ namespace DiscordFortniteBot2
                 mapGrid[x + 1, y + 1] = new Tile(TileType.Wall);
 
                 numberLeft--;
+            }
+        }
+
+        public void DropSupplyDrop() //Drop a chest on a random grass tile
+        {
+            while (true)
+            {
+                int randomX = random.Next(0, MAPWIDTH);
+                int randomY = random.Next(0, MAPHEIGHT);
+
+                if(mapGrid[randomY,randomX].Type == TileType.Grass)
+                {
+                    mapGrid[randomY, randomX] = new Tile(GenerateItems());
+                    Console.WriteLine($"Supply drop dropped at ({randomY},{randomX})");
+                    break;
+                }
+
             }
         }
 
