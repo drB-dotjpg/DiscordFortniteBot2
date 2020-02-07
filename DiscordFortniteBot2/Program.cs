@@ -403,6 +403,12 @@ namespace DiscordFortniteBot2
                             break;
                     }
                 }
+
+                if (map.mapGrid[player.y, player.x].Type == TileType.Storm) //also standing in the storm is cringe
+                {
+                    player.TakeDamage(15);
+                    player.briefing += "\n" + "Took 15 damage in the storm.";
+                }
             }
 
             foreach (Player player in players.ToList()) //make sure players are not dead, so they cannot continue doing stuff
@@ -459,6 +465,17 @@ namespace DiscordFortniteBot2
                         }
                         break;
 
+                }
+
+                if (turn == map.GetStormDelay()) //warn players about the storm
+                {
+                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {map.GetStormSpeed()} turns. Check your world map ({Emotes.infoButton} button) to see storm progress.";
+                }
+                else if (map.GetStormDelay() - 5 <= turn && turn < map.GetStormDelay())
+                {
+                    int turnsTillTheThingHappens = map.GetStormDelay() - turn;
+                    string plural = turnsTillTheThingHappens > 1 ? "s" : "";
+                    player.briefing += "\n" + $"The storm will appear in {turnsTillTheThingHappens} turn{plural}.";
                 }
 
                 player.stats.totalTurnsAlive++;

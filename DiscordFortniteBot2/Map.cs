@@ -314,7 +314,7 @@ namespace DiscordFortniteBot2
 
         public string GetWorldMapString(Player player = null)
         {
-            string mapString = "World Map (1/2 scale)\n0 = You | . = Ground | # = Water | ! = Storm\n\n";
+            string mapString = $"World Map (1/2 scale)\n{(player != null ? "0 = You | " : "")}. = Ground | # = Water | ! = Storm\n\n";
 
             for (int i = 0; i < MAPWIDTH; i += 2)
             {
@@ -354,6 +354,8 @@ namespace DiscordFortniteBot2
 
         public void UpdateStorm(int turn)
         {
+            if (turn >= stormGen.delay + stormGen.speed) return;
+
             bool[,] storm = stormGen.GetStormCircle(turn);
 
             for (int i = 0; i < MAPWIDTH; i++)
@@ -364,6 +366,10 @@ namespace DiscordFortniteBot2
                 }
             }
         }
+
+        public int GetStormDelay() => stormGen.delay;
+
+        public int GetStormSpeed() => stormGen.speed;
 
         public struct Tile //tiles represent a space on the map
         {
