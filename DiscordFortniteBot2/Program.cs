@@ -12,6 +12,14 @@ namespace DiscordFortniteBot2
 {
     class Program
     {
+        Phase phase = Phase.Pregame;
+        SocketTextChannel channel;
+
+        List<Player> players;
+        List<Player> deadPlayers;
+
+        Map map;
+
         #region Runs on Startup
 
         static void Main(string[] args) => new Program();
@@ -76,9 +84,14 @@ namespace DiscordFortniteBot2
                 }
             }
 
-            //The rest of the program methods will be called here (for better error handling)
-
             Login().GetAwaiter().GetResult(); //start login sequence
+
+            GameController();
+        }
+
+        void GameController()
+        {
+            phase = Phase.Pregame;
 
             Pregame().GetAwaiter().GetResult(); //start pregame sequence
 
@@ -89,6 +102,8 @@ namespace DiscordFortniteBot2
             phase = Phase.Postgame;
 
             PostGame().GetAwaiter().GetResult(); //start postgame sequence
+
+            GameController();
         }
 
         #endregion
@@ -96,14 +111,12 @@ namespace DiscordFortniteBot2
         #region Discord Related
 
         public DiscordSocketClient _client;
-        private IServiceProvider _services;
         public SocketGuild _server;
         bool ready = false;
 
         async Task Login()
         {
-            _client = new DiscordSocketClient(new DiscordSocketConfig { ExclusiveBulkDelete = true }); //create discord client
-            _services = new ServiceCollection().AddSingleton(_client).BuildServiceProvider();
+            _client = new DiscordSocketClient(new DiscordSocketConfig { ExclusiveBulkDelete = true }); //create discord client\
 
             _client.Log += Log; //subscribe to discord events
             _client.MessageReceived += MessageReceived;
@@ -163,16 +176,14 @@ namespace DiscordFortniteBot2
 
         #region Pre Game
 
-        Phase phase = Phase.Pregame;
-        SocketTextChannel channel;
-
-        List<Player> players = new List<Player>();
-
         bool playerLimitHit = false;
 
         async Task Pregame()
         {
             Console.WriteLine("Entering pregame phase.");
+
+            players = new List<Player>(); //set (or reset if coming from previous game) player lists
+            deadPlayers = new List<Player>();
 
             //Get a channel to post in
 
@@ -213,7 +224,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 180 : 6;
+            int seconds = !debug ? 300 : 6;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
@@ -298,18 +309,18 @@ namespace DiscordFortniteBot2
 
         #region In Game
 
-        Map map;
-        int turn = 1;
+        int turn;
         const int TURN_SECONDS = 40;
         const int INACTIVIY_LIMIT = 2;
         const int SUPPLY_DROP_DELAY = 20; //Amount of turns before supply drops start appearing
-        int supplyDropCooldown = 5; //Turns between each supply drop, once it reaches 5 a supply drop will drop somewhere
+        int supplyDropCooldown; //Turns between each supply drop, once it reaches a set number, a supply drop will drop somewhere
 
         RestUserMessage spectatorMesasge;
-        List<Player> deadPlayers = new List<Player>();
 
         async Task InGame()
         {
+            turn = 1;
+
             Console.WriteLine("Generating map...");
             map = new Map(debug); //generate map
 
@@ -368,8 +379,6 @@ namespace DiscordFortniteBot2
 
                 turn++;
             }
-
-            await Task.Delay(-1);
         }
 
         async Task ProcessEndOfTurn() //tldr: player list loops
@@ -951,7 +960,25 @@ namespace DiscordFortniteBot2
         {
             await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync()); //delete all messages before continuing
 
-            await channel.SendMessageAsync(GetTopRankingList());
+            Player winner = players.First();
+            string topRankings = GetTopRankingList();
+
+            int seconds = 120;
+
+            var message = await channel.SendMessageAsync("```Processing...```");
+
+            while (seconds > 0)
+            {
+                await Task.Delay(1000);
+
+                string timeRemaining = $"{seconds / 60}:{(seconds % 60).ToString("00")}";
+
+                await message.ModifyAsync(x => x.Content = $"{winner.discordUser.Username} wins!\n\n" +
+                    $"Next game starts in `{timeRemaining}`\n\n" +
+                    $"Final stats: {topRankings}");
+
+                seconds--;
+            }
         }
 
         string GetTopRankingList()
