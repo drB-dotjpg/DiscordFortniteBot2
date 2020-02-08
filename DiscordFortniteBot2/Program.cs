@@ -85,6 +85,10 @@ namespace DiscordFortniteBot2
             phase = Phase.Ingame;
 
             InGame().GetAwaiter().GetResult(); //start Ingame sequence
+
+            phase = Phase.Postgame;
+
+            PostGame().GetAwaiter().GetResult(); //start postgame sequence
         }
 
         #endregion
@@ -352,10 +356,10 @@ namespace DiscordFortniteBot2
 
                 map.UpdateStorm(turn);
 
-                if(turn > SUPPLY_DROP_DELAY) //Check if the delay has passed
+                if (turn > SUPPLY_DROP_DELAY) //Check if the delay has passed
                 {
                     supplyDropCooldown++;
-                    if(supplyDropCooldown >= 5) //Drop one every 5 turns
+                    if (supplyDropCooldown >= 5) //Drop one every 5 turns
                     {
                         supplyDropCooldown = 0;
                         map.DropSupplyDrop();
@@ -931,12 +935,65 @@ namespace DiscordFortniteBot2
         {
             string builder = "";
 
-            foreach(Player player in deadPlayers)
+            foreach (Player player in deadPlayers)
             {
                 builder += player.icon + " - `" + player.discordUser.Username + "`\n";
             }
 
             return builder;
+        }
+
+        #endregion
+
+        #region Post Game
+
+        async Task PostGame()
+        {
+            await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync()); //delete all messages before continuing
+
+            await channel.SendMessageAsync(GetTopRankingList());
+        }
+
+        string GetTopRankingList()
+        {
+            //Abandon Hope All Ye Who Enter Here
+
+            List<Player> ap = new List<Player>(); //ap: "all players"
+            ap.AddRange(players);
+            ap.AddRange(deadPlayers);
+
+            //all ints represent the index of a value (rather than creating a bunch of player objects)
+            int mostDamageTaken = ap.IndexOf(ap.OrderBy(o => o.stats.totalDmgTaken).FirstOrDefault());
+            int mostDamageHealed = ap.IndexOf(ap.OrderBy(o => o.stats.totalDmgHealed).FirstOrDefault());
+            int mostTilesMoved = ap.IndexOf(ap.OrderBy(o => o.stats.totalTilesMoved).FirstOrDefault());
+            int mostTurnsAlive = ap.IndexOf(ap.OrderBy(o => o.stats.totalTurnsAlive).FirstOrDefault());
+            int mostWallsPlaced = ap.IndexOf(ap.OrderBy(o => o.stats.totalWallsPlaced).FirstOrDefault());
+            int mostWallsDestroyed = ap.IndexOf(ap.OrderBy(o => o.stats.totalWallsDestroyed).FirstOrDefault());
+            int mostItemsUsed = ap.IndexOf(ap.OrderBy(o => o.stats.totalItemsUsed).FirstOrDefault());
+            int mostItemsLooted = ap.IndexOf(ap.OrderBy(o => o.stats.totalItemsLooted).FirstOrDefault());
+            int mostItemsDropped = ap.IndexOf(ap.OrderBy(o => o.stats.totalItemsDropped).FirstOrDefault());
+            int mostTreesCut = ap.IndexOf(ap.OrderBy(o => o.stats.totalTreesCut).FirstOrDefault());
+            int mostTrapsPlaced = ap.IndexOf(ap.OrderBy(o => o.stats.totalTrapsPlaced).FirstOrDefault());
+            int mostTrapsHit = ap.IndexOf(ap.OrderBy(o => o.stats.totalTrapsHit).FirstOrDefault());
+            int mostPlayersKilled = ap.IndexOf(ap.OrderBy(o => o.stats.totalPlayersKilled).FirstOrDefault());
+            //yeah sorry there is no better way to do this (that remains readable)
+            //haha unless?
+
+            return "```" +
+                $"Most damage taken.....{ap[mostDamageTaken].discordUser.Username}: {ap[mostDamageTaken].stats.totalDmgTaken}\n" +
+                $"Most damage healed....{ap[mostDamageHealed].discordUser.Username}: {ap[mostDamageHealed].stats.totalDmgHealed}\n" +
+                $"Most tiles moved......{ap[mostTilesMoved].discordUser.Username}: {ap[mostTilesMoved].stats.totalTilesMoved}\n" +
+                $"Most turns alive......{ap[mostTurnsAlive].discordUser.Username}: {ap[mostTurnsAlive].stats.totalTilesMoved}\n" +
+                $"Most walls placed.....{ap[mostWallsPlaced].discordUser.Username}: {ap[mostWallsPlaced].stats.totalWallsPlaced}\n" +
+                $"Most walls destroyed..{ap[mostWallsDestroyed].discordUser.Username}: {ap[mostWallsDestroyed].stats.totalWallsDestroyed}\n" +
+                $"Most items used.......{ap[mostItemsUsed].discordUser.Username}: {ap[mostItemsUsed].stats.totalItemsUsed}\n" +
+                $"Most items looted.....{ap[mostItemsLooted].discordUser.Username}: {ap[mostItemsLooted].stats.totalItemsLooted}\n" +
+                $"Most items dropped....{ap[mostItemsDropped].discordUser.Username}: {ap[mostItemsDropped].stats.totalItemsDropped}\n" +
+                $"Most trees cut........{ap[mostTreesCut].discordUser.Username}: {ap[mostTreesCut].stats.totalTreesCut}\n" +
+                $"Most traps placed.....{ap[mostTrapsPlaced].discordUser.Username}: {ap[mostTrapsPlaced].stats.totalTrapsPlaced}\n" +
+                $"Most traps hit........{ap[mostTrapsHit].discordUser.Username}: {ap[mostTrapsHit].stats.totalTrapsHit}\n" +
+                $"Most players killed...{ap[mostPlayersKilled].discordUser.Username}: {ap[mostPlayersKilled].stats.totalPlayersKilled}\n" +
+                "```";
         }
 
         #endregion
