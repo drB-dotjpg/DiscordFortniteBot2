@@ -224,7 +224,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 300 : 6;
+            int seconds = !debug ? 10 : 6;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
@@ -327,7 +327,7 @@ namespace DiscordFortniteBot2
             await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync());
             spectatorMesasge = await channel.SendMessageAsync("Starting game...");
 
-            while (players.Count == 1 || debug)
+            while (players.Count > 1 || debug)
             {
                 await spectatorMesasge.ModifyAsync(x => x.Content = GetSpectatorMessage());
 
@@ -594,7 +594,7 @@ namespace DiscordFortniteBot2
                 switch (item.type)
                 {
                     case ItemType.Weapon:
-                        s += $"{item.name} `Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
+                        s += $"{item.name} `Weapon. {item.range} range. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Health:
                         s += $"{item.name} `Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Shield:
@@ -644,7 +644,7 @@ namespace DiscordFortniteBot2
                 switch (item.type) //add the item data to the string
                 {
                     case ItemType.Weapon:
-                        builder += $"{item.name} `Weapon. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
+                        builder += $"{item.name} `Weapon. {item.range} range. Deals {item.effectVal} damage. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Health:
                         builder += $"{item.name} `Healing. Heals {item.effectVal} health. {item.ammo} {pluralUses} left.`"; break;
                     case ItemType.Shield:
@@ -963,7 +963,7 @@ namespace DiscordFortniteBot2
             Player winner = players.First();
             string topRankings = GetTopRankingList();
 
-            int seconds = 120;
+            int seconds = 20;
 
             var message = await channel.SendMessageAsync("```Processing...```");
 
