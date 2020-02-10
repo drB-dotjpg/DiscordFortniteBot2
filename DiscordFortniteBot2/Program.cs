@@ -74,7 +74,7 @@ namespace DiscordFortniteBot2
                         goto Login;
 
                     case ConsoleKey.Enter: //if the key pressed is enter then log into discord (done after switch statement)
-                        Console.Write("Enter- Logging in.");
+                        Console.Write("Enter- Logging in.\n");
                         goto Login;
 
                     Login:
@@ -311,7 +311,7 @@ namespace DiscordFortniteBot2
 
         int turn;
         const int TURN_SECONDS = 40;
-        const int INACTIVIY_LIMIT = 2;
+        const int INACTIVIY_LIMIT = 2; //turns a player is allowed to be inactive for
         const int SUPPLY_DROP_DELAY = 20; //Amount of turns before supply drops start appearing
         int supplyDropCooldown; //Turns between each supply drop, once it reaches a set number, a supply drop will drop somewhere
 
@@ -963,19 +963,22 @@ namespace DiscordFortniteBot2
             Player winner = players.First();
             string topRankings = GetTopRankingList();
 
-            int seconds = 20;
+            int seconds = 120;
 
-            var message = await channel.SendMessageAsync("```Processing...```");
+            await channel.SendMessageAsync($"> **{winner.discordUser.Mention} won the game!**\n");
+
+            var timerMessage = await channel.SendMessageAsync("_ _");
+
+            await channel.SendMessageAsync("Players: \n" + GetPlayersJoined(withDead: true));
+
+            await channel.SendMessageAsync("Top stats:\n" + GetTopRankingList());
 
             while (seconds > 0)
             {
                 await Task.Delay(1000);
 
                 string timeRemaining = $"{seconds / 60}:{(seconds % 60).ToString("00")}";
-
-                await message.ModifyAsync(x => x.Content = $"{winner.discordUser.Username} wins!\n\n" +
-                    $"Next game starts in `{timeRemaining}`\n\n" +
-                    $"Final stats: {topRankings}");
+                await timerMessage.ModifyAsync(x => x.Content = $"Next game starts in `{timeRemaining}`");
 
                 seconds--;
             }
@@ -1030,13 +1033,17 @@ namespace DiscordFortniteBot2
             return players.First(x => x.discordUser.Id == id);
         }
 
-        string GetPlayersJoined(bool showReady = false)
+        string GetPlayersJoined(bool showReady = false, bool withDead = false)
         {
             string builder = "";
 
+            List<Player> joinedPlayers = players;
+
+            if (withDead) joinedPlayers.AddRange(deadPlayers);
+
             if (players.Count > 0) //if there are more than 0 players
             {
-                foreach (Player player in players) //for each player in the game, add them to the list.
+                foreach (Player player in joinedPlayers) //for each player in the game, add them to the list.
                 {
                     builder += player.icon + " - `" + player.discordUser.Username + "`";
                     if (showReady && player.ready) builder += " Ready";
