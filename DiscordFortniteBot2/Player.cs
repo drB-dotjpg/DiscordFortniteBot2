@@ -44,11 +44,11 @@ namespace DiscordFortniteBot2
             equipped = 0;
             inactiveTurns = 0;
 
-            x = 10; //TODO: Remove these because they are temporary.
-            y = 10;
+            x = -1;
+            y = -1;
             materials = 0;
 
-            for (int i = 0; i < inventory.Length; i++) inventory[i] = Spawnables.GetRandomSpawnable();
+            for (int i = 0; i < inventory.Length; i++) inventory[i] = new Item();
 
             ready = false;
 
@@ -124,7 +124,7 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y, x + 1].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[y, x + 1] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y, x + 1] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall on your right.";
                         stats.totalWallsPlaced++;
                     }
@@ -138,7 +138,7 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y, x - 1].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[y, x - 1] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y, x - 1] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall on your left.";
                         stats.totalWallsPlaced++;
                     }
@@ -152,7 +152,7 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y - 1, x].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[y - 1, x] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y - 1, x] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall upward.";
                         stats.totalWallsPlaced++;
                     }
@@ -166,7 +166,7 @@ namespace DiscordFortniteBot2
                         && map.mapGrid[y + 1, x].Type != TileType.Wall)
                     {
                         materials -= 10;
-                        map.mapGrid[y + 1, x] = new Map.Tile(TileType.Wall);
+                        map.mapGrid[y + 1, x] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall downward.";
                         stats.totalWallsPlaced++;
                     }

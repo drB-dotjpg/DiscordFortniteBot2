@@ -324,6 +324,9 @@ namespace DiscordFortniteBot2
             Console.WriteLine("Generating map...");
             map = new Map(debug); //generate map
 
+            Console.WriteLine("Placing players...");
+            PlacePlayers();
+
             await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync());
             spectatorMesasge = await channel.SendMessageAsync("Starting game...");
 
@@ -445,7 +448,7 @@ namespace DiscordFortniteBot2
                         await p.discordUser.SendMessageAsync(embed:
                         new EmbedBuilder() { Title = player.discordUser.Username + " has died!" }.WithColor(Color.Gold).Build());
 
-                    map.mapGrid[player.y, player.x] = new Map.Tile(player.inventory);
+                    map.mapGrid[player.y, player.x] = new Tile(player.inventory);
 
                     await player.discordUser.SendMessageAsync("**Final stats:**\n" + player.stats.GetAllStats()); //send them stats
 
@@ -479,7 +482,7 @@ namespace DiscordFortniteBot2
                             {
                                 map.mapGrid[player.y, player.x].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
 
-                                if (map.mapGrid[player.y, player.x].IsEmpty()) map.mapGrid[player.x, player.y] = new Map.Tile(TileType.Grass); //remove the chest if its empty
+                                if (map.mapGrid[player.y, player.x].IsEmpty()) map.mapGrid[player.x, player.y] = new Tile(TileType.Grass); //remove the chest if its empty
                             }
                         }
                         else if (map.mapGrid[player.y, player.x].Type == TileType.Tree) //if the player is on a tree (they climbed it)
@@ -487,7 +490,7 @@ namespace DiscordFortniteBot2
                             player.materials += 10; //give them materials
                             player.briefing += "\n" + "You chopped down a tree and got +10 materials.";
                             player.stats.totalTreesCut++;
-                            map.mapGrid[player.y, player.x] = new Map.Tile(TileType.Grass); //the tree turns into grass
+                            map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //the tree turns into grass
                         }
                         break;
 
@@ -505,6 +508,47 @@ namespace DiscordFortniteBot2
                 }
 
                 player.stats.totalTurnsAlive++;
+            }
+        }
+
+        void PlacePlayers()
+        {
+            const int CENTER_LIMIT = 8; //the player will spawn this many tiles away from the spawn
+            const int PLAYER_DISTANCE = 7; //the player will spawn this many tiles away from other players
+
+            Random random = new Random();
+
+            int i = 0;
+            while (i < players.Count())
+            {
+                int x = random.Next(Map.MAPWIDTH); //choose a random spot on the map
+                int y = random.Next(Map.MAPHEIGHT);
+
+                //if that spot is on a wall
+                if (map.mapGrid[y, x].Type == TileType.Wall)
+                    continue; //do it again we can't be having that
+
+                //if the spot is near the center of the map
+                if (Math.Abs(x - Map.MAPHEIGHT / 2) <= CENTER_LIMIT && Math.Abs(y - Map.MAPHEIGHT) <= CENTER_LIMIT)
+                    continue; //do it again we can't be having that
+
+                //if the player is near any other players
+                bool nearPlayer = false;
+                foreach(Player player in players)
+                {
+                    if (player.Equals(players[i])) continue;
+                    if (player.x == -1 || player.y == -1) continue;
+
+                    nearPlayer = Math.Abs(x - player.x) <= PLAYER_DISTANCE && Math.Abs(y - player.y) <= PLAYER_DISTANCE;
+                }
+                if (nearPlayer) continue; //do it again we can't be having that
+
+                players[i].x = x;
+                players[i].y = y;
+
+                if (debug) Console.WriteLine($"x = {x}, y = {y}");
+
+                i++;
             }
         }
 
