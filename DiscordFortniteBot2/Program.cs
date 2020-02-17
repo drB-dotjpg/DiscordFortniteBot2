@@ -529,7 +529,7 @@ namespace DiscordFortniteBot2
                     continue; //do it again we can't be having that
 
                 //if the spot is near the center of the map
-                if (Math.Abs(x - Map.MAPHEIGHT / 2) <= CENTER_LIMIT && Math.Abs(y - Map.MAPHEIGHT) <= CENTER_LIMIT)
+                if (Math.Abs(x - Map.MAPHEIGHT / 2) <= CENTER_LIMIT && Math.Abs(y - Map.MAPHEIGHT / 2) <= CENTER_LIMIT)
                     continue; //do it again we can't be having that
 
                 //if the player is near any other players
