@@ -132,7 +132,7 @@ namespace DiscordFortniteBot2
             _server = _client.Guilds.First(g => g.Name == inputServerName); //get the server by name
         }
 
-        async Task ReactionRemoved(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task ReactionRemoved(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
             if (phase == Phase.Ingame)
                 await HandleIngameReactionRemoval(arg3);
@@ -155,7 +155,7 @@ namespace DiscordFortniteBot2
             return Task.CompletedTask;
         }
 
-        async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
             if (_server.GetUser(arg3.UserId).IsBot) return; //Task.CompletedTask;
 
@@ -405,7 +405,7 @@ namespace DiscordFortniteBot2
                 {
                     ItemType itemType = player.inventory[player.equipped].type;
 
-                    player.stats.totalItemsUsed++;
+                    player.stats.UpdateStat(PlayerStats.Stat.ItemsUsed);
 
                     switch (itemType)
                     {
@@ -489,7 +489,7 @@ namespace DiscordFortniteBot2
                         {
                             player.materials += 10; //give them materials
                             player.briefing += "\n" + "You chopped down a tree and got +10 materials.";
-                            player.stats.totalTreesCut++;
+                            player.stats.UpdateStat(PlayerStats.Stat.TreesCut);
                             map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //the tree turns into grass
                         }
                         break;
@@ -507,7 +507,7 @@ namespace DiscordFortniteBot2
                     player.briefing += "\n" + $"The storm will appear in {turnsTillTheThingHappens} turn{plural}.";
                 }
 
-                player.stats.totalTurnsAlive++;
+                player.stats.UpdateStat(PlayerStats.Stat.TurnsAlive);
             }
         }
 
@@ -865,7 +865,7 @@ namespace DiscordFortniteBot2
                             {
                                 player.inventory[player.turnIndex] = new Item(); //remove the item from the players inventory
                                 await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //change the turn message because the inventory changed 5head
-                                player.stats.totalItemsDropped++;
+                                player.stats.UpdateStat(PlayerStats.Stat.ItemsDropped);
                             }
                             break;
                     }
@@ -935,7 +935,7 @@ namespace DiscordFortniteBot2
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY))
                     {
                         player.briefing += "\n" + "You shot and destroyed a wall.";
-                        player.stats.totalWallsDestroyed++;
+                        player.stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
                         return;
                     }
 
@@ -1030,44 +1030,34 @@ namespace DiscordFortniteBot2
 
         string GetTopRankingList()
         {
-            //Abandon Hope All Ye Who Enter Here
-
             List<Player> ap = new List<Player>(); //ap: "all players"
             ap.AddRange(players);
             ap.AddRange(deadPlayers);
 
-            //all ints represent the index of a value (rather than creating a bunch of player objects)
-            int mostDamageTaken = ap.IndexOf(ap.OrderBy(o => o.stats.totalDmgTaken).FirstOrDefault());
-            int mostDamageHealed = ap.IndexOf(ap.OrderBy(o => o.stats.totalDmgHealed).FirstOrDefault());
-            int mostTilesMoved = ap.IndexOf(ap.OrderBy(o => o.stats.totalTilesMoved).FirstOrDefault());
-            int mostTurnsAlive = ap.IndexOf(ap.OrderBy(o => o.stats.totalTurnsAlive).FirstOrDefault());
-            int mostWallsPlaced = ap.IndexOf(ap.OrderBy(o => o.stats.totalWallsPlaced).FirstOrDefault());
-            int mostWallsDestroyed = ap.IndexOf(ap.OrderBy(o => o.stats.totalWallsDestroyed).FirstOrDefault());
-            int mostItemsUsed = ap.IndexOf(ap.OrderBy(o => o.stats.totalItemsUsed).FirstOrDefault());
-            int mostItemsLooted = ap.IndexOf(ap.OrderBy(o => o.stats.totalItemsLooted).FirstOrDefault());
-            int mostItemsDropped = ap.IndexOf(ap.OrderBy(o => o.stats.totalItemsDropped).FirstOrDefault());
-            int mostTreesCut = ap.IndexOf(ap.OrderBy(o => o.stats.totalTreesCut).FirstOrDefault());
-            int mostTrapsPlaced = ap.IndexOf(ap.OrderBy(o => o.stats.totalTrapsPlaced).FirstOrDefault());
-            int mostTrapsHit = ap.IndexOf(ap.OrderBy(o => o.stats.totalTrapsHit).FirstOrDefault());
-            int mostPlayersKilled = ap.IndexOf(ap.OrderBy(o => o.stats.totalPlayersKilled).FirstOrDefault());
-            //yeah sorry there is no better way to do this (that remains readable)
-            //haha unless?
+            string builder = "```";
 
-            return "```" +
-                $"Most damage taken.....{ap[mostDamageTaken].discordUser.Username}: {ap[mostDamageTaken].stats.totalDmgTaken}\n" +
-                $"Most damage healed....{ap[mostDamageHealed].discordUser.Username}: {ap[mostDamageHealed].stats.totalDmgHealed}\n" +
-                $"Most tiles moved......{ap[mostTilesMoved].discordUser.Username}: {ap[mostTilesMoved].stats.totalTilesMoved}\n" +
-                $"Most turns alive......{ap[mostTurnsAlive].discordUser.Username}: {ap[mostTurnsAlive].stats.totalTilesMoved}\n" +
-                $"Most walls placed.....{ap[mostWallsPlaced].discordUser.Username}: {ap[mostWallsPlaced].stats.totalWallsPlaced}\n" +
-                $"Most walls destroyed..{ap[mostWallsDestroyed].discordUser.Username}: {ap[mostWallsDestroyed].stats.totalWallsDestroyed}\n" +
-                $"Most items used.......{ap[mostItemsUsed].discordUser.Username}: {ap[mostItemsUsed].stats.totalItemsUsed}\n" +
-                $"Most items looted.....{ap[mostItemsLooted].discordUser.Username}: {ap[mostItemsLooted].stats.totalItemsLooted}\n" +
-                $"Most items dropped....{ap[mostItemsDropped].discordUser.Username}: {ap[mostItemsDropped].stats.totalItemsDropped}\n" +
-                $"Most trees cut........{ap[mostTreesCut].discordUser.Username}: {ap[mostTreesCut].stats.totalTreesCut}\n" +
-                $"Most traps placed.....{ap[mostTrapsPlaced].discordUser.Username}: {ap[mostTrapsPlaced].stats.totalTrapsPlaced}\n" +
-                $"Most traps hit........{ap[mostTrapsHit].discordUser.Username}: {ap[mostTrapsHit].stats.totalTrapsHit}\n" +
-                $"Most players killed...{ap[mostPlayersKilled].discordUser.Username}: {ap[mostPlayersKilled].stats.totalPlayersKilled}\n" +
-                "```";
+            foreach(PlayerStats.Stat stat in Enum.GetValues(typeof(PlayerStats.Stat)))
+            {
+
+                int max = 0;
+                string maxName = "";
+
+                foreach(Player player in ap)
+                {
+                    int statVal = player.stats.GetStat(stat);
+                    if (max < statVal)
+                    {
+                        max = statVal;
+                        maxName = player.discordUser.Username;
+                    }
+                }
+
+                builder += "Total " + PlayerStats.GetStatName(stat);
+                builder += string.Concat(Enumerable.Repeat(".", 23 - builder.Length));
+                builder += $"{maxName}: {max}\n";
+            }
+
+            return builder;
         }
 
         #endregion

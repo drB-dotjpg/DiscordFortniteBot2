@@ -66,7 +66,7 @@ namespace DiscordFortniteBot2
                             && map.mapGrid[y, x + 1].Type != TileType.Wall)
                         {
                             x++;
-                            stats.totalTilesMoved++;
+                            stats.UpdateStat(PlayerStats.Stat.TilesMoved);
                         }
 
                         break;
@@ -76,7 +76,7 @@ namespace DiscordFortniteBot2
                             && map.mapGrid[y, x - 1].Type != TileType.Wall)
                         {
                             x--;
-                            stats.totalTilesMoved++;
+                            stats.UpdateStat(PlayerStats.Stat.TilesMoved);
                         }
 
                         break;
@@ -86,7 +86,7 @@ namespace DiscordFortniteBot2
                             && map.mapGrid[y - 1, x].Type != TileType.Wall)
                         {
                             y--;
-                            stats.totalTilesMoved++;
+                            stats.UpdateStat(PlayerStats.Stat.TilesMoved);
                         }
 
                         break;
@@ -96,7 +96,7 @@ namespace DiscordFortniteBot2
                             && map.mapGrid[y + 1, x].Type != TileType.Wall)
                         {
                             y++;
-                            stats.totalTilesMoved++;
+                            stats.UpdateStat(PlayerStats.Stat.TilesMoved);
                         }
 
                         break;
@@ -106,7 +106,7 @@ namespace DiscordFortniteBot2
                     TakeDamage(map.mapGrid[y, x].trap.trapType.effectVal);
                     map.mapGrid[y, x].trap = null;
 
-                    stats.totalTrapsHit++;
+                    stats.UpdateStat(PlayerStats.Stat.TrapsHit);
                 }
             }
 
@@ -126,7 +126,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y, x + 1] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall on your right.";
-                        stats.totalWallsPlaced++;
+                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -140,7 +140,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y, x - 1] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall on your left.";
-                        stats.totalWallsPlaced++;
+                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -154,7 +154,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y - 1, x] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall upward.";
-                        stats.totalWallsPlaced++;
+                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -168,7 +168,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y + 1, x] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall downward.";
-                        stats.totalWallsPlaced++;
+                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -215,7 +215,7 @@ namespace DiscordFortniteBot2
 
             briefing += "\n" + $"Used {item.name} and healed {health - oldHeath} health and {shield - oldShield} shield.";
 
-            stats.totalDmgHealed += item.effectVal;
+            stats.UpdateStat(PlayerStats.Stat.DamageHealed, item.effectVal);
         }
 
         public bool Loot(Item newItem) //returns true if the loot was successful
@@ -237,7 +237,7 @@ namespace DiscordFortniteBot2
 
                     briefing += "\n" + $"You picked up {a}{newItem.name}.";
 
-                    stats.totalItemsLooted++;
+                    stats.UpdateStat(PlayerStats.Stat.ItemsLooted);
 
                     break;
                 }
@@ -302,7 +302,7 @@ namespace DiscordFortniteBot2
                 RemoveItem(equipped);
             }
 
-            stats.totalTrapsPlaced++;
+            stats.UpdateStat(PlayerStats.Stat.TrapsPlaced);
         }
 
         public void TakeDamage(int amount)
@@ -319,7 +319,7 @@ namespace DiscordFortniteBot2
             }
             health -= amount;
 
-            stats.totalDmgTaken += amount;
+            stats.UpdateStat(PlayerStats.Stat.DamageTaken, amount);
         }
 
         private void RemoveItem(int slot)
