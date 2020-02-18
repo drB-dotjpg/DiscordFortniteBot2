@@ -6,10 +6,11 @@ namespace DiscordFortniteBot2
 {
     public struct Tile //tiles represent a space on the map
     {
-        public TileType Type { get; set; }
+        public TileType Type;
+
         public Item[] Items { get; }
 
-        public Trap trap { get; set; }
+        public Trap trap;
 
         public Tile(TileType type)
         {

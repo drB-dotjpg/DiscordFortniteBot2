@@ -20,15 +20,14 @@ namespace DiscordFortniteBot2
         public const int MAPHEIGHT = 40;
 
         //Amount of things that will be generated
-        const int houseCount = 18;
-        const int treeCount = 150;
-        const int riverCount = 3; //river count is randomized, this is a cap to the amount of rivers generated.
+        private const int houseCount = MAPWIDTH * MAPHEIGHT / 89;
+        private const int treeCount = MAPWIDTH * MAPHEIGHT / 11;
+        private const int riverCount = (MAPWIDTH * MAPHEIGHT / 800) + 1; //river count is randomized, this is a cap to the amount of rivers generated.
 
-
+        
         public Tile[,] mapGrid = new Tile[MAPWIDTH, MAPHEIGHT];
 
-        Random random = new Random();
-
+        private Random random = new Random();
         private StormGenerator stormGen;
 
         public Map(bool debug)
@@ -37,7 +36,7 @@ namespace DiscordFortniteBot2
             stormGen = new StormGenerator(MAPWIDTH, MAPHEIGHT);
         }
 
-        void GenerateMap(bool debug)
+        private void GenerateMap(bool debug)
         {
             //Fill the map with grass tiles to start
             for (int i = 0; i < MAPWIDTH; i++)
@@ -61,7 +60,7 @@ namespace DiscordFortniteBot2
             if (debug) PrintMap();
         }
 
-        void RandomlyAddTile(int amount, TileType type)
+        private void RandomlyAddTile(int amount, TileType type)
         {
             int numberLeft = amount;
             while (numberLeft > 0)
@@ -78,7 +77,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        void GenerateRiver()
+        private void GenerateRiver()
         {
             bool vertical = random.Next(2) == 0; // 50% chance the river is vertically facing
             int noise = random.Next(5); //how smooth the river is
@@ -133,7 +132,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        void GenerateBuildings()
+        private void GenerateBuildings()
         {
             int numberLeft = houseCount;
             while (numberLeft > 0)
@@ -196,7 +195,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        Item[] GenerateItems() //Generate items for chests
+        private Item[] GenerateItems() //Generate items for chests
         {
             Item[] items = new Item[5];
 
@@ -226,7 +225,7 @@ namespace DiscordFortniteBot2
             }
         }
 
-        Tile[,] GetMapArea(int x, int y) //get info on 7x7 area around the map. x and y represent the center of the 7x7 grid
+        private Tile[,] GetMapArea(int x, int y) //get info on 7x7 area around the map. x and y represent the center of the 7x7 grid
         {
             Tile[,] mapArea = new Tile[7, 7];
 
@@ -372,7 +371,7 @@ namespace DiscordFortniteBot2
 
         public void UpdateStorm(int turn)
         {
-            if (turn >= stormGen.delay + stormGen.speed) return;
+            if (turn >= StormGenerator.DELAY + StormGenerator.SPEED) return;
 
             bool[,] storm = stormGen.GetStormCircle(turn);
 
@@ -384,10 +383,5 @@ namespace DiscordFortniteBot2
                 }
             }
         }
-
-        public int GetStormDelay() => stormGen.delay;
-
-        public int GetStormSpeed() => stormGen.speed;
-
     }
 }

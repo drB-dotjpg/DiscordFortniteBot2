@@ -496,13 +496,13 @@ namespace DiscordFortniteBot2
 
                 }
 
-                if (turn == map.GetStormDelay()) //warn players about the storm
+                if (turn == StormGenerator.DELAY) //warn players about the storm
                 {
-                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {map.GetStormSpeed()} turns. Check your world map ({Emotes.infoButton} button) to see storm progress.";
+                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {StormGenerator.SPEED} turns. Check your world map ({Emotes.infoButton} button) to see storm progress.";
                 }
-                else if (map.GetStormDelay() - 5 <= turn && turn < map.GetStormDelay())
+                else if (StormGenerator.DELAY - 5 <= turn && turn < StormGenerator.DELAY)
                 {
-                    int turnsTillTheThingHappens = map.GetStormDelay() - turn;
+                    int turnsTillTheThingHappens = StormGenerator.DELAY - turn;
                     string plural = turnsTillTheThingHappens > 1 ? "s" : "";
                     player.briefing += "\n" + $"The storm will appear in {turnsTillTheThingHappens} turn{plural}.";
                 }

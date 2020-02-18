@@ -7,32 +7,31 @@ namespace DiscordFortniteBot2
 {
     public class Player
     {
+        //player user data
         public SocketUser discordUser { get; }
-        public PlayerStats stats { get; set; } = new PlayerStats();
+        public PlayerStats stats = new PlayerStats();
 
-        public int health { get; set; }
-        public int shield { get; set; }
-
-        public Item[] inventory { get; set; } = new Item[5];
-        public int equipped { get; set; }
-
-        public int materials { get; set; } //building materials
-        public int x { get; set; }
-        public int y { get; set; }
+        //player game data
+        public int health;
+        public int shield;
+        public Item[] inventory = new Item[5];
+        public int equipped;
+        public int materials; //building materials
+        public int x;
+        public int y;
         public Emoji icon { get; }
 
-        public List<RestUserMessage> currentMessages { get; set; }
-        public bool ready { get; set; }
-        public string briefing { get; set; } //briefing is edited during a turn while currentBriefing keeps its value
-        public string currentBriefing { get; set; }
-        public int inactiveTurns { get; set; }
-
-        public Action turnAction { get; set; }
-        public Direction turnDirection { get; set; }
-        public int turnIndex { get; set; }
-        public int movementSpeed { get; set; }
-
-        public RestUserMessage turnMessage { get; set; }
+        //player state data
+        public List<RestUserMessage> currentMessages;
+        public bool ready;
+        public string briefing; //briefing is edited during a turn while currentBriefing keeps its value
+        public string currentBriefing;
+        public int inactiveTurns;
+        public Action turnAction;
+        public Direction turnDirection;
+        public int turnIndex;
+        public int movementSpeed;
+        public RestUserMessage turnMessage;
 
         public Player(SocketUser discordUser, Emoji icon)
         {
