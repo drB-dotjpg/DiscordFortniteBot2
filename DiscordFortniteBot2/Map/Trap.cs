@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DiscordFortniteBot2
+﻿namespace DiscordFortniteBot2
 {
     public class Trap
     {

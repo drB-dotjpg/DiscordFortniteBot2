@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -1049,6 +1048,10 @@ namespace DiscordFortniteBot2
                     {
                         max = statVal;
                         maxName = player.discordUser.Username;
+                    }
+                    else if (max == statVal)
+                    {
+                        maxName += ", " + player.discordUser.Username;
                     }
                 }
 

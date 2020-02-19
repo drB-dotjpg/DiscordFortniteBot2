@@ -42,6 +42,7 @@ namespace DiscordFortniteBot2
             shield = 0;
             equipped = 0;
             inactiveTurns = 0;
+            movementSpeed = 1;
 
             x = -1;
             y = -1;
