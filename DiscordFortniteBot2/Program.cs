@@ -511,23 +511,23 @@ namespace DiscordFortniteBot2
 
         void PlacePlayers()
         {
-            const int CENTER_LIMIT = 8; //the player will spawn this many tiles away from the spawn
-            const int PLAYER_DISTANCE = 7; //the player will spawn this many tiles away from other players
+            int centerLimit = Math.Min(map.width, map.height) / 5; //the player will spawn this many tiles away from the spawn
+            int playerDistance = Math.Min(map.width, map.height) / 6; //the player will spawn this many tiles away from other players
 
             Random random = new Random();
 
             int i = 0;
             while (i < players.Count())
             {
-                int x = random.Next(Map.MAPWIDTH); //choose a random spot on the map
-                int y = random.Next(Map.MAPHEIGHT);
+                int x = random.Next(map.height); //choose a random spot on the map
+                int y = random.Next(map.width);
 
                 //if that spot is on a wall
                 if (map.mapGrid[y, x].Type == TileType.Wall)
                     continue; //do it again we can't be having that
 
                 //if the spot is near the center of the map
-                if (Math.Abs(x - Map.MAPHEIGHT / 2) <= CENTER_LIMIT && Math.Abs(y - Map.MAPHEIGHT / 2) <= CENTER_LIMIT)
+                if (Math.Abs(x - map.height / 2) <= centerLimit && Math.Abs(y - map.height / 2) <= centerLimit)
                     continue; //do it again we can't be having that
 
                 //if the player is near any other players
@@ -537,7 +537,7 @@ namespace DiscordFortniteBot2
                     if (player.Equals(players[i])) continue;
                     if (player.x == -1 || player.y == -1) continue;
 
-                    nearPlayer = Math.Abs(x - player.x) <= PLAYER_DISTANCE && Math.Abs(y - player.y) <= PLAYER_DISTANCE;
+                    nearPlayer = Math.Abs(x - player.x) <= playerDistance && Math.Abs(y - player.y) <= playerDistance;
                 }
                 if (nearPlayer) continue; //do it again we can't be having that
 
@@ -925,8 +925,8 @@ namespace DiscordFortniteBot2
             {
                 int newX = i * xDir;
                 int newY = i * yDir;
-                if (player.x + newX >= 0 && player.x + newX < Map.MAPWIDTH
-                && player.y + newY >= 0 && player.y + newY < Map.MAPHEIGHT) //Check if the tile to be checked is within the bounds of the array
+                if (player.x + newX >= 0 && player.x + newX < map.width
+                && player.y + newY >= 0 && player.y + newY < map.height) //Check if the tile to be checked is within the bounds of the array
                 {
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY))
                     {

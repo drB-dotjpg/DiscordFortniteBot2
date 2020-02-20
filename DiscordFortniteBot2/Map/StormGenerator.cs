@@ -98,7 +98,7 @@ namespace DiscordFortniteBot2
                 if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
                     continue;
 
-                storm[xGrid, yGrid] = false;
+                storm[yGrid, xGrid] = false;
             }
 
             FloodFill(x, y, storm); //Fill in the circle

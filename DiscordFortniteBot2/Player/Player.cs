@@ -62,7 +62,7 @@ namespace DiscordFortniteBot2
                 switch (turnDirection)
                 {
                     case Direction.Right:
-                        if (x < Map.MAPWIDTH - 1
+                        if (x < map.width - 1
                             && map.mapGrid[y, x + 1].Type != TileType.Wall)
                         {
                             x++;
@@ -92,7 +92,7 @@ namespace DiscordFortniteBot2
                         break;
 
                     case Direction.Down:
-                        if (y < Map.MAPHEIGHT - 1
+                        if (y < map.height - 1
                             && map.mapGrid[y + 1, x].Type != TileType.Wall)
                         {
                             y++;
@@ -120,7 +120,7 @@ namespace DiscordFortniteBot2
             switch (turnDirection)
             {
                 case Direction.Right:
-                    if (x < Map.MAPWIDTH - 1
+                    if (x < map.width - 1
                         && map.mapGrid[y, x + 1].Type != TileType.Wall)
                     {
                         materials -= 10;
@@ -162,7 +162,7 @@ namespace DiscordFortniteBot2
                     break;
 
                 case Direction.Down:
-                    if (y < Map.MAPHEIGHT - 1
+                    if (y < map.height - 1
                         && map.mapGrid[y + 1, x].Type != TileType.Wall)
                     {
                         materials -= 10;
@@ -252,7 +252,7 @@ namespace DiscordFortniteBot2
             switch (turnDirection)
             {
                 case Direction.Right:
-                    if (x < Map.MAPWIDTH - 1
+                    if (x < map.width - 1
                         && map.mapGrid[y, x + 1].Type != TileType.Wall && map.mapGrid[x + 1, y].Type != TileType.Water)
                     {
                         map.mapGrid[y, x + 1].trap = trap;
@@ -274,7 +274,7 @@ namespace DiscordFortniteBot2
                     break;
 
                 case Direction.Up:
-                    if (y < Map.MAPHEIGHT - 1
+                    if (y < map.height - 1
                         && map.mapGrid[y - 1, x].Type != TileType.Wall && map.mapGrid[x, y - 1].Type != TileType.Water)
                     {
                         map.mapGrid[y - 1, x].trap = trap;

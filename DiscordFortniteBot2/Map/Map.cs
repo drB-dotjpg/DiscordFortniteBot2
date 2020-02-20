@@ -16,32 +16,43 @@ namespace DiscordFortniteBot2
 
     public class Map
     {
-        public const int MAPWIDTH = 40;
-        public const int MAPHEIGHT = 40;
+        public int width { get; }
+        public int height { get; }
 
         //Amount of things that will be generated
-        private const int houseCount = MAPWIDTH * MAPHEIGHT / 89;
-        private const int treeCount = MAPWIDTH * MAPHEIGHT / 11;
-        private const int riverCount = (MAPWIDTH * MAPHEIGHT / 800) + 1; //river count is randomized, this is a cap to the amount of rivers generated.
+        private int houseCount;
+        private int treeCount;
+        private int riverCount;
 
-        
-        public Tile[,] mapGrid = new Tile[MAPWIDTH, MAPHEIGHT];
+
+        public Tile[,] mapGrid;
 
         private Random random = new Random();
         private StormGenerator stormGen;
 
         public Map(bool debug, int numPlayers)
         {
+            int baseMapSize = Math.Max(20, (int)(25 / Math.Log(7) * Math.Log(numPlayers - 1) + 20));
+            int modifier = random.Next(baseMapSize / 2) - baseMapSize / 4;
+            width = baseMapSize + modifier;
+            height = baseMapSize - modifier;
+
+            houseCount = width * height / 89;
+            treeCount = width * height / 11;
+            riverCount = (width * height / 800) + 1; //river count is randomized, this is a cap to the amount of rivers generated.
+
+            mapGrid = new Tile[width, height];
+
             GenerateMap(debug);
-            stormGen = new StormGenerator(MAPWIDTH, MAPHEIGHT, numPlayers);
+            stormGen = new StormGenerator(width, height, numPlayers);
         }
 
         private void GenerateMap(bool debug)
         {
             //Fill the map with grass tiles to start
-            for (int i = 0; i < MAPWIDTH; i++)
+            for (int i = 0; i < width; i++)
             {
-                for (int j = 0; j < MAPHEIGHT; j++)
+                for (int j = 0; j < height; j++)
                 {
                     mapGrid[i, j] = new Tile(TileType.Grass);
                 }
@@ -65,8 +76,8 @@ namespace DiscordFortniteBot2
             int numberLeft = amount;
             while (numberLeft > 0)
             {
-                int x = random.Next(0, MAPWIDTH);
-                int y = random.Next(0, MAPHEIGHT);
+                int x = random.Next(0, width);
+                int y = random.Next(0, height);
 
                 //If the randomly chosen tile is a grass tile, place new item, otherwise try again.
                 if (mapGrid[x, y].Type == TileType.Grass)
@@ -84,12 +95,12 @@ namespace DiscordFortniteBot2
 
             if (vertical)
             {
-                int width = (int)Math.Ceiling(MAPWIDTH / 15.0); //get how wide the river is based on map size
-                int drawPoint = random.Next(MAPWIDTH - width); //the point on the x axis the river starts drawing on
+                int size = (int)Math.Ceiling(width / 15.0); //get how wide the river is based on map size
+                int drawPoint = random.Next(width - size); //the point on the x axis the river starts drawing on
 
-                for (int y = 0; y < MAPHEIGHT; y++) //for each column of map tiles
+                for (int y = 0; y < height; y++) //for each column of map tiles
                 {
-                    for (int i = 0; i < width - 1; i++) //loop iterates the number of times width is worth.
+                    for (int i = 0; i < size - 1; i++) //loop iterates the number of times width is worth.
                     {
                         mapGrid[drawPoint + i, y] = new Tile(TileType.Water);
                     }
@@ -102,18 +113,18 @@ namespace DiscordFortniteBot2
                             ? drawPoint + 1
                             : drawPoint - 1;
 
-                        if (drawPoint > MAPWIDTH - width || drawPoint < 0) drawPoint = oldpoint;
+                        if (drawPoint > width - size || drawPoint < 0) drawPoint = oldpoint;
                     }
                 }
             }
             else //code below is very similar to above
             {
-                int height = (int)Math.Ceiling(MAPHEIGHT / 15.0);
-                int drawPoint = random.Next(MAPWIDTH - height);
+                int size = (int)Math.Ceiling(height / 15.0);
+                int drawPoint = random.Next(height - size);
 
-                for (int x = 0; x < MAPHEIGHT; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    for (int i = 0; i < height - 1; i++)
+                    for (int i = 0; i < size - 1; i++)
                     {
                         mapGrid[x, drawPoint + i] = new Tile(TileType.Water);
                     }
@@ -126,7 +137,7 @@ namespace DiscordFortniteBot2
                             ? drawPoint + 1
                             : drawPoint - 1;
 
-                        if (drawPoint > MAPHEIGHT - height || drawPoint < 0) drawPoint = oldPoint;
+                        if (drawPoint > height - size || drawPoint < 0) drawPoint = oldPoint;
                     }
                 }
             }
@@ -145,15 +156,15 @@ namespace DiscordFortniteBot2
                 {
                     safe = true;
 
-                    x = random.Next(1, MAPWIDTH - 1);  //Pick random set of coords to generate the building at
-                    y = random.Next(1, MAPHEIGHT - 1);
+                    x = random.Next(1, width - 1);  //Pick random set of coords to generate the building at
+                    y = random.Next(1, height - 1);
 
                     //Check if the building can generate (cannot generate on chests or walls)
                     for (int hor = x; hor < x + 2; hor++)
                     {
                         for (int vert = y; vert < y + 2; vert++)
                         {
-                            if (mapGrid[hor, vert].Type == TileType.Chest 
+                            if (mapGrid[hor, vert].Type == TileType.Chest
                                 || mapGrid[hor, vert].Type == TileType.Wall
                                 || mapGrid[hor, vert].Type == TileType.Water)
                                 safe = false;
@@ -182,10 +193,10 @@ namespace DiscordFortniteBot2
         {
             while (true)
             {
-                int randomX = random.Next(0, MAPWIDTH);
-                int randomY = random.Next(0, MAPHEIGHT);
+                int randomX = random.Next(0, width);
+                int randomY = random.Next(0, height);
 
-                if(mapGrid[randomY,randomX].Type == TileType.Grass)
+                if (mapGrid[randomY, randomX].Type == TileType.Grass)
                 {
                     mapGrid[randomY, randomX] = new Tile(GenerateItems());
                     Console.WriteLine($"Supply drop dropped at ({randomY},{randomX})");
@@ -199,7 +210,7 @@ namespace DiscordFortniteBot2
         {
             Item[] items = new Item[5];
 
-            int amount = random.Next(items.Length/2) + 1;
+            int amount = random.Next(items.Length / 2) + 1;
 
             for (int i = 0; i < items.Length; i++)
             {
@@ -215,9 +226,9 @@ namespace DiscordFortniteBot2
 
         void PrintMap() //debug function
         {
-            for (int i = 0; i < MAPWIDTH; i++)
+            for (int i = 0; i < width; i++)
             {
-                for (int j = 0; j < MAPHEIGHT; j++)
+                for (int j = 0; j < height; j++)
                 {
                     Console.Write((int)mapGrid[i, j].Type);
                 }
@@ -233,10 +244,10 @@ namespace DiscordFortniteBot2
             int yTrack = y - 3;
 
             int xCap = xTrack + 7; //the limit to how far the scan can go.
-            if (xCap >= MAPWIDTH) xCap = MAPWIDTH - 1; //make sure its not out of bounds.
+            if (xCap >= width) xCap = width - 1; //make sure its not out of bounds.
 
             int yCap = yTrack + 7;
-            if (yCap >= MAPHEIGHT) yCap = MAPHEIGHT - 1;
+            if (yCap >= height) yCap = height - 1;
 
             int yMap = 0;
             while (yMap < 7) //start the scan.
@@ -333,9 +344,9 @@ namespace DiscordFortniteBot2
         {
             string mapString = $"World Map (1/2 scale)\n{(player != null ? "0 = You | " : "")}. = Ground | # = Water | ! = Storm\n\n";
 
-            for (int i = 0; i < MAPWIDTH; i += 2)
+            for (int i = 0; i < width; i += 2)
             {
-                for (int j = 0; j < MAPHEIGHT; j += 2)
+                for (int j = 0; j < height; j += 2)
                 {
                     if (player != null)
                     {
@@ -375,11 +386,12 @@ namespace DiscordFortniteBot2
 
             bool[,] storm = stormGen.GetStormCircle(turn);
 
-            for (int i = 0; i < MAPWIDTH; i++)
+            for (int i = 0; i < width; i++)
             {
-                for (int j = 0; j < MAPHEIGHT; j++)
+                for (int j = 0; j < height; j++)
                 {
-                    if (storm[j, i]) mapGrid[j,i] = new Tile(TileType.Storm);
+                    if (storm[j, i]) 
+                        mapGrid[i, j] = new Tile(TileType.Storm);
                 }
             }
         }
