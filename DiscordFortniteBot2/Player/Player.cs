@@ -220,6 +220,7 @@ namespace DiscordFortniteBot2
 
         public bool Loot(Item newItem) //returns true if the loot was successful
         {
+            if (newItem.type == ItemType.Empty) return true;
             bool canLoot = false;
 
             for (int i = 0; i < inventory.Length; i++)

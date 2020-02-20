@@ -79,6 +79,8 @@ namespace DiscordFortniteBot2
 
         public static Emoji sprintButton = new Emoji("🚶");
         public static Emoji sprintFastButton = new Emoji("🏃‍♂️");
+
+        public static Emoji lootAllButton = new Emoji("↕️");
     }
 
     //Items that can be created and looted in game

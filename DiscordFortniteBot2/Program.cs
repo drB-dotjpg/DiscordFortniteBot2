@@ -476,17 +476,31 @@ namespace DiscordFortniteBot2
                     case Action.Loot:
                         if (map.mapGrid[player.y, player.x].Type == TileType.Chest) //if the player is on a chest
                         {
+                            if(player.turnIndex == 5) //Check if player is looting all
+                            {
+                                int i = 0;
+                                while(player.Loot(map.mapGrid[player.y, player.x].Items[i]))
+                                {
+                                    map.mapGrid[player.y, player.x].Items[i] = new Item(); //make the chest slot empty (since the item was taken you know?)
+
+                                    if (map.mapGrid[player.y, player.x].IsEmpty()) map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //remove the chest if its empty
+
+                                    i++;
+                                    if (i >= 4) break;
+                                }
+                                break;
+                            }
                             if (player.Loot(map.mapGrid[player.y, player.x].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
                             {
                                 map.mapGrid[player.y, player.x].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
 
-                                if (map.mapGrid[player.y, player.x].IsEmpty()) map.mapGrid[player.x, player.y] = new Tile(TileType.Grass); //remove the chest if its empty
+                                if (map.mapGrid[player.y, player.x].IsEmpty()) map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //remove the chest if its empty
                             }
                         }
                         else if (map.mapGrid[player.y, player.x].Type == TileType.Tree) //if the player is on a tree (they climbed it)
                         {
-                            player.materials += 10; //give them materials
-                            player.briefing += "\n" + "You chopped down a tree and got +10 materials.";
+                            player.materials += 25; //give them materials
+                            player.briefing += "\n" + "You chopped down a tree and got +25 materials.";
                             player.stats.UpdateStat(PlayerStats.Stat.TreesCut);
                             map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //the tree turns into grass
                         }
@@ -780,6 +794,7 @@ namespace DiscordFortniteBot2
                             {
                                 var lootMessage = await player.discordUser.SendMessageAsync(null, false, GetLootMessage(player)) as RestUserMessage; //follow up asking for the slot number
                                 await lootMessage.AddReactionsAsync(Emotes.slotEmojis);
+                                await lootMessage.AddReactionAsync(Emotes.lootAllButton);
                                 player.currentMessages.Add(lootMessage);
                             }
                             else if (map.mapGrid[player.y, player.x].Type == TileType.Tree)
@@ -831,6 +846,17 @@ namespace DiscordFortniteBot2
                 }
             }
 
+            if(emote.Name == Emotes.lootAllButton.Name) //Check for loot all first
+            {
+                player.ready = true; //commit loot next turn
+                var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                player.currentMessages.Add(lootConfirmMessage);
+
+                player.turnIndex = 5;
+
+                return;
+            }
+            
             for (int i = 0; i < Emotes.slotEmojis.Length; i++) //if the emotes are any of the number emotes
             {
                 if (emote.Name == Emotes.slotEmojis[i].Name)
