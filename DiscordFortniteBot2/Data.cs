@@ -22,7 +22,7 @@ namespace DiscordFortniteBot2
     //Player turn data
     public enum Action
     {
-        Move, Use, Build, Loot, Equip, Drop, None
+        Move, Use, Build, Loot, Equip, Drop, Info, None
     }
     public enum Direction
     {
@@ -73,12 +73,12 @@ namespace DiscordFortniteBot2
             new Emoji("🔨"),
             new Emoji("💼"),
             new Emoji("🔄"),
-            new Emoji("🗑️")
+            new Emoji("🗑️"),
+            new Emoji("ℹ")
         };
 
         public static Emoji sprintButton = new Emoji("🚶");
         public static Emoji sprintFastButton = new Emoji("🏃‍♂️");
-        public static Emoji infoButton = new Emoji("ℹ");
     }
 
     //Items that can be created and looted in game

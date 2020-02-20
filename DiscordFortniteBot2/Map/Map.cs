@@ -199,7 +199,7 @@ namespace DiscordFortniteBot2
         {
             Item[] items = new Item[5];
 
-            int amount = random.Next(items.Length);
+            int amount = random.Next(items.Length/2) + 1;
 
             for (int i = 0; i < items.Length; i++)
             {

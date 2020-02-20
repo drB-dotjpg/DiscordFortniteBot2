@@ -348,7 +348,6 @@ namespace DiscordFortniteBot2
                     string actionPrompt = "Choose an action: (Remove reaction to pick a different action)\n👣 Walk | ✋ Use Item | 🔨 Build Wall | 💼 Loot Chest/Tree | 🔄 Equip Item | 🗑️ Drop Item | ℹ World map/Map key/Player list.";
                     var actionMessage = await player.discordUser.SendMessageAsync(actionPrompt) as RestUserMessage;
                     await actionMessage.AddReactionsAsync(Emotes.actionEmojis);
-                    await actionMessage.AddReactionAsync(Emotes.infoButton);
                     player.currentMessages.Add(actionMessage); //add it to the players current messages so the reaction handler accepts this message
                 }
 
@@ -497,7 +496,7 @@ namespace DiscordFortniteBot2
 
                 if (turn == StormGenerator.DELAY) //warn players about the storm
                 {
-                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {map.GetStormSpeed()} turns. Check your world map ({Emotes.infoButton} button) to see storm progress.";
+                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {map.GetStormSpeed()} turns. Check your world map ({Emotes.actionEmojis[(int)Action.Info]} button) to see storm progress.";
                 }
                 else if (StormGenerator.DELAY - 5 <= turn && turn < StormGenerator.DELAY)
                 {
@@ -714,13 +713,6 @@ namespace DiscordFortniteBot2
             //if the message is the last active message, then continue
             if (player.currentMessages.Last().Id != reaction.MessageId) return;
 
-            if (reaction.Emote.Name == Emotes.infoButton.Name) //if the info button was pressed
-            {
-                var infoMessage = await player.discordUser.SendMessageAsync($"```{map.GetWorldMapString(player)}```", false, GetHelpMessage()); //send the info menu
-                player.currentMessages.Add(infoMessage as RestUserMessage);
-                return;
-            }
-
             if (reaction.Emote.Name == Emotes.sprintFastButton.Name) //if fast sprinting button is pressed
             {
                 player.movementSpeed = 3; //the player is sprinting (wow)
@@ -814,6 +806,11 @@ namespace DiscordFortniteBot2
                             await dropMessage.AddReactionsAsync(Emotes.slotEmojis);
                             player.currentMessages.Add(dropMessage);
                             break;
+
+                        case Action.Info:
+                            var infoMessage = await player.discordUser.SendMessageAsync($"```{map.GetWorldMapString(player)}```", false, GetHelpMessage()); //send the info menu
+                            player.currentMessages.Add(infoMessage as RestUserMessage);
+                            break;
                     }
 
                     return;
@@ -884,7 +881,7 @@ namespace DiscordFortniteBot2
                 if (emote.Name == reaction.Emote.Name) isActionEmote = true;
             }
 
-            if (!isActionEmote && reaction.Emote.Name != Emotes.infoButton.Name) return; //if the emote is not in the action emote array (and its not the info button) then don't do anything
+            if (!isActionEmote) return; //if the emote is not in the action emote array then don't do anything
 
             Player player = GetPlayerById(reaction.UserId);
 
