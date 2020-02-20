@@ -6,8 +6,7 @@ namespace DiscordFortniteBot2
 {
     public class StormGenerator
     {
-        public const int DELAY = 35; //how many turns before the storm starts closing in
-        public const int SPEED = 150; //how many turns it takes to close fully
+        public const int DELAY = 30; //how many turns before the storm starts closing in
         private const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
         private const float PRECISION = .01f; //keep at 0.01f or lower
 
@@ -15,9 +14,10 @@ namespace DiscordFortniteBot2
         private int height; //map height
         private int x; //where the storm is centered on
         private int y;
+        private int speed;
         private int[] turnSizes; //how big the storm is on the index representing the turn number
 
-        public StormGenerator(int width, int height)
+        public StormGenerator(int width, int height, int numPlayers)
         {
             this.width = width; //set width and height
             this.height = height;
@@ -26,6 +26,11 @@ namespace DiscordFortniteBot2
             x = rand.Next(width / 2) + width / 4;
             y = rand.Next(height / 2) + height / 4;
 
+            if (numPlayers > 1)
+                speed = (int)(40 / Math.Log(7) * Math.Log(numPlayers - 1) + 30); //logarithmic function determines storm speed based on number of players (assuming number of players is <1)
+            else
+                speed = 30;
+
             //Console.WriteLine($"Map x = {x}; y = {y}");
 
             GenerateTurnSizes();
@@ -33,18 +38,18 @@ namespace DiscordFortniteBot2
 
         private void GenerateTurnSizes()
         {
-            turnSizes = new int[DELAY + SPEED];
+            turnSizes = new int[DELAY + speed];
 
             int maxWidth = Math.Max(x, Math.Abs(width - x)); //get the longest distance from the center to the edge of the screen
             int maxHeight = Math.Max(y, Math.Abs(height - y));
             int maxDiameter = (int)Math.Ceiling(Math.Sqrt(Math.Pow(maxWidth, 2) + Math.Pow(maxHeight, 2))) * 2; //using TRIANGLES
             double diameter = maxDiameter;
-            double rate = maxDiameter / (double)SPEED;
+            double rate = maxDiameter / (double)speed;
 
             for (int i = 0; i < DELAY; i++) //keep the storm circle at max diameter (just outside the map) for as many turns the delay const is worth
                 turnSizes[i] = maxDiameter + 1;
 
-            for (int i = DELAY; i < SPEED + DELAY; i++) //shrink the storm at a constant rate so it takes the amount of turns the speed const is worth
+            for (int i = DELAY; i < speed + DELAY; i++) //shrink the storm at a constant rate so it takes the amount of turns the speed const is worth
             {
                 turnSizes[i] = (int)diameter;
                 diameter -= rate;
