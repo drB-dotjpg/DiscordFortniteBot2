@@ -47,7 +47,7 @@ namespace DiscordFortniteBot2
             {
                 string name = GetStatName(stat); 
                 builder += $"Total {name}";
-                builder += string.Concat(Enumerable.Repeat(".", 23 - builder.Length)) + statValues[(int)stat] + "\n";
+                builder += string.Concat(Enumerable.Repeat(".", 23 - name.Length)) + statValues[(int)stat] + "\n";
             }
             builder += "```";
 
