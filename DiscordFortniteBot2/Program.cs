@@ -321,7 +321,7 @@ namespace DiscordFortniteBot2
             turn = 1;
 
             Console.WriteLine("Generating map...");
-            map = new Map(debug); //generate map
+            map = new Map(debug, players.Count); //generate map
 
             Console.WriteLine("Placing players...");
             PlacePlayers();
@@ -497,7 +497,7 @@ namespace DiscordFortniteBot2
 
                 if (turn == StormGenerator.DELAY) //warn players about the storm
                 {
-                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {StormGenerator.SPEED} turns. Check your world map ({Emotes.infoButton} button) to see storm progress.";
+                    player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {map.GetStormSpeed()} turns. Check your world map ({Emotes.infoButton} button) to see storm progress.";
                 }
                 else if (StormGenerator.DELAY - 5 <= turn && turn < StormGenerator.DELAY)
                 {

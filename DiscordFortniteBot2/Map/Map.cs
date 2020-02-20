@@ -30,10 +30,10 @@ namespace DiscordFortniteBot2
         private Random random = new Random();
         private StormGenerator stormGen;
 
-        public Map(bool debug)
+        public Map(bool debug, int numPlayers)
         {
             GenerateMap(debug);
-            stormGen = new StormGenerator(MAPWIDTH, MAPHEIGHT);
+            stormGen = new StormGenerator(MAPWIDTH, MAPHEIGHT, numPlayers);
         }
 
         private void GenerateMap(bool debug)
@@ -371,7 +371,7 @@ namespace DiscordFortniteBot2
 
         public void UpdateStorm(int turn)
         {
-            if (turn >= StormGenerator.DELAY + StormGenerator.SPEED) return;
+            if (turn >= StormGenerator.DELAY + stormGen.speed) return;
 
             bool[,] storm = stormGen.GetStormCircle(turn);
 
@@ -383,5 +383,7 @@ namespace DiscordFortniteBot2
                 }
             }
         }
+
+        public int GetStormSpeed() => stormGen.speed;
     }
 }

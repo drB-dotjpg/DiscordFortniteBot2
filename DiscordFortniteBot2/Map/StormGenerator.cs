@@ -14,7 +14,7 @@ namespace DiscordFortniteBot2
         private int height; //map height
         private int x; //where the storm is centered on
         private int y;
-        private int speed;
+        public int speed { get; }
         private int[] turnSizes; //how big the storm is on the index representing the turn number
 
         public StormGenerator(int width, int height, int numPlayers)
