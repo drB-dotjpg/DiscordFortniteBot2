@@ -329,7 +329,7 @@ namespace DiscordFortniteBot2
             await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync());
             spectatorMesasge = await channel.SendMessageAsync("Starting game...");
 
-            while (players.Count > 1 || !debug)
+            while (players.Count > 1 || debug)
             {
                 await spectatorMesasge.ModifyAsync(x => x.Content = GetSpectatorMessage());
 
@@ -550,7 +550,7 @@ namespace DiscordFortniteBot2
                     continue; //do it again we can't be having that
 
                 //if the spot is near the center of the map
-                if (Math.Abs(x - map.height / 2) <= centerLimit && Math.Abs(y - map.height / 2) <= centerLimit)
+                if (Math.Abs(x - map.width / 2) <= centerLimit && Math.Abs(y - map.height / 2) <= centerLimit)
                     continue; //do it again we can't be having that
 
                 //if the player is near any other players

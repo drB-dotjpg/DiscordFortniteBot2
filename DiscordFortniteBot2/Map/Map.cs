@@ -33,9 +33,8 @@ namespace DiscordFortniteBot2
         public Map(bool debug, int numPlayers)
         {
             int baseMapSize = Math.Max(20, (int)(25 / Math.Log(7) * Math.Log(numPlayers - 1) + 20));
-            int modifier = random.Next(baseMapSize / 2) - baseMapSize / 4;
-            width = baseMapSize + modifier;
-            height = baseMapSize - modifier;
+            width = baseMapSize;
+            height = baseMapSize;
 
             houseCount = width * height / 89;
             treeCount = width * height / 11;
