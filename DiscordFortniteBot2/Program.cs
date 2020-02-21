@@ -1031,20 +1031,19 @@ namespace DiscordFortniteBot2
 
             int seconds = 120;
 
-            await channel.SendMessageAsync($"> **{winner.discordUser.Mention} won the game!**\n");
+            string messageContent = $"> **{winner.discordUser.Mention} won the game!**\n\n" +
+                $"Next game starts in ----\n\n" +
+                "**Players**: \n" + GetPlayersJoined(withDead: true) + "\n\n" +
+                "**Top stats**:\n" + GetTopRankingList();
 
-            var timerMessage = await channel.SendMessageAsync("_ _");
-
-            await channel.SendMessageAsync("Players: \n" + GetPlayersJoined(withDead: true));
-
-            await channel.SendMessageAsync("Top stats:\n" + GetTopRankingList());
+            var postgameMessage = await channel.SendMessageAsync(messageContent);
 
             while (seconds > 0)
             {
                 await Task.Delay(1000);
 
                 string timeRemaining = $"{seconds / 60}:{(seconds % 60).ToString("00")}";
-                await timerMessage.ModifyAsync(x => x.Content = $"Next game starts in `{timeRemaining}`");
+                await postgameMessage.ModifyAsync(x => x.Content = messageContent.Replace("----", $"`{timeRemaining}`"));
 
                 seconds--;
             }
@@ -1061,7 +1060,7 @@ namespace DiscordFortniteBot2
             foreach(PlayerStats.Stat stat in Enum.GetValues(typeof(PlayerStats.Stat)))
             {
 
-                int max = 0;
+                int max = -1;
                 string maxName = "";
 
                 foreach(Player player in ap)
@@ -1072,18 +1071,20 @@ namespace DiscordFortniteBot2
                         max = statVal;
                         maxName = player.discordUser.Username;
                     }
-                    else if (max == statVal)
+                    else if (max == statVal && maxName != "")
                     {
                         maxName += ", " + player.discordUser.Username;
                     }
                 }
 
-                builder += "Total " + PlayerStats.GetStatName(stat);
-                builder += string.Concat(Enumerable.Repeat(".", 23 - builder.Length));
-                builder += $"{maxName}: {max}\n";
+                string builderBuilder = "Total " + PlayerStats.GetStatName(stat);
+                builderBuilder += string.Concat(Enumerable.Repeat(".", 23 - builderBuilder.Length));
+                builderBuilder += $"{maxName}: {max}\n";
+
+                builder += builderBuilder;
             }
 
-            return builder;
+            return builder + "```";
         }
 
         #endregion
