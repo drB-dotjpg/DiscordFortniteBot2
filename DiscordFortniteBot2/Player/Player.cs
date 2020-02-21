@@ -32,6 +32,7 @@ namespace DiscordFortniteBot2
         public int turnIndex;
         public int movementSpeed;
         public RestUserMessage turnMessage;
+        public ulong lastHitBy;
 
         public Player(SocketUser discordUser, Emoji icon)
         {
@@ -103,7 +104,7 @@ namespace DiscordFortniteBot2
                 }
                 if (map.mapGrid[y, x].trap != null && map.mapGrid[y, x].trap.placedBy != this) //Check if the player has walked on another person's trap
                 {
-                    TakeDamage(map.mapGrid[y, x].trap.trapType.effectVal);
+                    TakeDamage(map.mapGrid[y, x].trap.trapType.effectVal, map.mapGrid[y, x].trap.placedBy.discordUser.Id);
                     map.mapGrid[y, x].trap = null;
 
                     stats.UpdateStat(PlayerStats.Stat.TrapsHit);
@@ -306,7 +307,7 @@ namespace DiscordFortniteBot2
             stats.UpdateStat(PlayerStats.Stat.TrapsPlaced);
         }
 
-        public void TakeDamage(int amount)
+        public void TakeDamage(int amount, ulong hitBy = 0)
         {
             if (amount >= shield)
             {
@@ -319,6 +320,8 @@ namespace DiscordFortniteBot2
                 return;
             }
             health -= amount;
+
+            lastHitBy = hitBy;
 
             stats.UpdateStat(PlayerStats.Stat.DamageTaken, amount);
         }

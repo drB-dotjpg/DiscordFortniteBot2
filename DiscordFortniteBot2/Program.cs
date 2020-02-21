@@ -329,7 +329,7 @@ namespace DiscordFortniteBot2
             await channel.DeleteMessagesAsync(await channel.GetMessagesAsync().FlattenAsync());
             spectatorMesasge = await channel.SendMessageAsync("Starting game...");
 
-            while (players.Count > 1 || debug)
+            while (players.Count > 1 || !debug)
             {
                 await spectatorMesasge.ModifyAsync(x => x.Content = GetSpectatorMessage());
 
@@ -393,6 +393,7 @@ namespace DiscordFortniteBot2
                     if (player.inactiveTurns >= INACTIVIY_LIMIT) //if they're at the inactivity limit
                     {
                         player.health = 0; //bye bye
+                        player.lastHitBy = 0;
                     }
                 }
             }
@@ -442,9 +443,17 @@ namespace DiscordFortniteBot2
             {
                 if (player.health <= 0)
                 {
+                    if (player.lastHitBy != 0)
+                    {
+                        Player killer = GetPlayerById(player.lastHitBy);
+                        players.First(p => p.discordUser == killer.discordUser).stats.UpdateStat(PlayerStats.Stat.PlayersKilled);
+                    }
+
                     foreach (Player p in players)
+                    {
                         await p.discordUser.SendMessageAsync(embed:
                         new EmbedBuilder() { Title = player.discordUser.Username + " has died!" }.WithColor(Color.Gold).Build());
+                    }
 
                     map.mapGrid[player.y, player.x] = new Tile(player.inventory);
 
@@ -961,7 +970,7 @@ namespace DiscordFortniteBot2
                         return;
                     }
 
-                    Player hitPlayer = CheckForPlayerHitAtTile(player.x + newX, player.y + newY, weapon);
+                    Player hitPlayer = CheckForPlayerHitAtTile(player, player.x + newX, player.y + newY, weapon);
                     if (hitPlayer != null)
                     {
                         player.briefing += "\n" + $"You shot {hitPlayer.discordUser.Username} and did {weapon.effectVal} damage.";
@@ -984,13 +993,13 @@ namespace DiscordFortniteBot2
             return false;
         }
 
-        Player CheckForPlayerHitAtTile(int x, int y, Item weapon) //Returns the player hit if there was one
+        Player CheckForPlayerHitAtTile(Player player, int x, int y, Item weapon) //Returns the player hit if there was one
         {
             foreach (Player otherPlayer in players)
             {
                 if (otherPlayer.x == x && otherPlayer.y == y)
                 {
-                    otherPlayer.TakeDamage(weapon.effectVal);
+                    otherPlayer.TakeDamage(weapon.effectVal, player.discordUser.Id);
                     return otherPlayer;
                 }
             }
