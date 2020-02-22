@@ -335,7 +335,7 @@ namespace DiscordFortniteBot2
 
                 int seconds = TURN_SECONDS; //set the turn timer
 
-                foreach (Player player in players) //
+                foreach (Player player in players) 
                 {
                     player.currentBriefing = player.briefing;
                     player.briefing = "";
@@ -732,18 +732,19 @@ namespace DiscordFortniteBot2
         {
             Emoji emote = new Emoji(reaction.Emote.Name);
             Player player = GetPlayerById(reaction.UserId);
+            int pi = players.IndexOf(player);
 
             //if the message is the last active message, then continue
-            if (player.currentMessages.Last().Id != reaction.MessageId) return;
+            if (players[pi].currentMessages.Last().Id != reaction.MessageId) return;
 
             if (reaction.Emote.Name == Emotes.sprintFastButton.Name) //if fast sprinting button is pressed
             {
-                player.movementSpeed = 3; //the player is sprinting (wow)
+                players[pi].movementSpeed = 3; //the players[pi] is sprinting (wow)
                 return;
             }
             else if (reaction.Emote.Name == Emotes.sprintButton.Name) //if sprinting button is pressed
             {
-                player.movementSpeed = 2;
+                players[pi].movementSpeed = 2;
                 return;
             }
 
@@ -751,89 +752,89 @@ namespace DiscordFortniteBot2
             {
                 if (emote.Name == Emotes.actionEmojis[i].Name) //if the emote matches
                 {
-                    player.turnAction = (Action)i; //the emote array pos should match the enum
+                    players[pi].turnAction = (Action)i; //the emote array pos should match the enum
 
                     switch ((Action)i)
                     {
                         case Action.Move:
-                            var moveMessage = await player.discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to move 2 tiles, {Emotes.sprintFastButton} to move 3.):") as RestUserMessage; //follow up asking for a direction
+                            var moveMessage = await players[pi].discordUser.SendMessageAsync($"Select Direction (Add {Emotes.sprintButton} to move 2 tiles, {Emotes.sprintFastButton} to move 3.):") as RestUserMessage; //follow up asking for a direction
                             await moveMessage.AddReactionAsync(Emotes.sprintButton);
                             await moveMessage.AddReactionAsync(Emotes.sprintFastButton);
                             await moveMessage.AddReactionsAsync(Emotes.arrowEmojis);
-                            player.currentMessages.Add(moveMessage);
+                            players[pi].currentMessages.Add(moveMessage);
                             break;
 
                         case Action.Use:
-                            ItemType itemType = player.inventory[player.equipped].type;
+                            ItemType itemType = players[pi].inventory[players[pi].equipped].type;
 
-                            if (map.mapGrid[player.y, player.x].Type == TileType.Water)
+                            if (map.mapGrid[players[pi].y, players[pi].x].Type == TileType.Water)
                             {
-                                var warnMessage = await player.discordUser.SendMessageAsync($"You cannot use items while in water!") as RestUserMessage;
-                                player.currentMessages.Add(warnMessage);
+                                var warnMessage = await players[pi].discordUser.SendMessageAsync($"You cannot use items while in water!") as RestUserMessage;
+                                players[pi].currentMessages.Add(warnMessage);
                             }
                             else if (itemType == ItemType.Weapon || itemType == ItemType.Trap)
                             {
-                                var useMessage = await player.discordUser.SendMessageAsync($"({itemType.ToString()} equipped) Select Direction:") as RestUserMessage; //follow up asking for a direction
+                                var useMessage = await players[pi].discordUser.SendMessageAsync($"({itemType.ToString()} equipped) Select Direction:") as RestUserMessage; //follow up asking for a direction
                                 await useMessage.AddReactionsAsync(Emotes.arrowEmojis);
-                                player.currentMessages.Add(useMessage);
+                                players[pi].currentMessages.Add(useMessage);
                             }
                             else
                             {
-                                var useMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
-                                player.currentMessages.Add(useMessage);
-                                player.ready = true;
+                                var useMessage = await players[pi].discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                                players[pi].currentMessages.Add(useMessage);
+                                players[pi].ready = true;
                             }
                             break;
 
                         case Action.Build:
-                            if (player.materials < 10)
+                            if (players[pi].materials < 10)
                             {
-                                var warnMessage = await player.discordUser.SendMessageAsync($"Building requires 10 materials!") as RestUserMessage;
-                                player.currentMessages.Add(warnMessage);
+                                var warnMessage = await players[pi].discordUser.SendMessageAsync($"Building requires 10 materials!") as RestUserMessage;
+                                players[pi].currentMessages.Add(warnMessage);
                                 break;
                             }
 
-                            var buildMessage = await player.discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
+                            var buildMessage = await players[pi].discordUser.SendMessageAsync("Select Direction:") as RestUserMessage; //follow up asking for a direction
                             await buildMessage.AddReactionsAsync(Emotes.arrowEmojis);
-                            player.currentMessages.Add(buildMessage);
+                            players[pi].currentMessages.Add(buildMessage);
                             break;
 
                         case Action.Loot:
-                            if (map.mapGrid[player.y, player.x].Type == TileType.Chest)
+                            if (map.mapGrid[players[pi].y, players[pi].x].Type == TileType.Chest)
                             {
-                                var lootMessage = await player.discordUser.SendMessageAsync(null, false, GetLootMessage(player)) as RestUserMessage; //follow up asking for the slot number
+                                var lootMessage = await players[pi].discordUser.SendMessageAsync(null, false, GetLootMessage(players[pi])) as RestUserMessage; //follow up asking for the slot number
                                 await lootMessage.AddReactionsAsync(Emotes.slotEmojis);
                                 await lootMessage.AddReactionAsync(Emotes.lootAllButton);
-                                player.currentMessages.Add(lootMessage);
+                                players[pi].currentMessages.Add(lootMessage);
                             }
-                            else if (map.mapGrid[player.y, player.x].Type == TileType.Tree)
+                            else if (map.mapGrid[players[pi].y, players[pi].x].Type == TileType.Tree)
                             {
-                                var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
-                                player.currentMessages.Add(lootConfirmMessage);
-                                player.ready = true;
+                                var lootConfirmMessage = await players[pi].discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                                players[pi].currentMessages.Add(lootConfirmMessage);
+                                players[pi].ready = true;
                             }
                             else
                             {
-                                var warnMessage = await player.discordUser.SendMessageAsync($"You can only loot trees for materials or chests for items!") as RestUserMessage;
-                                player.currentMessages.Add(warnMessage);
+                                var warnMessage = await players[pi].discordUser.SendMessageAsync($"You can only loot trees for materials or chests for items!") as RestUserMessage;
+                                players[pi].currentMessages.Add(warnMessage);
                             }
                             break;
 
                         case Action.Equip:
-                            var equipMessage = await player.discordUser.SendMessageAsync($"Select Slot: ") as RestUserMessage; //follow up asking for the slot number
+                            var equipMessage = await players[pi].discordUser.SendMessageAsync($"Select Slot: ") as RestUserMessage; //follow up asking for the slot number
                             await equipMessage.AddReactionsAsync(Emotes.slotEmojis);
-                            player.currentMessages.Add(equipMessage);
+                            players[pi].currentMessages.Add(equipMessage);
                             break;
 
                         case Action.Drop:
-                            var dropMessage = await player.discordUser.SendMessageAsync("Select Slot: (Items will be dropped into a chest)") as RestUserMessage; //follow up asking for the slot number
+                            var dropMessage = await players[pi].discordUser.SendMessageAsync("Select Slot: (Items will be dropped into a chest)") as RestUserMessage; //follow up asking for the slot number
                             await dropMessage.AddReactionsAsync(Emotes.slotEmojis);
-                            player.currentMessages.Add(dropMessage);
+                            players[pi].currentMessages.Add(dropMessage);
                             break;
 
                         case Action.Info:
-                            var infoMessage = await player.discordUser.SendMessageAsync($"```{map.GetWorldMapString(player)}```", false, GetHelpMessage()); //send the info menu
-                            player.currentMessages.Add(infoMessage as RestUserMessage);
+                            var infoMessage = await players[pi].discordUser.SendMessageAsync($"```{map.GetWorldMapString(players[pi])}```", false, GetHelpMessage()); //send the info menu
+                            players[pi].currentMessages.Add(infoMessage as RestUserMessage);
                             break;
                     }
 
@@ -845,11 +846,11 @@ namespace DiscordFortniteBot2
             {
                 if (emote.Name == Emotes.arrowEmojis[i].Name)
                 {
-                    player.turnDirection = (Direction)i; //change the turn direction value to the arrow emote value
-                    player.ready = true;
+                    players[pi].turnDirection = (Direction)i; //change the turn direction value to the arrow emote value
+                    players[pi].ready = true;
 
-                    var arrowConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
-                    player.currentMessages.Add(arrowConfirmMessage);
+                    var arrowConfirmMessage = await players[pi].discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                    players[pi].currentMessages.Add(arrowConfirmMessage);
 
                     return;
                 }
@@ -857,11 +858,11 @@ namespace DiscordFortniteBot2
 
             if(emote.Name == Emotes.lootAllButton.Name) //Check for loot all first
             {
-                player.ready = true; //commit loot next turn
-                var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
-                player.currentMessages.Add(lootConfirmMessage);
+                players[pi].ready = true; //commit loot next turn
+                var lootConfirmMessage = await players[pi].discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                players[pi].currentMessages.Add(lootConfirmMessage);
 
-                player.turnIndex = 5;
+                players[pi].turnIndex = 5;
 
                 return;
             }
@@ -870,33 +871,33 @@ namespace DiscordFortniteBot2
             {
                 if (emote.Name == Emotes.slotEmojis[i].Name)
                 {
-                    player.turnIndex = i;
+                    players[pi].turnIndex = i;
 
-                    switch (player.turnAction)
+                    switch (players[pi].turnAction)
                     {
                         case Action.Equip:
-                            player.equipped = player.turnIndex; //do the equip
-                            await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //edit the turn message
+                            players[pi].equipped = players[pi].turnIndex; //do the equip
+                            await players[pi].turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(players[pi])); //edit the turn message
                             break;
 
                         case Action.Loot:
-                            player.ready = true; //commit loot next turn
+                            players[pi].ready = true; //commit loot next turn
 
-                            var lootConfirmMessage = await player.discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
-                            player.currentMessages.Add(lootConfirmMessage);
+                            var lootConfirmMessage = await players[pi].discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
+                            players[pi].currentMessages.Add(lootConfirmMessage);
 
                             break;
 
                         case Action.Drop:
-                            Item item = player.inventory[player.turnIndex]; //get the item the player is dropping
+                            Item item = players[pi].inventory[players[pi].turnIndex]; //get the item the players[pi] is dropping
 
-                            bool added = map.mapGrid[player.y, player.x].AddChestItem(item); //add an item to a chest if possible
+                            bool added = map.mapGrid[players[pi].y, players[pi].x].AddChestItem(item); //add an item to a chest if possible
 
                             if (added) //if its possible
                             {
-                                player.inventory[player.turnIndex] = new Item(); //remove the item from the players inventory
-                                await player.turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(player)); //change the turn message because the inventory changed 5head
-                                player.stats.UpdateStat(PlayerStats.Stat.ItemsDropped);
+                                players[pi].inventory[players[pi].turnIndex] = new Item(); //remove the item from the players[pi]s inventory
+                                await players[pi].turnMessage.ModifyAsync(e => e.Embed = GetTurnBriefing(players[pi])); //change the turn message because the inventory changed 5head
+                                players[pi].stats.UpdateStat(PlayerStats.Stat.ItemsDropped);
                             }
                             break;
                     }

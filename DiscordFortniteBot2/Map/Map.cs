@@ -36,7 +36,7 @@ namespace DiscordFortniteBot2
             width = baseMapSize;
             height = baseMapSize;
 
-            houseCount = width * height / 89;
+            houseCount = width * height / 70;
             treeCount = width * height / 11;
             riverCount = (width * height / 800) + 1; //river count is randomized, this is a cap to the amount of rivers generated.
 
