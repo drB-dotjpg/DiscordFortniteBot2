@@ -63,8 +63,6 @@ namespace DiscordFortniteBot2
                 switch (turnDirection)
                 {
                     case Direction.Right:
-                        System.Console.WriteLine(x + ", " + y);
-                        System.Console.WriteLine(map.mapGrid[y, x + 1].Type);
                         if (x < map.width - 1
                             && map.mapGrid[y, x + 1].Type != TileType.Wall)
                         {
@@ -76,8 +74,6 @@ namespace DiscordFortniteBot2
                         break;
 
                     case Direction.Left:
-                        System.Console.WriteLine(x + ", " + y);
-                        System.Console.WriteLine(map.mapGrid[y, x - 1].Type);
                         if (x > 0
                             && map.mapGrid[y, x - 1].Type != TileType.Wall)
                         {
@@ -89,8 +85,6 @@ namespace DiscordFortniteBot2
                         break;
 
                     case Direction.Up:
-                        System.Console.WriteLine(x + ", " + y);
-                        System.Console.WriteLine(map.mapGrid[y - 1, x].Type);
                         if (y > 0
                             && map.mapGrid[y - 1, x].Type != TileType.Wall)
                         {
@@ -102,8 +96,6 @@ namespace DiscordFortniteBot2
                         break;
 
                     case Direction.Down:
-                        System.Console.WriteLine(x + ", " + y);
-                        System.Console.WriteLine(map.mapGrid[y + 1, x].Type);
                         if (y < map.height - 1
                             && map.mapGrid[y + 1, x].Type != TileType.Wall)
                         {

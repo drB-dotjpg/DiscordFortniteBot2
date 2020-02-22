@@ -33,6 +33,7 @@ namespace DiscordFortniteBot2
         public Map(bool debug, int numPlayers)
         {
             int baseMapSize = Math.Max(20, (int)(25 / Math.Log(7) * Math.Log(numPlayers - 1) + 20));
+            if (debug) Console.WriteLine($"Map is {baseMapSize}^2 tiles");
             width = baseMapSize;
             height = baseMapSize;
 
@@ -198,7 +199,7 @@ namespace DiscordFortniteBot2
                 if (mapGrid[randomY, randomX].Type == TileType.Grass)
                 {
                     mapGrid[randomY, randomX] = new Tile(GenerateItems());
-                    Console.WriteLine($"Supply drop dropped at ({randomY},{randomX})");
+                    //Console.WriteLine($"Supply drop dropped at ({randomY},{randomX})");
                     break;
                 }
 
@@ -237,12 +238,15 @@ namespace DiscordFortniteBot2
 
         private Tile[,] GetMapArea(int x, int y) //get info on 7x7 area around the map. x and y represent the center of the 7x7 grid
         {
+            //Console.WriteLine($"GetMapArea (x = {x}, y = {y})");
+
             Tile[,] mapArea = new Tile[7, 7];
 
             int xTrack = x - 3; //start the x axis scan 3 slots away from the center.
             int yTrack = y - 3;
 
             int xCap = xTrack + 7; //the limit to how far the scan can go.
+            int xReset = xCap - 7;
             if (xCap >= width) xCap = width - 1; //make sure its not out of bounds.
 
             int yCap = yTrack + 7;
@@ -252,7 +256,7 @@ namespace DiscordFortniteBot2
             while (yMap < 7) //start the scan.
             {
                 int xMap = 0;
-                xTrack = xCap - 7;
+                xTrack = xReset;
 
                 while (xMap < 7)
                 {
@@ -289,7 +293,7 @@ namespace DiscordFortniteBot2
 
                 for (int j = 0; j < 7; j++)
                 {
-                    //Console.WriteLine($"GetMapAreaString: x = {x}; y = {y}");
+                    //Console.Write($"x={x};y={y}|");
 
                     bool playerFound = false;
                     foreach (Player player in players) //Check for players in the area
@@ -331,6 +335,8 @@ namespace DiscordFortniteBot2
 
                     x++;
                 }
+
+                //Console.WriteLine();
 
                 y++;
                 mapString += "\n";
@@ -389,7 +395,7 @@ namespace DiscordFortniteBot2
             {
                 for (int j = 0; j < height; j++)
                 {
-                    if (storm[j, i]) 
+                    if (storm[j, i])
                         mapGrid[i, j] = new Tile(TileType.Storm);
                 }
             }

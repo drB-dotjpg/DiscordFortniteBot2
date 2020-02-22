@@ -223,7 +223,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 10 : 6;
+            int seconds = !debug ? 10 : 1;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
 
@@ -231,7 +231,7 @@ namespace DiscordFortniteBot2
             {
                 await Task.Delay(1000); //wait 1 second
 
-                if (players.Count >= 2 || debug) seconds--; //only move timer if there are 2 or more players (or debug is on)
+                if (players.Count >= 2 || (debug && players.Count > 0)) seconds--; //only move timer if there are 2 or more players (or debug is on)
 
                 if (playerLimitHit && seconds > 20) seconds = 15;
 
@@ -340,6 +340,7 @@ namespace DiscordFortniteBot2
                     player.currentBriefing = player.briefing;
                     player.briefing = "";
 
+                    if (debug) Console.WriteLine($"Turn Briefing (x = {player.x}, y = {player.y})");
                     player.turnMessage = await player.discordUser.SendMessageAsync(null, false, GetTurnBriefing(player)) as RestUserMessage; //send turn briefing
 
                     player.currentMessages.Add(player.turnMessage); //add it to the active messages (only these accept reactions)
@@ -542,9 +543,10 @@ namespace DiscordFortniteBot2
             int i = 0;
             while (i < players.Count())
             {
-                int x = random.Next(map.height); //choose a random spot on the map
-                int y = random.Next(map.width);
+                int x = random.Next(map.height-1); //choose a random spot on the map
+                int y = random.Next(map.width-1);
 
+                /*
                 //if that spot is on a wall
                 if (map.mapGrid[y, x].Type == TileType.Wall)
                     continue; //do it again we can't be having that
@@ -563,6 +565,7 @@ namespace DiscordFortniteBot2
                     nearPlayer = Math.Abs(x - player.x) <= playerDistance && Math.Abs(y - player.y) <= playerDistance;
                 }
                 if (nearPlayer) continue; //do it again we can't be having that
+                */
 
                 players[i].x = x;
                 players[i].y = y;
@@ -911,6 +914,13 @@ namespace DiscordFortniteBot2
         async Task HandleIngameReactionRemoval(SocketReaction reaction)
         {
             bool isActionEmote = false;
+            
+            Player player = GetPlayerById(reaction.UserId);
+
+            if (reaction.Emote.Name == Emotes.sprintButton.Name || reaction.Emote.Name == Emotes.sprintFastButton.Name)
+            {
+                player.movementSpeed = 1;
+            }
 
             foreach (Emoji emote in Emotes.actionEmojis)
             {
@@ -918,8 +928,6 @@ namespace DiscordFortniteBot2
             }
 
             if (!isActionEmote) return; //if the emote is not in the action emote array then don't do anything
-
-            Player player = GetPlayerById(reaction.UserId);
 
             if (player.currentMessages.Last().Id == reaction.MessageId) return; //if the message is the latest message, then don't do anything
             if (player.currentMessages.Count < 2) return; //if there is 1 message in the thingy then don't do the thingy
