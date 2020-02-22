@@ -263,7 +263,7 @@ namespace DiscordFortniteBot2
                     //Console.Write($"\nxTrack = {xTrack}; yTrack = {yTrack}; xMap = {xMap}; yMap = {yMap}; ");
                     //Console.WriteLine($"mapGrid[xTrack, yTrack] = {mapGrid[xTrack, yTrack].Type.ToString()}");
 
-                    if (xTrack >= 0 && yTrack >= 0 && xTrack < xCap && yTrack < yCap) //if its not out of bounds.
+                    if (xTrack >= 0 && yTrack >= 0 && xTrack <= xCap && yTrack <= yCap) //if its not out of bounds.
                         mapArea[yMap, xMap] = mapGrid[yTrack, xTrack];
                     else
                         mapArea[yMap, xMap] = new Tile(TileType.Bounds);
@@ -387,7 +387,7 @@ namespace DiscordFortniteBot2
 
         public void UpdateStorm(int turn)
         {
-            if (turn >= StormGenerator.DELAY + stormGen.speed) return;
+            if (turn >= stormGen.delay + stormGen.speed) return;
 
             bool[,] storm = stormGen.GetStormCircle(turn);
 
@@ -402,5 +402,7 @@ namespace DiscordFortniteBot2
         }
 
         public int GetStormSpeed() => stormGen.speed;
+
+        public int GetStormDelay() => stormGen.delay;
     }
 }

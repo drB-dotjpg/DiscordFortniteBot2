@@ -518,13 +518,13 @@ namespace DiscordFortniteBot2
 
                 }
 
-                if (turn == StormGenerator.DELAY) //warn players about the storm
+                if (turn == map.GetStormDelay()) //warn players about the storm
                 {
                     player.briefing += "\n" + $"The storm's eye has started shrinking. It will fully close in {map.GetStormSpeed()} turns. Check your world map ({Emotes.actionEmojis[(int)Action.Info]} button) to see storm progress.";
                 }
-                else if (StormGenerator.DELAY - 5 <= turn && turn < StormGenerator.DELAY)
+                else if (map.GetStormDelay() - 5 <= turn && turn < map.GetStormDelay())
                 {
-                    int turnsTillTheThingHappens = StormGenerator.DELAY - turn;
+                    int turnsTillTheThingHappens = map.GetStormDelay() - turn;
                     string plural = turnsTillTheThingHappens > 1 ? "s" : "";
                     player.briefing += "\n" + $"The storm will appear in {turnsTillTheThingHappens} turn{plural}.";
                 }
@@ -1105,8 +1105,13 @@ namespace DiscordFortniteBot2
 
         #endregion
 
-        Player GetPlayerById(ulong id)
+        Player GetPlayerById(ulong id, bool includeDead = false)
         {
+            if (includeDead)
+            {
+                
+            }
+
             return players.First(x => x.discordUser.Id == id);
         }
 

@@ -6,7 +6,7 @@ namespace DiscordFortniteBot2
 {
     public class StormGenerator
     {
-        public const int DELAY = 30; //how many turns before the storm starts closing in
+        
         private const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
         private const float PRECISION = .01f; //keep at 0.01f or lower
 
@@ -15,6 +15,7 @@ namespace DiscordFortniteBot2
         private int x; //where the storm is centered on
         private int y;
         public int speed { get; }
+        public int delay { get; } //how many turns before the storm starts closing in
         private int[] turnSizes; //how big the storm is on the index representing the turn number
 
         public StormGenerator(int width, int height, int numPlayers)
@@ -27,9 +28,15 @@ namespace DiscordFortniteBot2
             y = rand.Next(height / 2) + height / 4;
 
             if (numPlayers > 1)
+            {
                 speed = (int)(40 / Math.Log(7) * Math.Log(numPlayers - 1) + 30); //logarithmic function determines storm speed based on number of players (assuming number of players is <1)
+                delay = (int)(5.0 / 3.0 * (numPlayers - 2) + 20); //linear function ranging from (2,20) to (8,30)
+            }
             else
+            {
                 speed = 30;
+                delay = 20;
+            }
 
             //Console.WriteLine($"Map x = {x}; y = {y}");
 
@@ -38,7 +45,7 @@ namespace DiscordFortniteBot2
 
         private void GenerateTurnSizes()
         {
-            turnSizes = new int[DELAY + speed];
+            turnSizes = new int[delay + speed];
 
             int maxWidth = Math.Max(x, Math.Abs(width - x)); //get the longest distance from the center to the edge of the screen
             int maxHeight = Math.Max(y, Math.Abs(height - y));
@@ -46,10 +53,10 @@ namespace DiscordFortniteBot2
             double diameter = maxDiameter;
             double rate = maxDiameter / (double)speed;
 
-            for (int i = 0; i < DELAY; i++) //keep the storm circle at max diameter (just outside the map) for as many turns the delay const is worth
+            for (int i = 0; i < delay; i++) //keep the storm circle at max diameter (just outside the map) for as many turns the delay const is worth
                 turnSizes[i] = maxDiameter + 1;
 
-            for (int i = DELAY; i < speed + DELAY; i++) //shrink the storm at a constant rate so it takes the amount of turns the speed const is worth
+            for (int i = delay; i < speed + delay; i++) //shrink the storm at a constant rate so it takes the amount of turns the speed const is worth
             {
                 turnSizes[i] = (int)diameter;
                 diameter -= rate;
