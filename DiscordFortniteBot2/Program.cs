@@ -440,6 +440,22 @@ namespace DiscordFortniteBot2
                 }
             }
 
+            if (AllPlayersDead()) //there are moments where the last 2 (or more) players all go under 0 health. Thats an issue
+            {
+                int maxHealth = int.MaxValue; //make the player with the most health the winner
+                Player winner = null;
+                foreach(Player player in players)
+                {
+                    if (player.health < maxHealth)
+                    {
+                        maxHealth = player.health;
+                        winner = player;
+                    }
+                }
+
+                winner.health = 1;
+            }
+
             foreach (Player player in players.ToList()) //make sure players are not dead, so they cannot continue doing stuff
             {
                 if (player.health <= 0)
@@ -447,7 +463,7 @@ namespace DiscordFortniteBot2
                     if (player.lastHitBy != 0)
                     {
                         Player killer = GetPlayerById(player.lastHitBy);
-                        players.First(p => p.discordUser == killer.discordUser).stats.UpdateStat(PlayerStats.Stat.PlayersKilled);
+                        if (killer != null) players.First(p => p.discordUser == killer.discordUser).stats.UpdateStat(PlayerStats.Stat.PlayersKilled);
                     }
 
                     foreach (Player p in players)
@@ -531,6 +547,15 @@ namespace DiscordFortniteBot2
 
                 player.stats.UpdateStat(PlayerStats.Stat.TurnsAlive);
             }
+        }
+
+        bool AllPlayersDead()
+        {
+            foreach(Player player in players)
+            {
+                if (player.health > 0) return false;
+            }
+            return true;
         }
 
         void PlacePlayers()
@@ -733,6 +758,7 @@ namespace DiscordFortniteBot2
         {
             Emoji emote = new Emoji(reaction.Emote.Name);
             Player player = GetPlayerById(reaction.UserId);
+            if (player == null) return;
             int pi = players.IndexOf(player);
 
             //if the message is the last active message, then continue
@@ -1105,14 +1131,17 @@ namespace DiscordFortniteBot2
 
         #endregion
 
-        Player GetPlayerById(ulong id, bool includeDead = false)
+        Player GetPlayerById(ulong id)
         {
-            if (includeDead)
+            try
             {
-                
+                return players.First(x => x.discordUser.Id == id);
+            } 
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
             }
-
-            return players.First(x => x.discordUser.Id == id);
         }
 
         string GetPlayersJoined(bool showReady = false, bool withDead = false)
