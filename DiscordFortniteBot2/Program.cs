@@ -546,7 +546,6 @@ namespace DiscordFortniteBot2
                 int x = random.Next(map.height-1); //choose a random spot on the map
                 int y = random.Next(map.width-1);
 
-                /*
                 //if that spot is on a wall
                 if (map.mapGrid[y, x].Type == TileType.Wall)
                     continue; //do it again we can't be having that
@@ -565,7 +564,6 @@ namespace DiscordFortniteBot2
                     nearPlayer = Math.Abs(x - player.x) <= playerDistance && Math.Abs(y - player.y) <= playerDistance;
                 }
                 if (nearPlayer) continue; //do it again we can't be having that
-                */
 
                 players[i].x = x;
                 players[i].y = y;
