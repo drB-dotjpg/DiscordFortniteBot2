@@ -211,16 +211,34 @@ namespace DiscordFortniteBot2
                 default:
                     return;
             }
-            item.ammo--;
-
-            if (inventory[equipped].ammo <= 0)
-            {
-                RemoveItem(equipped);
-            }
-
+            UseAmmo(slot);
             briefing += "\n" + $"Used {item.name} and healed {health - oldHeath} health and {shield - oldShield} shield.";
 
             stats.UpdateStat(PlayerStats.Stat.DamageHealed, item.effectVal);
+        }
+
+        public void Use(int slot)
+        {
+            switch (inventory[slot].type)
+            {
+                case ItemType.HealAll:
+                case ItemType.Health:
+                case ItemType.Shield:
+                    UseHealingItem(slot);
+                    break;
+                case ItemType.Weapon:
+                    UseAmmo(slot);
+                    break;
+            }
+        }
+
+        private void UseAmmo(int slot)
+        {
+            inventory[slot].ammo--;
+            if(inventory[slot].ammo <= 0)
+            {
+                RemoveItem(slot);
+            }
         }
 
         public bool Loot(Item newItem) //returns true if the loot was successful
@@ -301,12 +319,7 @@ namespace DiscordFortniteBot2
                         briefing += "\n" + "You cannot place a trap here!";
                     break;
             }
-            inventory[slot].ammo--;
-
-            if (inventory[slot].ammo <= 0)
-            {
-                RemoveItem(equipped);
-            }
+            UseAmmo(slot);
 
             stats.UpdateStat(PlayerStats.Stat.TrapsPlaced);
         }

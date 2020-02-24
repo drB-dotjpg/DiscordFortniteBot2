@@ -414,11 +414,7 @@ namespace DiscordFortniteBot2
 
                         case ItemType.Weapon:
                             HandleShootAction(player, player.equipped);
-                            player.inventory[player.equipped].ammo--;
-                            if (player.inventory[player.equipped].ammo <= 0)
-                            {
-                                player.inventory[player.equipped] = new Item();
-                            }
+                            player.Use(player.equipped);
                             break;
 
                         case ItemType.Trap:
@@ -428,7 +424,7 @@ namespace DiscordFortniteBot2
                         case ItemType.Health:
                         case ItemType.Shield:
                         case ItemType.HealAll:
-                            player.UseHealingItem(player.equipped);
+                            player.Use(player.equipped);
                             break;
                     }
                 }
