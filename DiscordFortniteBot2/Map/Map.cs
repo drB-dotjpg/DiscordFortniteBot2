@@ -95,7 +95,7 @@ namespace DiscordFortniteBot2
 
             if (vertical)
             {
-                int size = (int)Math.Ceiling(width / 15.0); //get how wide the river is based on map size
+                int size = (int)Math.Min(3, Math.Ceiling(width / 15.0)); //get how wide the river is based on map size
                 int drawPoint = random.Next(width - size); //the point on the x axis the river starts drawing on
 
                 for (int y = 0; y < height; y++) //for each column of map tiles
@@ -119,7 +119,7 @@ namespace DiscordFortniteBot2
             }
             else //code below is very similar to above
             {
-                int size = (int)Math.Ceiling(height / 15.0);
+                int size = (int)Math.Min(3, Math.Ceiling(width / 15.0));
                 int drawPoint = random.Next(height - size);
 
                 for (int x = 0; x < width; x++)

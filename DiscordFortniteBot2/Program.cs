@@ -317,7 +317,7 @@ namespace DiscordFortniteBot2
         int turn;
         const int TURN_SECONDS = 40;
         const int INACTIVIY_LIMIT = 2; //turns a player is allowed to be inactive for
-        const int SUPPLY_DROP_DELAY = 20; //Amount of turns before supply drops start appearing
+        const int SUPPLY_DROP_DELAY = 10; //Amount of turns before supply drops start appearing
         int supplyDropCooldown; //Turns between each supply drop, once it reaches a set number, a supply drop will drop somewhere
 
         RestUserMessage spectatorMesasge;
