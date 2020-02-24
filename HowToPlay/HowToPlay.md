@@ -28,7 +28,7 @@ On every turn, you can perform a variety of actions. Each action is controlled u
 * Walk: Lets you move around the map. You can walk in one of four directions. You can move at a maximum speed of three tiles in one turn. You will be stopped if you collide into a wall.
 * Use: Uses an item (weapons, health packs, etc). Use is changed depending on what item is equipped. Weapons will prompt you to choose a direction to fire at. Healing items will just get consumed. You cannot use items while standing in water.
 * Build: Builds a wall in a certain direction. Building costs 10 materials.
-* Loot: Gets items from chests or +10 materials from trees.
+* Loot: Gets items from chests or +15 materials from trees.
 * Equip (*does not end turn*): Changes what item is used on the use action.
 * Drop (*does not end turn*): Drops an item, removing it from your inventory.
 * Info (*does not end turn*): Shows the world map, map key, and player list.

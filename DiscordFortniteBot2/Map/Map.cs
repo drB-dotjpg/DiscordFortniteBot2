@@ -95,7 +95,7 @@ namespace DiscordFortniteBot2
 
             if (vertical)
             {
-                int size = (int)Math.Ceiling(width / 15.0); //get how wide the river is based on map size
+                int size = (int)Math.Min(3, Math.Ceiling(width / 15.0)); //get how wide the river is based on map size
                 int drawPoint = random.Next(width - size); //the point on the x axis the river starts drawing on
 
                 for (int y = 0; y < height; y++) //for each column of map tiles
@@ -119,7 +119,7 @@ namespace DiscordFortniteBot2
             }
             else //code below is very similar to above
             {
-                int size = (int)Math.Ceiling(height / 15.0);
+                int size = (int)Math.Min(3, Math.Ceiling(width / 15.0));
                 int drawPoint = random.Next(height - size);
 
                 for (int x = 0; x < width; x++)
@@ -146,11 +146,15 @@ namespace DiscordFortniteBot2
         private void GenerateBuildings()
         {
             int numberLeft = houseCount;
+            List<int[]> locations = new List<int[]>();
+
             while (numberLeft > 0)
             {
                 int y;
                 int x;
                 bool safe;
+                int distanceMax = Math.Max(width, height);
+                int distance = distanceMax * 10;
 
                 do
                 {
@@ -170,6 +174,20 @@ namespace DiscordFortniteBot2
                                 safe = false;
                         }
                     }
+
+                    if (!safe) continue;
+
+                    foreach(int[] l in locations)
+                    {
+                        int d = (int)Math.Sqrt(Math.Pow(Math.Abs(l[0] - x), 2) + Math.Pow(Math.Abs(l[1] - y), 2));
+                        if (Math.Abs(d - Math.Ceiling(distance / 10.0)) < 1)
+                        {
+                            continue;
+                        }
+                    }
+
+                    distance--;
+
                 } while (!safe);
 
                 int opening = random.Next(4);
@@ -184,6 +202,8 @@ namespace DiscordFortniteBot2
                 mapGrid[x - 1, y + 1] = new Tile(TileType.Wall);
                 if (opening != 3) mapGrid[x, y + 1] = new Tile(TileType.Wall);
                 mapGrid[x + 1, y + 1] = new Tile(TileType.Wall);
+
+                locations.Add(new int[] { x, y });
 
                 numberLeft--;
             }

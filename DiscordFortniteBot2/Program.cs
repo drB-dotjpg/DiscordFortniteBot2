@@ -209,23 +209,29 @@ namespace DiscordFortniteBot2
             }
 
             //Prompt users to join
+            EmbedBuilder tutorialLink = new EmbedBuilder()
+            {
+                Title = "Click here to view the game tutorial (Read this before joining).",
+                Url = "https://github.com/drB-dotjpg/DiscordFortniteBot2/blob/master/HowToPlay/HowToPlay.md",
+                Color = Color.Blue
+            };
 
             try
             {
-                await channel.SendFileAsync("FortniteBot2.png", null); //try to send the epic logo (c# is weird with this)
+                await channel.SendFileAsync("FortniteBot2.png", null, embed: tutorialLink.Build()); //try to send the epic logo (c# is weird with this)
             }
             catch (FileNotFoundException)
             {
                 string imageDir = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + Path.DirectorySeparatorChar; //try again
-                await channel.SendFileAsync(imageDir + "FortniteBot2.png", null);
+                await channel.SendFileAsync(imageDir + "FortniteBot2.png", null, embed: tutorialLink.Build());
             }
 
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 10 : 1;
+            int seconds = !debug ? 20 : 1;
 
-            var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
+            var usersJoinedMessage = await channel.SendMessageAsync($"discord.gg/obama");    //post the users joined message (And has the timer)
 
             while (seconds > 0) //while the timer is running
             {
@@ -311,7 +317,7 @@ namespace DiscordFortniteBot2
         int turn;
         const int TURN_SECONDS = 40;
         const int INACTIVIY_LIMIT = 2; //turns a player is allowed to be inactive for
-        const int SUPPLY_DROP_DELAY = 20; //Amount of turns before supply drops start appearing
+        const int SUPPLY_DROP_DELAY = 10; //Amount of turns before supply drops start appearing
         int supplyDropCooldown; //Turns between each supply drop, once it reaches a set number, a supply drop will drop somewhere
 
         RestUserMessage spectatorMesasge;
@@ -335,7 +341,7 @@ namespace DiscordFortniteBot2
 
                 int seconds = TURN_SECONDS; //set the turn timer
 
-                foreach (Player player in players) 
+                foreach (Player player in players)
                 {
                     player.currentBriefing = player.briefing;
                     player.briefing = "";
@@ -439,41 +445,43 @@ namespace DiscordFortniteBot2
             if (AllPlayersDead()) //there are moments where the last 2 (or more) players all go under 0 health. Thats an issue
             {
                 int maxHealth = int.MaxValue; //make the player with the most health the winner
-                Player winner = null;
-                foreach(Player player in players)
+                int winnerIndex = 0;
+                for (int i = 0; i < players.Count; i++)
                 {
-                    if (player.health < maxHealth)
+                    if (players[i].health < maxHealth)
                     {
-                        maxHealth = player.health;
-                        winner = player;
+                        maxHealth = players[i].health;
+                        winnerIndex = i;
                     }
                 }
 
-                winner.health = 1;
+                players[winnerIndex].health = 1;
             }
 
-            foreach (Player player in players.ToList()) //make sure players are not dead, so they cannot continue doing stuff
+            for(int i = 0; i < players.Count; i++) //make sure players are not dead, so they cannot continue doing stuff
             {
-                if (player.health <= 0)
+                if (players[i].health <= 0)
                 {
-                    if (player.lastHitBy != 0)
+                    if (players[i].lastHitBy != 0)
                     {
-                        Player killer = GetPlayerById(player.lastHitBy);
+                        Player killer = GetPlayerById(players[i].lastHitBy);
                         if (killer != null) players.First(p => p.discordUser == killer.discordUser).stats.UpdateStat(PlayerStats.Stat.PlayersKilled);
                     }
 
                     foreach (Player p in players)
                     {
                         await p.discordUser.SendMessageAsync(embed:
-                        new EmbedBuilder() { Title = player.discordUser.Username + " has died!" }.WithColor(Color.Gold).Build());
+                        new EmbedBuilder() { Title = players[i].discordUser.Username + " has died!" }.WithColor(Color.Gold).Build());
                     }
 
-                    map.mapGrid[player.y, player.x] = new Tile(player.inventory);
+                    map.mapGrid[players[i].y, players[i].x] = new Tile(players[i].inventory);
 
-                    await player.discordUser.SendMessageAsync("**Final stats:**\n" + player.stats.GetAllStats()); //send them stats
+                    await players[i].discordUser.SendMessageAsync("**Final stats:**\n" + players[i].stats.GetAllStats()); //send them stats
 
-                    deadPlayers.Add(player); //join the club
-                    players.Remove(player); //they're out bye bye
+                    deadPlayers.Add(players[i]); //join the club
+                    players.Remove(players[i]); //they're out bye bye
+
+                    i = 0; //reset the loop to ensure no player is skipped
                 }
             }
 
@@ -498,10 +506,10 @@ namespace DiscordFortniteBot2
                     case Action.Loot:
                         if (map.mapGrid[player.y, player.x].Type == TileType.Chest) //if the player is on a chest
                         {
-                            if(player.turnIndex == 5) //Check if player is looting all
+                            if (player.turnIndex == 5) //Check if player is looting all
                             {
                                 int i = 0;
-                                while(player.Loot(map.mapGrid[player.y, player.x].Items[i]))
+                                while (player.Loot(map.mapGrid[player.y, player.x].Items[i]))
                                 {
                                     map.mapGrid[player.y, player.x].Items[i] = new Item(); //make the chest slot empty (since the item was taken you know?)
 
@@ -521,7 +529,7 @@ namespace DiscordFortniteBot2
                         }
                         else if (map.mapGrid[player.y, player.x].Type == TileType.Tree) //if the player is on a tree (they climbed it)
                         {
-                            player.materials += 25; //give them materials
+                            player.materials += 15; //give them materials
                             player.briefing += "\n" + "You chopped down a tree and got +25 materials.";
                             player.stats.UpdateStat(PlayerStats.Stat.TreesCut);
                             map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //the tree turns into grass
@@ -547,7 +555,7 @@ namespace DiscordFortniteBot2
 
         bool AllPlayersDead()
         {
-            foreach(Player player in players)
+            foreach (Player player in players)
             {
                 if (player.health > 0) return false;
             }
@@ -564,8 +572,8 @@ namespace DiscordFortniteBot2
             int i = 0;
             while (i < players.Count())
             {
-                int x = random.Next(map.height-1); //choose a random spot on the map
-                int y = random.Next(map.width-1);
+                int x = random.Next(map.height - 1); //choose a random spot on the map
+                int y = random.Next(map.width - 1);
 
                 //if that spot is on a wall
                 if (map.mapGrid[y, x].Type == TileType.Wall)
@@ -577,7 +585,7 @@ namespace DiscordFortniteBot2
 
                 //if the player is near any other players
                 bool nearPlayer = false;
-                foreach(Player player in players)
+                foreach (Player player in players)
                 {
                     if (player.Equals(players[i])) continue;
                     if (player.x == -1 || player.y == -1) continue;
@@ -879,7 +887,7 @@ namespace DiscordFortniteBot2
                 }
             }
 
-            if(emote.Name == Emotes.lootAllButton.Name) //Check for loot all first
+            if (emote.Name == Emotes.lootAllButton.Name) //Check for loot all first
             {
                 players[pi].ready = true; //commit loot next turn
                 var lootConfirmMessage = await players[pi].discordUser.SendMessageAsync("Selected action will be executed at the start of the next turn.") as RestUserMessage;
@@ -889,7 +897,7 @@ namespace DiscordFortniteBot2
 
                 return;
             }
-            
+
             for (int i = 0; i < Emotes.slotEmojis.Length; i++) //if the emotes are any of the number emotes
             {
                 if (emote.Name == Emotes.slotEmojis[i].Name)
@@ -934,7 +942,7 @@ namespace DiscordFortniteBot2
         async Task HandleIngameReactionRemoval(SocketReaction reaction)
         {
             bool isActionEmote = false;
-            
+
             Player player = GetPlayerById(reaction.UserId);
 
             if (reaction.Emote.Name == Emotes.sprintButton.Name || reaction.Emote.Name == Emotes.sprintFastButton.Name)
@@ -995,7 +1003,7 @@ namespace DiscordFortniteBot2
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY))
                     {
                         player.briefing += "\n" + "You shot and destroyed a wall.";
-                        player.stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
+                        player.stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
                         return;
                     }
 
@@ -1072,7 +1080,7 @@ namespace DiscordFortniteBot2
             string messageContent = $"> **{winner.discordUser.Mention} won the game!**\n\n" +
                 $"Next game starts in ----\n\n" +
                 "**Players**: \n" + GetPlayersJoined(withDead: true) + "\n\n" +
-                "**Top stats**:\n" + GetTopRankingList();
+                "**Top stats**:\n" + topRankings;
 
             var postgameMessage = await channel.SendMessageAsync(messageContent);
 
@@ -1093,15 +1101,17 @@ namespace DiscordFortniteBot2
             ap.AddRange(players);
             ap.AddRange(deadPlayers);
 
+            foreach (Player p in ap)
+                Console.WriteLine("ap: " + p.discordUser.Username);
+
             string builder = "```";
 
-            foreach(PlayerStats.Stat stat in Enum.GetValues(typeof(PlayerStats.Stat)))
+            foreach (PlayerStats.Stat stat in Enum.GetValues(typeof(PlayerStats.Stat)))
             {
-
                 int max = -1;
                 string maxName = "";
 
-                foreach(Player player in ap)
+                foreach (Player player in ap)
                 {
                     int statVal = player.stats.GetStat(stat);
                     if (max < statVal)
@@ -1132,7 +1142,7 @@ namespace DiscordFortniteBot2
             try
             {
                 return players.First(x => x.discordUser.Id == id);
-            } 
+            }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.Message);
