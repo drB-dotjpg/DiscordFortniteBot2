@@ -146,11 +146,15 @@ namespace DiscordFortniteBot2
         private void GenerateBuildings()
         {
             int numberLeft = houseCount;
+            List<int[]> locations = new List<int[]>();
+
             while (numberLeft > 0)
             {
                 int y;
                 int x;
                 bool safe;
+                int distanceMax = Math.Max(width, height);
+                int distance = distanceMax * 10;
 
                 do
                 {
@@ -170,6 +174,20 @@ namespace DiscordFortniteBot2
                                 safe = false;
                         }
                     }
+
+                    if (!safe) continue;
+
+                    foreach(int[] l in locations)
+                    {
+                        int d = (int)Math.Sqrt(Math.Pow(Math.Abs(l[0] - x), 2) + Math.Pow(Math.Abs(l[1] - y), 2));
+                        if (Math.Abs(d - Math.Ceiling(distance / 10.0)) < 1)
+                        {
+                            continue;
+                        }
+                    }
+
+                    distance--;
+
                 } while (!safe);
 
                 int opening = random.Next(4);
@@ -184,6 +202,8 @@ namespace DiscordFortniteBot2
                 mapGrid[x - 1, y + 1] = new Tile(TileType.Wall);
                 if (opening != 3) mapGrid[x, y + 1] = new Tile(TileType.Wall);
                 mapGrid[x + 1, y + 1] = new Tile(TileType.Wall);
+
+                locations.Add(new int[] { x, y });
 
                 numberLeft--;
             }
