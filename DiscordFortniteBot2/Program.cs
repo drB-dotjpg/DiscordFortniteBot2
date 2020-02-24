@@ -209,15 +209,21 @@ namespace DiscordFortniteBot2
             }
 
             //Prompt users to join
+            EmbedBuilder tutorialLink = new EmbedBuilder()
+            {
+                Title = "Click here to view the game tutorial (Read this before joining).",
+                Url = "https://github.com/drB-dotjpg/DiscordFortniteBot2/blob/master/HowToPlay/HowToPlay.md",
+                Color = Color.Blue
+            };
 
             try
             {
-                await channel.SendFileAsync("FortniteBot2.png", null); //try to send the epic logo (c# is weird with this)
+                await channel.SendFileAsync("FortniteBot2.png", null, embed: tutorialLink.Build()); //try to send the epic logo (c# is weird with this)
             }
             catch (FileNotFoundException)
             {
                 string imageDir = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + Path.DirectorySeparatorChar; //try again
-                await channel.SendFileAsync(imageDir + "FortniteBot2.png", null);
+                await channel.SendFileAsync(imageDir + "FortniteBot2.png", null, embed: tutorialLink.Build());
             }
 
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
