@@ -533,7 +533,7 @@ namespace DiscordFortniteBot2
                         }
                         else if (map.mapGrid[player.y, player.x].Type == TileType.Tree) //if the player is on a tree (they climbed it)
                         {
-                            player.materials += 25; //give them materials
+                            player.materials += 15; //give them materials
                             player.briefing += "\n" + "You chopped down a tree and got +25 materials.";
                             player.stats.UpdateStat(PlayerStats.Stat.TreesCut);
                             map.mapGrid[player.y, player.x] = new Tile(TileType.Grass); //the tree turns into grass

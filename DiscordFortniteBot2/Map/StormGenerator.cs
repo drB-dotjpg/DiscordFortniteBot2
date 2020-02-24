@@ -8,7 +8,7 @@ namespace DiscordFortniteBot2
     {
         
         private const float LIMIT = (float)Math.PI * 2; //pi times 2 makes a full circle (decreasing this makes a cool pie chart tho)
-        private const float PRECISION = .01f; //keep at 0.01f or lower
+        private const float PRECISION = .001f; //keep at 0.01f or lower
 
         private int width; //map width
         private int height; //map height
@@ -29,13 +29,13 @@ namespace DiscordFortniteBot2
 
             if (numPlayers > 1)
             {
-                speed = (int)(40 / Math.Log(7) * Math.Log(numPlayers - 1) + 30); //logarithmic function determines storm speed based on number of players (assuming number of players is <1)
-                delay = (int)(5.0 / 3.0 * (numPlayers - 2) + 20); //linear function ranging from (2,20) to (8,30)
+                speed = (int)(30.0 / Math.Log(7) * Math.Log(numPlayers - 1) + 30); //logarithmic function determines storm speed based on number of players (assuming number of players is <1)
+                delay = (int)(4.0 / 3.0 * (numPlayers - 2) + 14); //linear function ranging from (2,20) to (8,30)
             }
             else
             {
-                speed = 30;
-                delay = 20;
+                speed = 20;
+                delay = 14;
             }
 
             //Console.WriteLine($"Map x = {x}; y = {y}");
