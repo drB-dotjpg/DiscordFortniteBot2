@@ -229,9 +229,9 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 10 : 1;
+            int seconds = !debug ? 20 : 1;
 
-            var usersJoinedMessage = await channel.SendMessageAsync($"`Starting...`");    //post the users joined message (And has the timer)
+            var usersJoinedMessage = await channel.SendMessageAsync($"discord.gg/obama");    //post the users joined message (And has the timer)
 
             while (seconds > 0) //while the timer is running
             {
@@ -1007,7 +1007,7 @@ namespace DiscordFortniteBot2
                     if (CheckForWallHitAtTile(player.x + newX, player.y + newY))
                     {
                         player.briefing += "\n" + "You shot and destroyed a wall.";
-                        player.stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
+                        player.stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
                         return;
                     }
 
@@ -1084,7 +1084,7 @@ namespace DiscordFortniteBot2
             string messageContent = $"> **{winner.discordUser.Mention} won the game!**\n\n" +
                 $"Next game starts in ----\n\n" +
                 "**Players**: \n" + GetPlayersJoined(withDead: true) + "\n\n" +
-                "**Top stats**:\n" + GetTopRankingList();
+                "**Top stats**:\n" + topRankings;
 
             var postgameMessage = await channel.SendMessageAsync(messageContent);
 
@@ -1105,11 +1105,13 @@ namespace DiscordFortniteBot2
             ap.AddRange(players);
             ap.AddRange(deadPlayers);
 
+            foreach (Player p in ap)
+                Console.WriteLine("ap: " + p.discordUser.Username);
+
             string builder = "```";
 
             foreach (PlayerStats.Stat stat in Enum.GetValues(typeof(PlayerStats.Stat)))
             {
-
                 int max = -1;
                 string maxName = "";
 

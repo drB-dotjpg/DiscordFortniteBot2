@@ -131,7 +131,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y, x + 1] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall on your right.";
-                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
+                        stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -145,7 +145,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y, x - 1] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall on your left.";
-                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
+                        stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -159,7 +159,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y - 1, x] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall upward.";
-                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
+                        stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
@@ -173,7 +173,7 @@ namespace DiscordFortniteBot2
                         materials -= 10;
                         map.mapGrid[y + 1, x] = new Tile(TileType.Wall);
                         briefing += "\n" + $"You built a wall downward.";
-                        stats.UpdateStat(PlayerStats.Stat.WallsDestroyed);
+                        stats.UpdateStat(PlayerStats.Stat.WallsPlaced);
                     }
                     else
                         briefing += "\n" + $"Cannot build a wall here!";
