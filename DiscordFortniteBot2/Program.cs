@@ -378,7 +378,7 @@ namespace DiscordFortniteBot2
                 if (turn > SUPPLY_DROP_DELAY) //Check if the delay has passed
                 {
                     supplyDropCooldown++;
-                    if (supplyDropCooldown >= 5) //Drop one every 5 turns
+                    if (supplyDropCooldown >= 3) //Drop one every 3 turns
                     {
                         supplyDropCooldown = 0;
                         map.DropSupplyDrop();
@@ -437,7 +437,7 @@ namespace DiscordFortniteBot2
 
                 if (map.mapGrid[player.y, player.x].Type == TileType.Storm) //also standing in the storm is cringe
                 {
-                    player.TakeDamage(15);
+                    player.TakeStormDamage(15);
                     player.briefing += "\n" + "Took 15 damage in the storm.";
                 }
             }

@@ -188,7 +188,7 @@ namespace DiscordFortniteBot2
         {
             Item item = inventory[slot];
 
-            int oldHeath = health;
+            int oldHealth = health;
             int oldShield = shield;
 
             switch (item.type)
@@ -212,7 +212,7 @@ namespace DiscordFortniteBot2
                     return;
             }
             UseAmmo(slot);
-            briefing += "\n" + $"Used {item.name} and healed {health - oldHeath} health and {shield - oldShield} shield.";
+            briefing += "\n" + $"Used {item.name} and healed {health - oldHealth} health and {shield - oldShield} shield.";
 
             stats.UpdateStat(PlayerStats.Stat.DamageHealed, item.effectVal);
         }
@@ -340,6 +340,13 @@ namespace DiscordFortniteBot2
 
             lastHitBy = hitBy;
 
+            stats.UpdateStat(PlayerStats.Stat.DamageTaken, amount);
+        }
+
+        public void TakeStormDamage(int amount)
+        {
+            health -= amount;
+            lastHitBy = 0;
             stats.UpdateStat(PlayerStats.Stat.DamageTaken, amount);
         }
 
