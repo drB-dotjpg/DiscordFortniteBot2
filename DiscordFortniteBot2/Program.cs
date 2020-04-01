@@ -229,7 +229,7 @@ namespace DiscordFortniteBot2
             var joinPrompt = await channel.SendMessageAsync($"> Click {Emotes.joinGame} to hop on the Battle Bus.");
             await joinPrompt.AddReactionAsync(Emotes.joinGame);
 
-            int seconds = !debug ? 20 : 1;
+            int seconds = !debug ? 300 : 1;
 
             var usersJoinedMessage = await channel.SendMessageAsync($"discord.gg/obama");    //post the users joined message (And has the timer)
 
@@ -315,7 +315,7 @@ namespace DiscordFortniteBot2
         #region In Game
 
         int turn;
-        const int TURN_SECONDS = 40;
+        const int TURN_SECONDS = 60;
         const int INACTIVIY_LIMIT = 2; //turns a player is allowed to be inactive for
         const int SUPPLY_DROP_DELAY = 10; //Amount of turns before supply drops start appearing
         int supplyDropCooldown; //Turns between each supply drop, once it reaches a set number, a supply drop will drop somewhere

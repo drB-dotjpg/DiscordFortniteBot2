@@ -86,7 +86,7 @@ namespace DiscordFortniteBot2
     //Items that can be created and looted in game
     public static class Spawnables
     {
-        public static Item[] allItems = new Item[]
+        private static Item[] items = new Item[]
         {
             //weapons (in order of range then damage)
             //       v-Name-----------v  v-Item type---v  v-Range---v  v-damage, ammo
@@ -113,6 +113,8 @@ namespace DiscordFortniteBot2
             //traps
             new Item("Spike Trap", ItemType.Trap, Range.None, 75, 1)
         };
+
+        public static Item[] allItems => (Item[])items.Clone();
 
         public static Item GetRandomSpawnable()
         {

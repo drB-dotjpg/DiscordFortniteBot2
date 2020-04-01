@@ -89,26 +89,31 @@ namespace DiscordFortniteBot2
             float d = turnSizes[turn]; //d is diameter, the value is grabbed from the turnsizes array created in the generateturnsizes function
 
 
-            float xDraw = 0f;
-            float yDraw = 0f;
-
-            while (xDraw < LIMIT - PRECISION && yDraw < LIMIT - PRECISION)
+            while (d >= 0) //while the diameter is above 0 (d shrinks each loop)
             {
-                xDraw += PRECISION;
-                yDraw += PRECISION;
+                float xDraw = 0f;
+                float yDraw = 0f;
 
-                int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //Calculate circle coordinates
-                int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //The coordinates of any point on a circle can be expressed as (cos(x) * r, sin(x) * r) 
+                while (xDraw < LIMIT - PRECISION && yDraw < LIMIT - PRECISION)
+                {
+                    xDraw += PRECISION;
+                    yDraw += PRECISION;
 
-                //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
+                    int xGrid = (int)Math.Round(Math.Sin(xDraw) * d / 2) + y; //Calculate circle coordinates
+                    int yGrid = (int)Math.Round(Math.Cos(yDraw) * d / 2) + x; //The coordinates of any point on a circle can be expressed as (cos(x) * r, sin(x) * r) 
 
-                if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
-                    continue;
+                    //Console.WriteLine($"xGrid = {xGrid}; yGrid = {yGrid}");
 
-                storm[yGrid, xGrid] = false;
+                    if (xGrid >= width || xGrid < 0 || yGrid >= height || yGrid < 0)
+                        continue;
+
+                    storm[xGrid, yGrid] = false;
+                }
+
+                d -= PRECISION * 100;
             }
 
-            FloodFill(x, y, storm); //Fill in the circle
+            //FloodFill(x, y, storm); //Fill in the circle
 
             /*
             string draw = "";
@@ -121,7 +126,7 @@ namespace DiscordFortniteBot2
             
             Console.WriteLine(draw);
             */
-            
+
 
             return storm;
         }
