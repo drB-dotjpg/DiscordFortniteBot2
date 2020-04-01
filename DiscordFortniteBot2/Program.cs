@@ -506,10 +506,11 @@ namespace DiscordFortniteBot2
                     case Action.Loot:
                         if (map.mapGrid[player.y, player.x].Type == TileType.Chest) //if the player is on a chest
                         {
+                            Item[] copyOfItems = (Item[])map.mapGrid[player.y, player.x].Items.Clone();
                             if (player.turnIndex == 5) //Check if player is looting all
                             {
                                 int i = 0;
-                                while (player.Loot(map.mapGrid[player.y, player.x].Items[i]))
+                                while (player.Loot(copyOfItems[i]))
                                 {
                                     map.mapGrid[player.y, player.x].Items[i] = new Item(); //make the chest slot empty (since the item was taken you know?)
 
@@ -520,7 +521,8 @@ namespace DiscordFortniteBot2
                                 }
                                 break;
                             }
-                            if (player.Loot(map.mapGrid[player.y, player.x].Items[player.turnIndex])) //true if player could loot (had empty inventory slots)
+
+                            if (player.Loot(copyOfItems[player.turnIndex])) //true if player could loot (had empty inventory slots)
                             {
                                 map.mapGrid[player.y, player.x].Items[player.turnIndex] = new Item(); //make the chest slot empty (since the item was taken you know?)
 
